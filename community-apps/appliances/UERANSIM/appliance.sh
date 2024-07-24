@@ -74,8 +74,7 @@ UE_SUPI="${UE_SUPI:-imsi-999700000000001}"
 # Global variables
 # ------------------------------------------------------------------------------
 
-# moreutils
-DEP_PKGS="libsctp-dev lksctp-tools iproute2 wget"
+DEP_PKGS= "libsctp-dev lksctp-tools iproute2 wget moreutils"
 
 
 
