@@ -22,7 +22,7 @@ if [ ! -d "${BUILD_PATH}" ] || ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; the
     git clone https://github.com/aligungr/UERANSIM ${BUILD_PATH}
     cd ${BUILD_PATH}
 
-    if [ ! make -j 0 ]; then
+    if ! make -j 0 ; then
        echo "ERROR: Error building UERANSIM binaries"
        exit 1
     fi
