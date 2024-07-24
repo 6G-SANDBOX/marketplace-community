@@ -25,14 +25,7 @@ if [ ! -d "${BUILD_PATH}" ] || ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; the
     if [ ! make -j 0 ]; then
        echo "ERROR: Error building UERANSIM binaries"
        exit 1
-    fi 
-
-    cd -
-
-    echo "Purge build dependencies"
-    apt-get purge -y  ${BUILD_PACKAGES}
-    apt-get autoclean
-    rm -rf /var/lib/apt/lists/*
+    fi
 
 else
     echo "UERANSIM binaries found. Proceeding..."
