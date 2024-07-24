@@ -1,0 +1,104 @@
+---
+name: UERANSIM
+version: "20240705-1102"
+publisher: Telefonica Innovacion Digital
+description: |-
+  This appliance installs the latest version of [UERANSIM](https://github.com/aligungr/UERANSIM), the open source state-of-the-art 5G UE and RAN (gNodeB) simulator. UE and RAN can be considered as a 5G mobile phone and a base station in basic terms. The project can be used for testing 5G Core Network and studying 5G System.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+  
+  **Note**: Remember to update the template in order to add a network after importing it.
+short_description: UERANSIM 5G gNB & UE simulator
+tags:
+  - ubuntu
+  - ueransim
+format: qcow2
+creation_time: "1721640274"
+os-id: Ubuntu
+os-release: '22.04'
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    set_hostname: "$NAME"
+    gnb_amf_address: "$GNB_AMF_ADDRESS"
+    gnb_mcc: "$GNB_MCC"
+    gnb_mnc: "$GNB_MNC"
+    gnb_slices_sd: "$GNB_SLICES_SD"
+    gnb_slices_sst: "$GNB_SLICES_SST"
+    gnb_tac: "$GNB_TAC"
+    oneke_vnf: "$ONEKE_VNF"
+    run_gnb: "$RUN_GNB"
+    run_ue: "$RUN_UE"
+    ue_configured_nssai_sd: "$UE_CONFIGURED_NSSAI_SD"
+    ue_configured_nssai_sst: "$UE_CONFIGURED_NSSAI_SST"
+    ue_default_nssai_sd: "$UE_DEFAULT_NSSAI_SD"
+    ue_default_nssai_sst: "$UE_DEFAULT_NSSAI_SST"
+    ue_gnbsearchlist: "$UE_GNBSEARCHLIST"
+    ue_key: "$UE_KEY"
+    ue_mcc: "$UE_MCC"
+    ue_mnc: "$UE_MNC"
+    ue_op: "$UE_OP"
+    ue_session_apn: "$UE_SESSION_APN"
+    ue_session_sd: "$UE_SESSION_SD"
+    ue_session_sst: "$UE_SESSION_SST"
+    ue_supi: "$UE_SUPI"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  lxd_security_privileged: 'true'
+  user_inputs:
+    gnb_amf_address: "O|text|GNB_AMF_ADDRESS: gNB's AMF Address| |"
+    gnb_mcc: "O|text|GNB_MCC: gNB's Mobile Country Code value| |999"
+    gnb_mnc: "O|text|GNB_MNC: gNB's Mobile Network Code value (2 or 3 digits)| |70"
+    gnb_slices_sd: "O|text|GNB_SLICES_SD: SD of supported S-NSSAI by this gNB| |1"
+    gnb_slices_sst: "O|text|GNB_SLICES_SST: SST of supported S-NSSAI by this gNB| |1"
+    gnb_tac: "O|text|GNB_TAC: gNB's Tracking Area Code| |1"
+    oneke_vnf: "O|text|ONEKE_VNF: If specified, address where the gNB will route the traffic in order to reach the gnb_amf_address| |"
+    run_gnb: "M|boolean|RUN_GNB: Whether to start the gNB service or not| |"
+    run_ue: "M|boolean|RUN_UE: Wether to start the UE service or not| |"
+    ue_configured_nssai_sd: "O|text|UE_CONFIGURED_NSSAI_SD: SD of configured NSSAI for this UE by HPLMN| |"
+    ue_configured_nssai_sst: "O|text|UE_CONFIGURED_NSSAI_SST: SST of configured NSSAI for this UE by HPLMN| |1"
+    ue_default_nssai_sd: "O|text|UE_DEFAULT_NSSAI_SD: SD of default Configured NSSAI for this UE| |1"
+    ue_default_nssai_sst: "O|text|UE_DEFAULT_NSSAI_SST: SST of default Configured NSSAI for this UE| |1"
+    ue_gnbsearchlist: "O|text|UE_GNBSEARCHLIST: UE's comma separated list of gNB IP addresses for Radio Link Simulation| |127.0.0.1"
+    ue_key: "O|text|UE_KEY: UE's permanent subscription key| |465B5CE8B199B49FAA5F0A2EE238A6BC"
+    ue_mcc: "O|text|UE_MCC: UE's Mobile Country Code value of HPLMN| |999"
+    ue_mnc: "O|text|UE_MNC: UE's Mobile Network Code value of HPLMN (2 or 3 digits)| |70"
+    ue_op: "O|text|UE_OP: Operator code (OP or OPC) of the UE| |E8ED289DEBA952E4283B54E88E6183CA"
+    ue_session_apn: "O|text|UE_SESSION_APN: UE's APN of initial PDU session to be stablished| |internet"
+    ue_session_sd: "O|text|UE_SESSION_SD: UE's SD of initial PDU session to be stablished| |"
+    ue_session_sst: "O|text|UE_SESSION_SST: UE's SST of initial PDU session to be stablished| |1"
+    ue_supi: "O|text|UE_SUPI: IMSI number of the UE. IMSI = [MCC+MNC+MSISDN](In total 15 digits)| |imsi-999700000000001"
+logo: ueransim.png
+images:
+  - name: UERANSIM
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/service_UERANSIM.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "7516192768"
+    checksum:
+      md5: "490330ca6ee051cc7549cbdf80809e60"
+      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"

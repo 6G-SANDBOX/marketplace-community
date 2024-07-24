@@ -52,9 +52,10 @@ opennebula_template:
   hypervisor: kvm
   memory: '4096'
   memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
-  logo: images/logos/jenkins.png
+  logo: images/logos/ubuntu.png
   lxd_security_privileged: 'true'
   user_inputs:
     jenkins_host: "M|text|JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"

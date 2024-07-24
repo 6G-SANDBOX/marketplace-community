@@ -9,19 +9,17 @@ set -o errexit -o pipefail
 ONE_SERVICE_NAME='UERANSIM'
 ONE_SERVICE_VERSION='3.2.6'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='UERANSIM 5G gnb+UE simulator'
+ONE_SERVICE_SHORT_DESCRIPTION='UERANSIM 5G gNB & UE simulator'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
 This appliance installs the latest version of [UERANSIM](https://github.com/aligungr/UERANSIM), the open source state-of-the-art 5G UE and RAN (gNodeB) simulator. UE and RAN can be considered as a 5G mobile phone and a base station in basic terms. The project can be used for testing 5G Core Network and studying 5G System.
 
 The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
 After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-
-**WARNING: The appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.**
 EOF
 )
 
-ONE_SERVICE_RECONFIGURABLE=false
+ONE_SERVICE_RECONFIGURABLE=true
 
 
 # ------------------------------------------------------------------------------
@@ -194,6 +192,8 @@ service_bootstrap()
     msg info "BOOTSTRAP FINISHED"
     return 0
 }
+
+
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
