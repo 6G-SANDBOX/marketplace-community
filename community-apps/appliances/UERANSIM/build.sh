@@ -4,7 +4,7 @@ set -o errexit -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 BUILD_PACKAGES="make gcc g++ cmake"
-BUILD_PATH="community-apps/appliances/UERANSIM/UERANSIM"
+BUILD_PATH="appliances/UERANSIM/UERANSIM"
 
 if [ ! -d "${BUILD_PATH}" ] || ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; then
 
