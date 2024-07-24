@@ -41,6 +41,7 @@ JENKINS_HOST="${JENKINS_HOST:-127.0.0.1}"
 JENKINS_USERNAME="${JENKINS_USERNAME:-admin}"
 JENKINS_PASSWORD="${JENKINS_PASSWORD:-admin}"
 
+
 # ------------------------------------------------------------------------------
 # Global variables
 # ------------------------------------------------------------------------------
@@ -78,7 +79,6 @@ service_install()
     # tnlcm frontend
     install_tnlcm_frontend
 
-    chmod +x /etc/systemd/system/tnlcm-*
     systemctl daemon-reload
 
     # service metadata
@@ -285,4 +285,3 @@ postinstall_cleanup()
     apt-get autoremove
     rm -rf /var/lib/apt/lists/*
 }
-

@@ -1,168 +1,198 @@
-# ---------------------------------------------------------------------------- #
-# Copyright 2024, OpenNebula Project, OpenNebula Systems                       #
-#                                                                              #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may      #
-# not use this file except in compliance with the License. You may obtain      #
-# a copy of the License at                                                     #
-#                                                                              #
-# http://www.apache.org/licenses/LICENSE-2.0                                   #
-#                                                                              #
-# Unless required by applicable law or agreed to in writing, software          #
-# distributed under the License is distributed on an "AS IS" BASIS,            #
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.     #
-# See the License for the specific language governing permissions and          #
-# limitations under the License.                                               #
-# ---------------------------------------------------------------------------- #
+#!/usr/bin/env bash
 
-# UERANSIM Appliance for for OpenNebula Marketplace
+set -o errexit -o pipefail
+
+# ------------------------------------------------------------------------------
+# Appliance metadata
+# ------------------------------------------------------------------------------
+
+ONE_SERVICE_NAME='UERANSIM'
+ONE_SERVICE_VERSION='3.2.6'   #latest
+ONE_SERVICE_BUILD=$(date +%s)
+ONE_SERVICE_SHORT_DESCRIPTION='UERANSIM 5G gnb+UE simulator'
+ONE_SERVICE_DESCRIPTION=$(cat <<EOF
+This appliance installs the latest version of [UERANSIM](https://github.com/aligungr/UERANSIM), the open source state-of-the-art 5G UE and RAN (gNodeB) simulator. UE and RAN can be considered as a 5G mobile phone and a base station in basic terms. The project can be used for testing 5G Core Network and studying 5G System.
+
+The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+
+**WARNING: The appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.**
+EOF
+)
+
+ONE_SERVICE_RECONFIGURABLE=false
+
 
 # ------------------------------------------------------------------------------
 # List of contextualization parameters
 # ------------------------------------------------------------------------------
 ONE_SERVICE_PARAMS=(
-    'ONEAPP_UERAN_NETWORK_MCC' 'configure' 'Mobile Country Code value' 'O|text'
-    'ONEAPP_UERAN_NETWORK_MNC' 'configure' 'Mobile Network Code value (2 or 3 digits)' 'O|text'
-    'ONEAPP_UERAN_CELL_ID' 'configure' 'NR Cell Identity (36-bit)' 'O|text'
-    'ONEAPP_UERAN_GNB_ID' 'configure' 'NR gNB ID length in bits [22...32]' 'O|text'
-    'ONEAPP_UERAN_TAC_ID' 'configure' 'Tracking Area Code' 'O|text'
-    'ONEAPP_UERAN_AMF_IP' 'configure' 'AMF IP Address' 'O|text'
-    'ONEAPP_UERAN_AMF_PORT' 'configure' 'AMF_PORT' 'O|text'
-    'ONEAPP_UERAN_SST_ID' 'configure' 'List of supported S-NSSAIs by this gNB slices' 'O|text'
-    'ONEAPP_UERAN_UE_IMSI' 'configure' 'IMSI number of the UE. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)' 'O|text'
-    'ONEAPP_UERAN_SUBSCRIPTOIN_KEY' 'configure' 'Permanent subscription key' 'O|text'
-    'ONEAPP_UERAN_OPERATOR_CODE' 'configure' 'Operator code (OP or OPC) of the UE' 'O|text'
-    'ONEAPP_UERAN_VNF_IP' 'configure' 'IP of the virtual router to connect to the OneKE cluster' 'O|text'
-    'ONEAPP_UERAN_CORE_SUBNET' 'configure' 'Subnet assigned to the 5G core services' 'O|text'
+    'GNB_AMF_ADDRESS'         'configure' 'gNB AMF IP Address'                                                                                  'O|text'
+    'GNB_MCC'                 'configure' 'gNB Mobile Country Code value'                                                                       'O|text'
+    'GNB_MNC'                 'configure' 'gNB Mobile Network Code value (2 or 3 digits)'                                                       'O|text'
+    'GNB_TAC'                 'configure' 'gNB Tracking Area Code'                                                                              'O|text'
+    'GNB_SLICES_SD'           'configure' 'gNB SD of supported S-NSSAI'                                                                         'O|text'
+    'GNB_SLICES_SST'          'configure' 'gNB SST of supported S-NSSAI'                                                                        'O|text'
+    'ONEKE_VNF'               'configure' 'If specified, IP address where the gNB will route the traffic in order to reach the gnb_amf_address' 'O|text'
+    'RUN_GNB'                 'configure' 'Whether to start the gNB service or not'                                                             'M|boolean'
+    'RUN_UE'                  'configure' 'Whether to start the UE service or not'                                                              'M|boolean'
+    'UE_CONFIGURED_NSSAI_SD'  'configure' 'UE SD of NSSAI configured by HPLMN'                                                                  'O|text'
+    'UE_CONFIGURED_NSSAI_SST' 'configure' 'UE SST of NSSAI configured by HPLMN'                                                                 'O|text'
+    'UE_DEFAULT_NSSAI_SD'     'configure' 'UE SD of default Configured NSSAI'                                                                   'O|text'
+    'UE_DEFAULT_NSSAI_SST'    'configure' 'UE SST of default Configured NSSAI'                                                                  'O|text'
+    'UE_GNBSEARCHLIST'        'configure' 'UE comma separated list of gNB IP addresses for Radio Link Simulation'                               'O|text'
+    'UE_KEY'                  'configure' 'UE permanent subscription key'                                                                       'O|text'
+    'UE_MCC'                  'configure' 'UE Mobile Country Code value of HPLMN'                                                               'O|text'
+    'UE_MNC'                  'configure' 'UE Mobile Network Code value of HPLMN (2 or 3 digits)'                                               'O|text'
+    'UE_OP'                   'configure' 'UE Operator code (OP or OPC)'                                                                        'O|text'
+    'UE_SESSION_APN'          'configure' 'UE APN of initial PDU session to be stablished'                                                      'O|text'
+    'UE_SESSION_SD'           'configure' 'UE SD of initial PDU session to be stablished'                                                       'O|text'
+    'UE_SESSION_SST'          'configure' 'UE SST of of initial PDU session to be stablished'                                                   'O|text'
+    'UE_SUPI'                 'configure' 'IMSI number of the UE. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)'                                 'O|text'
 )
 
+
+
+GNB_MCC="${GNB_MCC:-999}"
+GNB_MNC="${GNB_MNC:-70}"
+GNB_SLICES_SD="${GNB_SLICES_SD:-1}"
+GNB_SLICES_SST="${GNB_SLICES_SST:-1}"
+GNB_TAC="${GNB_TAC:-1}"
+UE_CONFIGURED_NSSAI_SST="${UE_CONFIGURED_NSSAI_SST:-1}"
+UE_DEFAULT_NSSAI_SD="${UE_DEFAULT_NSSAI_SD:-1}"
+UE_DEFAULT_NSSAI_SST="${UE_DEFAULT_NSSAI_SST:-1}"
+UE_GNBSEARCHLIST="${UE_GNBSEARCHLIST:-127.0.0.1}"
+UE_KEY="${UE_KEY:-465B5CE8B199B49FAA5F0A2EE238A6BC}"
+UE_MCC="${UE_MCC:-999}"
+UE_MNC="${UE_MNC:-70}"
+UE_OP="${UE_KEY:-E8ED289DEBA952E4283B54E88E6183CA}"
+UE_SESSION_APN="${UE_SESSION_APN:-internet}"
+UE_SESSION_SST="${UE_SESSION_SST:-1}"
+UE_SUPI="${UE_SUPI:-imsi-999700000000001}"
+
+
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Global variables
 # ------------------------------------------------------------------------------
 
-# Appliance metadata
-ONE_SERVICE_NAME='UERANSIM - KVM'
-ONE_SERVICE_VERSION='1.0.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Appliance with UERANSIM 5G simulator'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-Appliance with preinstalled EURANSIM simulator.
+# moreutils
+DEP_PKGS= "libsctp-dev lksctp-tools iproute2 wget"
 
-After deploying the appliance, check the status of the deployment in
-/etc/one-appliance/status. You chan check the appliance logs in
-/var/log/one-appliance/.
 
-**WARNING: The appliance does not permit recontextualization. Modifying the
-context variables will not have any real efects on the running instance.**
-EOF
-)
 
 # ------------------------------------------------------------------------------
-# Contextualization defaults for appliance
 # ------------------------------------------------------------------------------
-NETWORK_MCC="${ONEAPP_UERAN_NETWORK_MCC:-922}"
-NETWORK_MNC="${ONEAPP_UERAN_NETWORK_MNC:-77}"
-CELL_ID="${ONEAPP_UERAN_CELL_ID:-0x000000010}"
-GNB_ID_LENGTH="${ONEAPP_UERAN_GNB_ID_LENGTH:-32}"
-TAC_ID="${ONEAPP_UERAN_TAC_ID:-1}"
-AMF_IP="${ONEAPP_UERAN_AMF_IP:-127.0.0.1}"
-AMF_PORT="${ONEAPP_UERAN_AMF_PORT:-38412}"
-SST_ID="${ONEAPP_UERAN_SST_ID:-1}"
-VNF_IP="${ONEAPP_UERAN_VNF_IP:-1}"
-CORE_SUBNET="${ONEAPP_UERAN_CORE_SUBNET:-1}"
-
-UE_IMSI="${ONEAPP_UERAN_UE_IMSI:-imsi-999700000000001}"
-SUBSCRIPTOIN_KEY="${ONEAPP_UERAN_SUBSCRIPTOIN_KEY:-465B5CE8B199B49FAA5F0A2EE238A6BC}"
-OPERATOR_CODE="${ONEAPP_UERAN_OPERATOR_CODE:-E8ED289DEBA952E4283B54E88E6183CA}"
-#
+# Mandatory Functions
 # ------------------------------------------------------------------------------
-# Installation Stage => Installs requirements, downloads and unpacks Harbor
 # ------------------------------------------------------------------------------
-service_install() {
 
-    msg info "Checking internet access..."
+service_install()
+{
+    export DEBIAN_FRONTEND=noninteractive
+    systemctl stop unattended-upgrades
 
-    if ping -c 1 8.8.8.8 &> /dev/null; then
-        msg info "Internet access OK"
-    else
-        msg error "No internet access detected."
-        exit 1
-    fi
+    # packages
+    install_pkg_deps DEP_PKGS
 
-    msg info "Installing build dependencies..."
+    # yaml query
+    install_yq
 
-    BUILD_PACKAGES="make gcc g++ cmake"
-    DEBIAN_FRONTEND=noninteractive
+    # services
+    define_services
 
-    apt-get update && apt install -y ${BUILD_PACKAGES} curl libsctp-dev lksctp-tools
-
-    msg info "Building UERANSIM..."
-
-    cd /opt
-    [ ! -d /opt/UERANSIM ] && git clone https://github.com/aligungr/UERANSIM
-
-    if [ ! -f /opt/UERANSIM/build/nr-gnb ]; then
-        cd UERANSIM
-        make -j 8
-    fi
-
-    if [ $? -ne 0 ]; then
-       msg error "Error building UERANSIM"
-       exit 1
-    fi
-
+    # service metadata
     create_one_service_metadata
 
-    msg info "Purging build dependencies..."
+    # cleanup
+    postinstall_cleanup
 
-    apt-get purge -y  ${BUILD_PACKAGES}
-    apt-get autoclean
+    msg info "INSTALLATION FINISHED"
 
-    rm -rf /var/lib/apt/lists/*
-
-    msg info "Installation phase finished"
+    return 0
 }
 
 
 # ------------------------------------------------------------------------------
 # Configuration Stage => Senerates gNodeB and UE config files
 # ------------------------------------------------------------------------------
-service_configure() {
-    msg info "Starting configuration..."
+service_configure()
+{
+    export DEBIAN_FRONTEND=noninteractive
 
-    ip route add ${CORE_SUBNET} via ${VNF_IP}
+    # Environmental values and the yaml paths to change
+    declare -A gnb_variables=(
+        [".mcc"]="GNB_MCC"
+        [".mnc"]="GNB_MNC"
+        [".tac"]="GNB_TAC"
+        [".linkIp"]="GNB_LINKIP"
+        [".ngapIp"]="GNB_NGAPIP"
+        [".gtpIp"]="GNB_GTPIP"
+        [".amfConfigs[0].address"]="GNB_AMF_ADDRESS"
+        [".slices[0].sst"]="GNB_SLICES_SST"
+        [".slices[0].sd"]="GNB_SLICES_SD"
+    )
+    declare -A ue_variables=(
+        [".supi"]="UE_SUPI"
+        [".mcc"]="UE_MCC"
+        [".mnc"]="UE_MNC"
+        [".key"]="UE_KEY"
+        [".op"]="UE_OP"
+        [".gnbSearchList[0]"]="UE_GNBSEARCHLIST"
+        [".sessions[0].apn"]="UE_SESSION_APN"
+        [".sessions[0].slice.sst"]="UE_SESSION_SST"
+        [".sessions[0].slice.sd"]="UE_SESSION_SD"
+        [".configured-nssai[0].sst"]="UE_CONFIGURED_NSSAI_SST"
+        [".configured-nssai[0].sd"]="UE_CONFIGURED_NSSAI_SD"
+        [".default-nssai[0].sst"]="UE_DEFAULT_NSSAI_SST"
+        [".default-nssai[0].sd"]="UE_DEFAULT_NSSAI_SD"
+    )
+
+    ### gNB local IP and UE gnbSearchList will be by default the address from eth0
+    GNB_LINKIP=$(hostname -I | awk '{print $1}')
+    GNB_NGAPIP=$(hostname -I | awk '{print $1}')
+    GNB_GTPIP=$(hostname -I | awk '{print $1}')
+    if [ -z "${UE_GNBSEARCHLIST}" ]; then
+      UE_GNBSEARCHLIST=$(hostname -I | awk '{print $1}')
+    fi
 
     config_gnb
 
     config_ue
 
-    msg info "Configuration phase finished"
+    amf_route
+
+    msg info "CONFIGURATION FINISHED"
+    return 0
 }
 
 # Will start gNB and UE
-service_bootstrap() {
-    msg info "Starting bootstrap..."
+service_bootstrap()
+{
+    export DEBIAN_FRONTEND=noninteractive
 
-    # Starting gNB process
-     /opt/UERANSIM/build/nr-gnb -c  /opt/UERANSIM/config/ueransim-gnb.yaml > /var/log/gnb.log &
-    if [ $? -ne 0 ]; then
-        msg error "Error starting gNodeB, aborting..."
-        exit 1
-    else
-        msg info "gNodeB was strarted..."
+    if [ -n "${RUN_GNB}" ] && [ "${RUN_GNB}" = "YES" ]; then
+        if ! systemctl enable --now ueransim-gnb.service ; then
+            msg error "Error starting ueransimb-gnb.service"
+            exit 1
+        else
+            msg info "ueransimb-gnb.service was started"
+        fi
     fi
 
     sleep 5
 
-    # Starting UE
-    /opt/UERANSIM/build/nr-ue -c /opt/UERANSIM/config/ueransim-ue.yaml > /var/log/ue.log &
-    if [ $? -ne 0 ]; then
-        msg error "Error starting UE, aborting..."
-        exit 1
-    else
-        msg info "UE was strarted..."
+    if [ -n "${RUN_UE}" ] && [ "${RUN_UE}" = "YES" ]; then
+        if ! systemctl enable --now ueransim-ue.service ; then
+            msg error "Error starting ueransimb-ue.service"
+            exit 1
+        else
+            msg info "ueransimb-ue.service was started"
+        fi
     fi
 
-    msg info "Bootstrap phase finished"
+    msg info "BOOTSTRAP FINISHED"
+    return 0
 }
 
 # ------------------------------------------------------------------------------
@@ -170,90 +200,125 @@ service_bootstrap() {
 # Function Definitions
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-config_gnb(){
-   LOCALIP=$(hostname -I | awk '{print $1}')
-   # Assuming config/open5gs-gnb.yaml as the default UE config file
-   cat << EOF > /opt/UERANSIM/config/ueransim-gnb.yaml
-mcc: '${NETWORK_MCC}'
-mnc: '${NETWORK_MNC}'
 
-nci: '${CELL_ID}'
-idLength: ${GNB_ID_LENGTH}
-tac: ${TAC_ID}
+install_pkg_deps()
+{
+    msg info "Run apt-get update"
+    apt-get update
 
-linkIp: 127.0.0.1  # gNB's local IP address for Radio Link Simulation (Usually same with local IP)
-ngapIp: ${LOCALIP} # gNB's local IP address for N2 Interface (Usually same with local IP)
-gtpIp: ${LOCALIP}  # gNB's local IP address for N3 Interface (Usually same with local IP)
-
-amfConfigs:
-  - address: ${AMF_IP}
-    port: ${AMF_PORT}
-
-slices:
-  - sst: ${SST_ID}
-    sd: 0x111111
-
-ignoreStreamIds: true
-
-EOF
+    msg info "Install required packages for TNLCM"
+    if ! apt-get install -y ${!1} ; then
+        msg error "Package(s) installation failed"
+        exit 1
+    fi
 }
 
-config_ue(){
-   cat << EOF > /opt/UERANSIM/config/ueransim-ue.yaml
-supi: '${UE_IMSI}'
-mcc: '${NETWORK_MCC}'
-mnc: '${NETWORK_MNC}'
+install_yq()
+{
+    msg info "Download yq binary"
+    if ! wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64 -O /usr/bin/yq ; then
+        msg error "yq binary download failed"
+        exit 1
+    fi
+    chmod +x /usr/bin/yq
+}
 
-key: '${SUBSCRIPTOIN_KEY}'
-op: '${OPERATOR_CODE}'
+define_services()
+{
+    msg info "Define ueransim-gnb systemd service"
+    cat > /etc/systemd/system/ueransim-gnb.service << EOF
+[Unit]
+Description=UERANSIM gNB Service
+After=network.target
 
-opType: 'OPC'
-amf: '8000'
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/nr-gnb -c /etc/ueransim/open5gs-gnb.yaml
+Restart=always
+PIDFile=/run/ueransim-gnb.pid
 
-gnbSearchList:
-  - 127.0.0.1
-
-uacAic:
-  mps: false
-  mcs: false
-
-uacAcc:
-  normalClass: 0
-  class11: false
-  class12: false
-  class13: false
-  class14: false
-  class15: false
-
-sessions:
-  - apn: internet
-    emergency: false
-    slice:
-      sd: "0x111111"
-      sst: 1
-    type: IPv4
-
-configured-nssai:
-  - sst: 1
-    sd: 0x111111
-
-default-nssai:
-  - sst: 1
-    sd: 0x111111
-
-integrity:
-  IA1: true
-  IA2: true
-  IA3: true
-
-ciphering:
-  EA1: true
-  EA2: true
-  EA3: true
-
-integrityMaxRate:
-  uplink: 'full'
-  downlink: 'full'
-
+[Install]
+WantedBy=multi-user.target
 EOF
+
+    msg info "Define ueransim-ue systemd service"
+    cat > /etc/systemd/system/ueransim-ue.service << EOF
+[Unit]
+Description=UERANSIM UE Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/nr-ue -c /etc/ueransim/open5gs-ue.yaml
+Restart=always
+PIDFile=/run/ueransim-ue.pid
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+}
+
+
+
+config_gnb()
+{
+    gnb_config_bak=/etc/ueransim/open5gs-gnb-bak.yaml
+    gnb_config=/etc/ueransim/open5gs-gnb.yaml
+
+    msg info "Modify variables from file ${gnb_config}"
+    cp ${gnb_config_bak} ${gnb_config}
+
+    for path in "${!gnb_variables[@]}"; do
+        yq_replacements_chain ${path} ${gnb_variables[${path}]} ${gnb_config}
+    done
+}
+
+config_ue()
+{
+    ue_config_bak=/etc/ueransim/open5gs-ue-bak.yaml
+    ue_config=/etc/ueransim/open5gs-ue.yaml
+
+    msg info "Modify variables from file ${ue_config}"
+    cp ${ue_config_bak} ${ue_config}
+
+    for path in "${!ue_variables[@]}"; do
+        yq_replacements_chain ${path} ${ue_variables[${path}]} ${ue_config}
+    done
+}
+
+yq_replacements_chain()
+{
+    local path="$1"
+    local value="$2"
+    local configfile="$3"
+
+    if [ -z "${!value}" ]; then
+        msg info "    Variable ${value} not defined"
+    else
+        cat ${configfile} | yq "${path} = \"${!value}\"" | sponge ${configfile}
+        msg info "    Variable ${value} succesfully modified"
+    fi
+}
+
+amf_route()
+{
+    if [ -n "${ONEKE_VNF}" ] && [ -n "${GNB_AMF_ADDRESS}" ]; then
+        oneke_subnet=$(echo ${GNB_AMF_ADDRESS} | cut -d '.' -f 1-3).0/24
+        line="ExecStartPre=/usr/sbin/ip route replace ${oneke_subnet} via ${ONEKE_VNF}"
+
+        msg info "Configure routing to the AMF from the gnb service file"
+        sed -i "/^ExecStart=/i ${line}" "/etc/systemd/system/ueransim-gnb.service"
+    else
+        msg info "Either the ONEKE_VNF=${ONEKE_VNF} or the GNB_AMF_ADDRESS=${GNB_AMF_ADDRESS} are not defined so no routing to the AMF has been configured in the gnb service file"
+    fi
+}
+
+postinstall_cleanup()
+{
+    msg info "Delete cache and stored packages"
+    apt-get autoclean
+    apt-get autoremove
+    rm -rf /var/lib/apt/lists/*
 }

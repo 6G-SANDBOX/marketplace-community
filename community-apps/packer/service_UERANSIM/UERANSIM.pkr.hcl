@@ -3,6 +3,13 @@ source "null" "null" { communicator = "none" }
 build {
   sources = ["source.null.null"]
 
+  # New local script to first compile UERANSIM binaries if they are not present in the system
+  provisioner "shell-local" {
+    inline = [
+      "appliances/UERANSIM/build.sh",
+    ]
+  }
+
   provisioner "shell-local" {
     inline = [
       "mkdir -p ${var.input_dir}/context",
@@ -12,7 +19,7 @@ build {
   }
 }
 
-# Build VM image
+
 source "qemu" "UERANSIM" {
   cpus        = 2
   memory      = 2048
@@ -29,7 +36,8 @@ source "qemu" "UERANSIM" {
   net_device       = "virtio-net"
   format           = "qcow2"
   disk_compression = false
-  disk_size        = 10240
+  #skip_resize_disk = true
+  disk_size        = "10240"        # default size increased to 10G
 
   output_directory = var.output_dir
 
@@ -48,10 +56,10 @@ source "qemu" "UERANSIM" {
   vm_name          = "${var.appliance_name}"
 }
 
+
 build {
   sources = ["source.qemu.UERANSIM"]
 
-  # revert insecure ssh options done by context start_script
   provisioner "shell" {
     scripts = ["${var.input_dir}/81-configure-ssh.sh"]
   }
@@ -71,6 +79,7 @@ build {
     ]
     destination = "/etc/one-appliance/"
   }
+
   provisioner "file" {
     sources = [
       "../one-apps/appliances/lib/common.sh",
@@ -78,12 +87,46 @@ build {
     ]
     destination = "/etc/one-appliance/lib/"
   }
+
   provisioner "file" {
     source      = "../one-apps/appliances/service.sh"
     destination = "/etc/one-appliance/service"
   }
+
+
+  # Import UERANSIM binaries to path
   provisioner "file" {
-    sources     = ["appliances/UERANSIM/appliance.sh"]
+    sources      = [
+      "appliances/UERANSIM/UERANSIM/build/nr-gnb",
+      "appliances/UERANSIM/UERANSIM/build/nr-ue",
+      "appliances/UERANSIM/UERANSIM/build/nr-cli",
+      "appliances/UERANSIM/UERANSIM/build/nr-binder",
+    ]
+    destination = "/usr/local/bin/"
+  }
+  # Import UERANSIM library to path
+  provisioner "file" {
+    sources      = [
+      "appliances/UERANSIM/UERANSIM/build/libdevbnd.so",
+    ]
+    destination = "/usr/local/lib/"
+  }
+  # Import sample configuration files for the UERANSIM
+  provisioner "shell" { inline = ["mkdir -p /etc/ueransim"] }
+  provisioner "file" {
+    source      = "appliances/UERANSIM/UERANSIM/config/open5gs-gnb.yaml"
+    destination = "/etc/ueransim/open5gs-gnb-bak.yaml"
+  }
+  provisioner "file" {
+    source      = "appliances/UERANSIM/UERANSIM/config/open5gs-ue.yaml"
+    destination = "/etc/ueransim/open5gs-ue-bak.yaml"
+  }
+
+
+  provisioner "file" {
+    sources     = [
+      "appliances/UERANSIM/appliance.sh",
+      ]
     destination = "/etc/one-appliance/service.d/"
   }
 

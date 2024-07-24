@@ -12,6 +12,7 @@ build {
   }
 }
 
+
 source "qemu" "TNLCM" {
   cpus        = 2 
   memory      = 4096
@@ -56,10 +57,6 @@ build {
     scripts = ["${var.input_dir}/81-configure-ssh.sh"]
   }
 
-  ##############################################
-  # BEGIN placing script logic inside Guest OS #
-  ##############################################
-
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
     inline = [
@@ -96,10 +93,6 @@ build {
     destination = "/etc/one-appliance/service.d/"
   }
 
-  #######################################################################
-  # Setup appliance: Execute install step                               #
-  # https://github.com/OpenNebula/one-apps/wiki/apps_intro#installation #
-  #######################################################################
   provisioner "shell" {
     scripts = ["${var.input_dir}/82-configure-context.sh"]
   }
