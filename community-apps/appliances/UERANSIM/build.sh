@@ -6,8 +6,11 @@ export DEBIAN_FRONTEND=noninteractive
 BUILD_PACKAGES="make gcc g++ cmake"
 BUILD_PATH="appliances/UERANSIM/UERANSIM"
 
-if [ ! -d "${BUILD_PATH}" ] || ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; then
+if [ ! -d "${BUILD_PATH}" ]; then
+    git clone https://github.com/aligungr/UERANSIM ${BUILD_PATH}
+fi
 
+if ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; then
     echo "UERANSIM binaries could not be found. Proceeding to make the necessary steps to build them..."
 
     echo "Install required packages"
