@@ -1,6 +1,6 @@
 ---
 name: UERANSIM
-version: "20240705-1102"
+version: "20240724-1824"
 publisher: Telefonica Innovacion Digital
 description: |-
   This appliance installs the latest version of [UERANSIM](https://github.com/aligungr/UERANSIM), the open source state-of-the-art 5G UE and RAN (gNodeB) simulator. UE and RAN can be considered as a 5G mobile phone and a base station in basic terms. The project can be used for testing 5G Core Network and studying 5G System.
@@ -10,14 +10,14 @@ description: |-
   After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
-  
+
   **Note**: Remember to update the template in order to add a network after importing it.
 short_description: UERANSIM 5G gNB & UE simulator
 tags:
   - ubuntu
   - ueransim
 format: qcow2
-creation_time: "1721640274"
+creation_time: "1721838167"
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
@@ -98,7 +98,7 @@ images:
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "7516192768"
+    size: "10737418240"
     checksum:
-      md5: "490330ca6ee051cc7549cbdf80809e60"
-      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+      md5: "16da388980a2e575c09cf3f4a2a40180"
+      sha256: "79477b99b9d7e7ef4158cf17614d1e626c166fe0da8a1d5d5a766a40facfda18"
