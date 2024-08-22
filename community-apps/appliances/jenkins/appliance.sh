@@ -16,7 +16,7 @@ This appliance installs the latest version of Jenkins LTS from the official down
 The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
 Run with default values and manually configure the credentials from Jenkins WebUI, or use contextualization variables to automate the bootstrap.
-Default Jenkins credentials (if JENKINS_USERNAME and JENKINS_PASSWORD are unspecified) are admin:admin
+Default Jenkins credentials (if ONEAPP_JENKINS_USERNAME and ONEAPP_JENKINS_PASSWORD are unspecified) are admin:admin
 
 After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
 
@@ -32,20 +32,21 @@ ONE_SERVICE_RECONFIGURABLE=false
 # ------------------------------------------------------------------------------
 
 ONE_SERVICE_PARAMS=(
-    'JENKINS_USERNAME'              'configure'  'The username for the Jenkins admin user'                                        'O|text'
-    'JENKINS_PASSWORD'              'configure'  'The password for the Jenkins admin user'                                        'O|text'
-    'ANSIBLE_VAULT_PASSWORD'        'configure'  'Password to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'   'O|text'
-    'OPENNEBULA_ENDPOINT'           'configure'  'The URL of your OpenNebula XML-RPC Endpoint API'                                'O|text'
-    'OPENNEBULA_FLOW_ENDPOINT'      'configure'  'The URL of your OneFlow HTTP Endpoint API'                                      'O|text'
-    'OPENNEBULA_USERNAME'           'configure'  'The OpenNebula username used to deploy each component'                          'O|text'
-    'OPENNEBULA_PASSWORD'           'configure'  'The OpenNebula password matching OPENNEBULA_USERNAME'                           'O|text'
-    'OPENNEBULA_INSECURE'           'configure'  'Allow insecure connexion into the OpenNebula XML-RPC Endpoint API (skip TLS verification)'                 'O|text64'
-    'AWS_ACCESS_KEY_ID'             'configure'  'S3 Storage access key. Same as used in the MinIO instance'                      'O|text'
-    'AWS_SECRET_ACCESS_KEY'         'configure'  'S3 Storage secret key. Same as used in the MinIO instance'                      'O|text'
+    'ONEAPP_JENKINS_USERNAME'                  'configure'  'The username for the Jenkins admin user'                                        'O|text'
+    'ONEAPP_JENKINS_PASSWORD'                  'configure'  'The password for the Jenkins admin user'                                        'O|text'
+    'ONEAPP_JENKINS_ANSIBLE_VAULT'             'configure'  'Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'  'M|password'
+    'ONEAPP_JENKINS_OPENNEBULA_ENDPOINT'       'configure'  'The URL of your OpenNebula XML-RPC Endpoint API'                                'M|text'
+    'ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT'  'configure'  'The URL of your OneFlow HTTP Endpoint API'                                      'M|text'
+    'ONEAPP_JENKINS_OPENNEBULA_USERNAME'       'configure'  'The OpenNebula username used by Jenkins to deploy each component'               'M|text'
+    'ONEAPP_JENKINS_OPENNEBULA_PASSWORD'       'configure'  'The password matching OPENNEBULA_USERNAME'                                      'M|password'
+    'ONEAPP_JENKINS_OPENNEBULA_INSECURE'       'configure'  'Allow insecure connexion into the OpenNebula XML-RPC Endpoint API (skip TLS verification)'                  'O|boolean'
+    'ONEAPP_JENKINS_AWS_ACCESS_KEY_ID'         'configure'  'S3 Storage access key. Same as used in the MinIO instance'                      'M|text'
+    'ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY'     'configure'  'S3 Storage secret key. Same as used in the MinIO instance'                      'M|text'
 )
 
-JENKINS_USERNAME="${JENKINS_USERNAME:-admin}"
-JENKINS_PASSWORD="${JENKINS_PASSWORD:-admin}"
+ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
+ONEAPP_JENKINS_PASSWORD="${ONEAPP_JENKINS_PASSWORD:-admin}"
+ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 
 
 # ------------------------------------------------------------------------------
@@ -342,9 +343,9 @@ update_admin_user()
     msg info "Update admin username and password in jenkins"
     url=http://localhost:8080
 
-    username=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${JENKINS_USERNAME}")
-    password=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${JENKINS_PASSWORD}")
-    fullname=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${JENKINS_USERNAME}")
+    username=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_USERNAME}")
+    password=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_PASSWORD}")
+    fullname=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_USERNAME}")
     email=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "hello@world.com")
 
     # GET THE CRUMB AND COOKIE
@@ -365,9 +366,9 @@ update_admin_user()
 
     msg info "Generate admin token in jenkins and write it at ${CONSULT_ME_DIR}jenkins_tnlcm_token"
     another_cookie_jar="$(mktemp)"
-    another_full_crumb=$(curl -u "${JENKINS_USERNAME}:${JENKINS_PASSWORD}" --cookie-jar "$another_cookie_jar" ${url}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\))
+    another_full_crumb=$(curl -u "${ONEAPP_JENKINS_USERNAME}:${ONEAPP_JENKINS_PASSWORD}" --cookie-jar "$another_cookie_jar" ${url}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\))
 
-    jenkins_tnlcm_token=$(curl -u "${JENKINS_USERNAME}:${JENKINS_PASSWORD}" ${url}/me/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken \
+    jenkins_tnlcm_token=$(curl -u "${ONEAPP_JENKINS_USERNAME}:${ONEAPP_JENKINS_PASSWORD}" ${url}/me/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken \
         -H ${another_full_crumb} -s \
         --cookie ${another_cookie_jar} \
         --data 'newTokenName=TNLCMtoken' | jq -r '.data.tokenValue')
@@ -407,49 +408,49 @@ credentials:
           - string:
               scope: GLOBAL
               id: "ANSIBLE_VAULT_PASSWORD"
-              secret: "$(echo ${ANSIBLE_VAULT_PASSWORD} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_ANSIBLE_VAULT} | xargs)"
               description: "Password to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
       - credentials:
           - string:
               scope: GLOBAL
               id: "OPENNEBULA_ENDPOINT"
-              secret: "$(echo ${OPENNEBULA_ENDPOINT} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_ENDPOINT} | xargs)"
               description: "The URL of your OpenNebula XML-RPC Endpoint API (for example,'http://example.com:2633/RPC2')"
       - credentials:
           - string:
               scope: GLOBAL
               id: "OPENNEBULA_FLOW_ENDPOINT"
-              secret: "$(echo ${OPENNEBULA_FLOW_ENDPOINT} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT} | xargs)"
               description: "The URL of your OneFlow HTTP Endpoint API (for example,'http://example.com:2474')"
       - credentials:
           - string:
               scope: GLOBAL
               id: "OPENNEBULA_USERNAME"
-              secret: "$(echo ${OPENNEBULA_USERNAME} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_USERNAME} | xargs)"
               description: "The OpenNebula username used to deploy each component (for example,'jenkins')"
       - credentials:
           - string:
               scope: GLOBAL
               id: "OPENNEBULA_PASSWORD"
-              secret: "$(echo ${OPENNEBULA_PASSWORD} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_PASSWORD} | xargs)"
               description: "The OpenNebula password matching OPENNEBULA_USERNAME"
       - credentials:
           - string:
               scope: GLOBAL
               id: "OPENNEBULA_INSECURE"
-              secret: "$(echo ${OPENNEBULA_INSECURE} | xargs)"
+              secret: "$(if [ \"${ONEAPP_JENKINS_OPENNEBULA_INSECURE}\" = \"YES\" ]; then echo true; else echo false; fi)"
               description: "Allow insecure connexion into the OpenNebula XML-RPC Endpoint API (skip TLS verification)"
       - credentials:
           - string:
               scope: GLOBAL
               id: "AWS_ACCESS_KEY_ID"
-              secret: "$(echo ${AWS_ACCESS_KEY_ID} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_AWS_ACCESS_KEY_ID} | xargs)"
               description: "S3 Storage access key. Same as used in the MinIO instance"
       - credentials:
           - string:
               scope: GLOBAL
               id: "AWS_SECRET_ACCESS_KEY"
-              secret: "$(echo ${AWS_SECRET_ACCESS_KEY} | xargs)"
+              secret: "$(echo ${ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY} | xargs)"
               description: "S3 Storage secret key. Same as used in the MinIO instance"
 EOF
     chown jenkins:jenkins /var/lib/jenkins/casc_configs/credentials.yaml

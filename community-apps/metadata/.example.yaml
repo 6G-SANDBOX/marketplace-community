@@ -30,15 +30,13 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    jenkins_host: "$JENKINS_HOST"
-    jenkins_username: "$JENKINS_USERNAME"
-    jenkins_password: "$JENKINS_PASSWORD"
-    jenkins_token: "$JENKINS_TOKEN"
-    jenkins_job_deploy: "$JENKINS_JOB_DEPLOY"
-    jenkins_job_destroy: "$JENKINS_JOB_DESTROY"
-    ansible_vault: "$ANSIBLE_VAULT"
-    mail_username: "tnlcm.uma@gmail.com"
-    mail_password: "czrs rsdg ktpm rrlx"
+    oneapp_example_jenkins_host: "$ONEAPP_EXAMPLE_JENKINS_HOST"
+    oneapp_example_jenkins_username: "$ONEAPP_EXAMPLE_JENKINS_USERNAME"
+    oneapp_example_jenkins_password: "$ONEAPP_EXAMPLE_JENKINS_PASSWORD"
+    oneapp_example_jenkins_token: "$ONEAPP_EXAMPLE_JENKINS_TOKEN"
+    oneapp_example_jenkins_job_deploy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY"
+    oneapp_example_jenkins_job_destroy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY"
+    oneapp_example_ansible_vault: "$ONEAPP_EXAMPLE_ANSIBLE_VAULT"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -58,13 +56,13 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   lxd_security_privileged: 'true'
   user_inputs:
-    jenkins_host: "M|text|JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
-    jenkins_username: "M|text|JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
-    jenkins_password: "M|text|JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
-    jenkins_token: "M|text|JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API| |114803bbd81a27f5eb9052ce4d3b9212d4"
-    jenkins_job_deploy: "M|text|JENKINS_JOB_DEPLOY: Name of the Jenkins pipeline used to deploy Trial Networks| |TN_DEPLOY"
-    jenkins_job_destroy: "M|text|JENKINS_JOB_DESTROY: Name of the Jenkins pipeline used to destroy Trial Networks| |TN_DESTROY"
-    ansible_vault: "M|text|ANSIBLE_VAULT: Password used to decrypt the contents of the 6G-Sandbox-Sites repository file| |"
+    oneapp_example_jenkins_host:         "M|text|ONEAPP_EXAMPLE_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
+    oneapp_example_jenkins_username:     "M|text|ONEAPP_EXAMPLE_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
+    oneapp_example_jenkins_password:     "M|text|ONEAPP_EXAMPLE_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
+    oneapp_example_jenkins_token:        "M|text|ONEAPP_EXAMPLE_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API| |114803bbd81a27f5eb9052ce4d3b9212d4"
+    oneapp_example_jenkins_job_deploy:   "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY: Name of the Jenkins pipeline used to deploy Trial Networks| |TN_DEPLOY"
+    oneapp_example_jenkins_job_destroy:  "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY: Name of the Jenkins pipeline used to destroy Trial Networks| |TN_DESTROY"
+    oneapp_example_ansible_vault:        "M|password|ONEAPP_EXAMPLE_ANSIBLE_VAULT: Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
 logo: tnlcm.png
 images:
   - name: TNLCM_6GSandbox

@@ -35,7 +35,7 @@ ONE_SERVICE_RECONFIGURABLE=true
 # https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section
 
 # 'name' 'type' 'description' 'input'.
-# 'type' is always 'configure', and 'input' are shown at https://docs.opennebula.io/6.8/management_and_operations/vm_management/vm_templates.html?#user-inputs
+# 'type' is always 'configure', and 'input' are shown at https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
 ONE_SERVICE_PARAMS=(
     'ONEAPP_LITHOPS_BACKEND'            'configure'  'Lithops compute backend'                                          'O|text'
     'ONEAPP_LITHOPS_STORAGE'            'configure'  'Lithops storage backend'                                          'O|text'
@@ -51,7 +51,7 @@ ONEAPP_LITHOPS_BACKEND="${ONEAPP_LITHOPS_BACKEND:-localhost}"
 ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 
 # You can make these parameters a required step of the VM instantiation wizard by using the USER_INPUTS feature
-# https://docs.opennebula.io/6.8/management_and_operations/vm_management/vm_templates.html?#user-inputs
+# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
 
 
 # ------------------------------------------------------------------------------

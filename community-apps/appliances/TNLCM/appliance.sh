@@ -30,16 +30,18 @@ ONE_SERVICE_RECONFIGURABLE=true
 # ------------------------------------------------------------------------------
 
 ONE_SERVICE_PARAMS=(
-    'JENKINS_HOST'           'configure'  'IP address of the Jenkins server used to deploy the Trial Networks'                      'M|text'
-    'JENKINS_USERNAME'       'configure'  'Username used to login into the Jenkins server to access and retrieve pipeline info'     'M|text'
-    'JENKINS_PASSWORD'       'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'     'M|text'
-    'JENKINS_TOKEN'          'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'             'M|text'
-    'ANSIBLE_VAULT'          'configure'  'Password used to decrypt the contents of the 6G-Sandbox-Sites repository file'           'M|text'
+    'ONEAPP_TNLCM_JENKINS_HOST'            'configure'  'IP address of the Jenkins server used to deploy the Trial Networks'                     'M|text'
+    'ONEAPP_TNLCM_JENKINS_USERNAME'        'configure'  'Username used to login into the Jenkins server to access and retrieve pipeline info'    'M|text'
+    'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'    'M|text'
+    'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'            'M|password'
+    'ONEAPP_TNLCM_ANSIBLE_VAULT'           'configure'  'Password used to decrypt the contents of the 6G-Sandbox-Sites repository file'          'M|password'
 )
 
-JENKINS_HOST="${JENKINS_HOST:-127.0.0.1}"
-JENKINS_USERNAME="${JENKINS_USERNAME:-admin}"
-JENKINS_PASSWORD="${JENKINS_PASSWORD:-admin}"
+ONEAPP_TNLCM_JENKINS_HOST="${ONEAPP_TNLCM_JENKINS_HOST:-127.0.0.1}"
+ONEAPP_TNLCM_JENKINS_USERNAME="${ONEAPP_TNLCM_JENKINS_USERNAME:-admin}"
+ONEAPP_TNLCM_JENKINS_PASSWORD="${ONEAPP_TNLCM_JENKINS_PASSWORD:-admin}"
+ONEAPP_TNLCM_MAIL_USERNAME="${ONEAPP_TNLCM_MAIL_USERNAME:-tnlcm.uma@gmail.com}"
+ONEAPP_TNLCM_MAIL_PASSWORD="${ONEAPP_TNLCM_MAIL_PASSWORD:-czrs rsdg ktpm rrlx}"
 
 
 # ------------------------------------------------------------------------------
@@ -261,16 +263,27 @@ EOF
 update_envfiles()
 {
     TNLCM_HOST=$(ip addr show eth0 | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -n 1)
+    declare -A var_map=(
+        ["JENKINS_HOST"]="ONEAPP_TNLCM_JENKINS_HOST"
+        ["JENKINS_USERNAME"]="ONEAPP_TNLCM_JENKINS_USERNAME"
+        ["JENKINS_PASSWORD"]="ONEAPP_TNLCM_JENKINS_PASSWORD"
+        ["JENKINS_TOKEN"]="ONEAPP_TNLCM_JENKINS_TOKEN"
+        ["ANSIBLE_VAULT"]="ONEAPP_TNLCM_ANSIBLE_VAULT"
+        ["MAIL_USERNAME"]="ONEAPP_TNLCM_MAIL_USERNAME"
+        ["MAIL_PASSWORD"]="ONEAPP_TNLCM_MAIL_PASSWORD"
+        ["TNLCM_HOST"]="TNLCM_HOST"
+    )
 
     msg info "Update enviromental variables with the input parameters"
-    for var in JENKINS_HOST JENKINS_USERNAME JENKINS_PASSWORD JENKINS_TOKEN ANSIBLE_VAULT MAIL_USERNAME MAIL_PASSWORD TNLCM_HOST
-    do
-        if [ -z "${!var}" ]; then
-            msg warning "Variable ${var} is not defined or empty"
+    for env_var in "${!var_map[@]}"; do
+
+        if [ -z "${!var_map[$env_var]}" ]; then
+            msg warning "Variable ${var_map[$env_var]} is not defined or empty"
         else
-            sed -i "s%^${var}=.*%${var}=\"${!var}\"%" /opt/TNLCM/.env
-            msg debug "Variable ${var} overwritten with value ${!var}"
+            sed -i "s%^${env_var}=.*%${env_var}=\"${!var_map[$env_var]}\"%" /opt/TNLCM/.env
+            msg debug "Variable ${env_var} overwritten with value ${!var_map[$env_var]}"
         fi
+
     done
 
     msg info "Update enviromental variables of the TNLCM frontend"
