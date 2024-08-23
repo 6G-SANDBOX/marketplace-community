@@ -80,10 +80,10 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_TNLCM_JENKINS_HOST = "${jenkins.template.context.eth0_ip}"
+        ONEAPP_TNLCM_JENKINS_HOST     = "${jenkins.template.context.eth0_ip}"
         ONEAPP_TNLCM_JENKINS_USERNAME = "${jenkins.template.context.oneapp_jenkins_username}"
         ONEAPP_TNLCM_JENKINS_PASSWORD = "${jenkins.template.context.oneapp_jenkins_password}"
-        ONEAPP_TNLCM_JENKINS_TOKEN "${jenkins.template.context.jenkins_token}"
-        ONEAPP_TNLCM_ANSIBLE_VAULT = "${jenkins.template.context.oneapp_jenkins_ansible_vault}"
+        ONEAPP_TNLCM_JENKINS_TOKEN    = "${jenkins.template.context.jenkins_token}"
+        ONEAPP_TNLCM_ANSIBLE_VAULT    = "${jenkins.template.context.oneapp_jenkins_ansible_vault}"
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
 logo: sandbox.png
