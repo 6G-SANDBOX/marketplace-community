@@ -33,10 +33,10 @@ opennebula_template:
     token: "YES"
     report_ready: "YES"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    start_script_base64: "IyEvYmluL2Jhc2gKSkVOS0lOU19UT0tFTj0kKG9uZWdhdGUgdm0gc2hvdyAkKG9uZWdhdGUgc2VydmljZSBzaG93IC0tanNvbiB8anEgJy5TRVJWSUNFLnJvbGVzW10gfCBzZWxlY3QoLm5hbWUgPT0gImplbmtpbnMiKS5ub2Rlc1tdLmRlcGxveV9pZCcpIC0tanNvbiB8anEgLlZNLlVTRVJfVEVNUExBVEUuSkVOS0lOU19UT0tFTikKc2VkIC1pICJzJV5KRU5LSU5TX1RPS0VOPS4qJUpFTktJTlNfVE9LRU49XCIke0pFTktJTlNfVE9LRU59XCIlIiAvb3B0L1ROTENNLy5lbnY="
     oneapp_tnlcm_jenkins_host:      "$ONEAPP_TNLCM_JENKINS_HOST"
     oneapp_tnlcm_jenkins_username:  "$ONEAPP_TNLCM_JENKINS_USERNAME"
     oneapp_tnlcm_jenkins_password:  "$ONEAPP_TNLCM_JENKINS_PASSWORD"
-    oneapp_tnlcm_jenkins_token:     "$ONEAPP_TNLCM_JENKINS_TOKEN"
     oneapp_tnlcm_ansible_vault:     "$ONEAPP_TNLCM_ANSIBLE_VAULT"
   cpu: '2'
   vcpu: '2'
