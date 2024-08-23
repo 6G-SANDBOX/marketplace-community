@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] Jenkins"
-version: "20240705-1102"   # SYNC
+version: 1724418332   # date +%s
 publisher: Telefonica Innovacion Digital
 description: |-
   Custom template of the [6G-Sandbox Jenkins appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_jenkins) for the 6G-Sandbox toolkit.
@@ -15,7 +15,7 @@ tags:
 - ubuntu
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1717151321  # SYNC
+creation_time: 1724418332   # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -30,6 +30,7 @@ opennebula_template:
     token: "YES"
     report_ready: "YES"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    start_script_base64: "IyEvYmluL2Jhc2gKb25lZ2F0ZSB2bSB1cGRhdGUgLS1kYXRhIEpFTktJTlNfVE9LRU49JChjYXQgL3Zhci9saWIvamVua2lucy9jb25zdWx0X21lL2plbmtpbnNfdG5sY21fdG9rZW4pCm9uZWdhdGUgdm0gdXBkYXRlIC0tZGF0YSBKRU5LSU5TX1BVQktFWT0kKGNhdCAvdmFyL2xpYi9qZW5raW5zL2NvbnN1bHRfbWUvaWRfZWQyNTUxOS5wdWIp"
     oneapp_jenkins_username:                 "$ONEAPP_JENKINS_USERNAME"
     oneapp_jenkins_password:                 "$ONEAPP_JENKINS_PASSWORD"
     oneapp_jenkins_ansible_vault:            "$ONEAPP_JENKINS_ANSIBLE_VAULT"

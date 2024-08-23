@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] TNLCM"
-version: "20240705-1102"   # SYNC
+version: 1724418332   # date +%s
 publisher: Telefonica Innovacion Digital
 description: |-
   Custom template of the [6G-Sandbox TNLCM appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_TNLCM) for the 6G-Sandbox toolkit.
@@ -18,7 +18,7 @@ tags:
 - ubuntu
 type: VMTEMPLATE
 format: qcow2
-creation_time: "1721640274"  # SYNC
+creation_time: 1724418332   # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
