@@ -35,36 +35,29 @@ roles:                        # "roles" is a crutial field and is also anywhere 
   minio: "[6G-Sandbox toolkit] MinIO"
   jenkins: "[6G-Sandbox toolkit] Jenkins"
   tnlcm: "[6G-Sandbox toolkit] TNLCM"
-
 opennebula_template:
   name: 6G-Sandbox toolkit installer
   description: This service is ment to be deployed once per site. You can effectively delete this template after checking that the MinIO, Jenkins and TNLCM appliances are RUNNING.
   deployment: straight            # each Role is deployed when all its parent Roles are RUNNING
   ready_status_gate: true         # OneFlow will consider VMs are RUNNING when they have READY=YES in their user template
   automatic_deletion: true        # delete Service if it has no running VMs
-
   custom_attrs:                   # Hash of custom attributes to use in the service. Initially meaningless. Has to also be specified in the role's vm_template_contents. custom_attrs_values serves the same purpose
     oneapp_minio_hostname:       "O|text|MinIO hostname for TLS certificate||localhost,minio-*.example.net"
     oneapp_minio_opts:           "O|text|Additional commandline options for MinIO server||--console-address :9001"
     oneapp_minio_root_user:      "O|text|MinIO root user for MinIO server. At least 3 characters||myminioadmin"
-    oneapp_minio_root_password:  "M|password|MinIO root user password for MinIO server. At least 8 characters||"
+    oneapp_minio_root_password:  "M|password|MinIO root user password for MinIO server. At least 8 characters"
     oneapp_minio_tls_cert:       "O|text64|MinIO TLS certificate (.crt)||"
     oneapp_minio_tls_key:        "O|text64|MinIO TLS key (.key)||"
-
-    oneapp_jenkins_username: "O|text|The username for the Jenkins admin user||admin"
-    oneapp_jenkins_password: "O|text|The password for the Jenkins admin user||admin"
-    oneapp_jenkins_ansible_vault: "M|password|Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    oneapp_jenkins_username:                  "O|text|The username for the Jenkins admin user||admin"
+    oneapp_jenkins_password:                  "O|password|The password for the Jenkins admin user"
+    oneapp_jenkins_ansible_vault:             "M|password|Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
     oneapp_jenkins_opennebula_endpoint:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
     oneapp_jenkins_opennebula_flow_endpoint:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
     oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component||"
     oneapp_jenkins_opennebula_password:       "M|password|The password for the OpenNebula user used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_insecure:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
-
-    # ONEAPP_JENKINS_HOST:     "O|text|IP address of the Jenkins server used to deploy the Trial Networks||${jenkins.TEMPLATE.CONTEXT.ETH0_IP}"
-
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
-
   roles:
     - name: minio           # letters, numbers or underscore
       vm_template_contents: |
@@ -72,27 +65,25 @@ opennebula_template:
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
-
     - name: jenkins           # letters, numbers or underscore
       parents: [minio]         # Names of the roles that must be deployed before this one.
       vm_template_contents: |
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID = "$ONEAPP_MINIO_ROOT_USER"
-        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "$ONEAPP_MINIO_ROOT_PASSWORD"
+        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID = "${minio.template.context.oneapp_minio_root_user}"
+        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "${minio.template.context.oneapp_minio_root_password}"
       cooldown: 120
-
-    # - name: tnlcm           # letters, numbers or underscore
-    #   parents: [jenkins]         # Names of the roles that must be deployed before this one.
-    #   vm_template_contents: |
-    #     NIC = [
-    #       NAME = "NIC0",
-    #       NETWORK_ID = "$Public" ]
-    #   cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
-
+    - name: tnlcm           # letters, numbers or underscore
+      parents: [jenkins]         # Names of the roles that must be deployed before this one.
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_TNLCM_JENKINS_HOST = "${jenkins.template.context.eth0_ip}"
+        ONEAPP_TNLCM_JENKINS_USERNAME = "${jenkins.template.context.oneapp_jenkins_username}"
+        ONEAPP_TNLCM_JENKINS_PASSWORD = "${jenkins.template.context.oneapp_jenkins_password}"
+        ONEAPP_TNLCM_JENKINS_TOKEN "${jenkins.template.context.jenkins_token}"
+        ONEAPP_TNLCM_ANSIBLE_VAULT = "${jenkins.template.context.oneapp_jenkins_ansible_vault}"
+      cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
 logo: sandbox.png
-# images: []
-
-########################
-# Hijos heredan valores con "${vnf.template.context.ETH0_IP}"

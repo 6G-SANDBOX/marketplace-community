@@ -30,7 +30,7 @@ opennebula_template:
     token: "YES"
     report_ready: "YES"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    start_script_base64: "IyEvYmluL2Jhc2gKb25lZ2F0ZSB2bSB1cGRhdGUgLS1kYXRhIEpFTktJTlNfVE9LRU49JChjYXQgL3Zhci9saWIvamVua2lucy9jb25zdWx0X21lL2plbmtpbnNfdG5sY21fdG9rZW4pCm9uZWdhdGUgdm0gdXBkYXRlIC0tZGF0YSBKRU5LSU5TX1BVQktFWT0kKGNhdCAvdmFyL2xpYi9qZW5raW5zL2NvbnN1bHRfbWUvaWRfZWQyNTUxOS5wdWIp"
+    start_script_base64: "IyEvYmluL2Jhc2gKb25lZ2F0ZSB2bSB1cGRhdGUgLS1kYXRhIEpFTktJTlNfVE9LRU49JChjYXQgL3Zhci9saWIvamVua2lucy9jb25zdWx0X21lL2plbmtpbnNfdG5sY21fdG9rZW4p"
     oneapp_jenkins_username:                 "$ONEAPP_JENKINS_USERNAME"
     oneapp_jenkins_password:                 "$ONEAPP_JENKINS_PASSWORD"
     oneapp_jenkins_ansible_vault:            "$ONEAPP_JENKINS_ANSIBLE_VAULT"
