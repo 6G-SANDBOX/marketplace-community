@@ -12,10 +12,10 @@ description: |-
    change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
 short_description: 6G-Sandbox toolkit VM template for the TNLCM appliance
 tags:
-  - 6G-Sandbox
-  - toolkit
-  - TNLCM
-  - ubuntu
+- 6G-Sandbox
+- toolkit
+- TNLCM
+- ubuntu
 type: VMTEMPLATE
 format: qcow2
 creation_time: "1721640274"  # SYNC

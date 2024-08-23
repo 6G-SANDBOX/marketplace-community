@@ -9,10 +9,10 @@ description: |-
   For appliance deployment logs, check /var/log/one-appliance/.
 short_description: 6G-Sandbox toolkit VM template for the Jenkins appliance
 tags:
-  - 6G-Sandbox
-  - toolkit
-  - jenkins
-  - ubuntu
+- 6G-Sandbox
+- toolkit
+- jenkins
+- ubuntu
 type: VMTEMPLATE
 format: qcow2
 creation_time: 1717151321  # SYNC

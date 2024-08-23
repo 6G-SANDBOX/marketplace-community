@@ -1,10 +1,10 @@
 ---
-name: 6G-Sandbox Toolkit
+name: "6G-Sandbox Toolkit with minio beta"
 version: 6.10.0-2-20240715    # SYNC
 publisher: Telefonica Innovacion Digital
 description: |-
   OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer).
-  The service automatically deploys and configures one MinIO VM, one Jenkins VM, and one TNLCM VM, all ready to be used in your 6G-Sandbox site.
+  This service automatically deploys and configures one MinIO VM, one Jenkins VM, and one TNLCM VM, all ready to be used in your 6G-Sandbox site.
 
   All multi-VM OpenNebula Services need to have running the following services:
     - [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/overview.html)
@@ -32,20 +32,13 @@ os-arch: x86_64
 hypervisor: KVM
 opennebula_version: 6.0, 6.2, 6.4, 6.6, 6.8, 6.10
 roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
-  minio: "Service MinIO"
+  minio: "[6G-Sandbox toolkit] MinIO"
   jenkins: "6G-Sandbox Jenkins"
   tnlcm: "6G-Sandbox TNLCM backend+frontend"
 
-# Tengo un SERVICE 
-# Añado esto, que supongo que serán "IMAGE" 
-  vnf: "OneKE 1.29 VNF"
-  master: "OneKE 1.29 Airgapped"
-  worker: "OneKE 1.29 Airgapped"
-  storage: "OneKE 1.29 Airgapped Storage"
-
 opennebula_template:
   name: 6G-Sandbox toolkit installer
-  description: This service is ment to be depl  oyed once per site. You can effectively delete this template after checking that the MinIO, Jenkins and TNLCM appliances are RUNNING.
+  description: This service is ment to be deployed once per site. You can effectively delete this template after checking that the MinIO, Jenkins and TNLCM appliances are RUNNING.
   deployment: straight            # each Role is deployed when all its parent Roles are RUNNING
   ready_status_gate: true         # OneFlow will consider VMs are RUNNING when they have READY=YES in their user template
   automatic_deletion: true        # delete Service if it has no running VMs
@@ -53,45 +46,21 @@ opennebula_template:
   custom_attrs:                   # Hash of custom attributes to use in the service. Initially meaningless. Has to also be specified in the role's vm_template_contents. custom_attrs_values serves the same purpose
     oneapp_minio_hostname:       "O|text|MinIO hostname for TLS certificate||localhost,minio-*.example.net"
     oneapp_minio_opts:           "O|text|Additional commandline options for MinIO server||--console-address :9001"
-    oneapp_minio_root_user:      "O|text|MinIO root user for MinIO server||myminioadmin"
-    oneapp_minio_root_password:  "M|password|MinIO root user password for MinIO server||"
+    oneapp_minio_root_user:      "O|text|MinIO root user for MinIO server. At least 3 characters||myminioadmin"
+    oneapp_minio_root_password:  "M|password|MinIO root user password for MinIO server. At least 8 characters||"
     oneapp_minio_tls_cert:       "O|text64|MinIO TLS certificate (.crt)||"
     oneapp_minio_tls_key:        "O|text64|MinIO TLS key (.key)||"
 
-    ONEAPP_JENKINS_USERNAME: "O|text|The username for the Jenkins admin user||admin"
-    ONEAPP_JENKINS_PASSWORD: "O|text|The password for the Jenkins admin user||admin"
-    ONEAPP_JENKINS_HOST:     "O|text|IP address of the Jenkins server used to deploy the Trial Networks||${jenkins.TEMPLATE.CONTEXT.ETH0_IP}"
+    oneapp_jenkins_username: "O|text|The username for the Jenkins admin user||admin"
+    oneapp_jenkins_password: "O|text|The password for the Jenkins admin user||admin"
+    oneapp_jenkins_ansible_vault: "M|password|Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    oneapp_jenkins_opennebula_endpoint:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
+    oneapp_jenkins_opennebula_flow_endpoint:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
+    oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component||"
+    oneapp_jenkins_opennebula_password:       "M|password|The password for the OpenNebula user used by Jenkins to deploy each component"
+    oneapp_jenkins_opennebula_insecure:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
 
-    ONEAPP_ANSIBLE_VAULT: "M|password|Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-
-    ONEAPP_OPENNEBULA_ENDPOINT:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
-    ONEAPP_OPENNEBULA_FLOW_ENDPOINT:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
-    ONEAPP_OPENNEBULA_USERNAME:       "M|text|The OpenNebula username used by Jenkins to deploy each component||"
-    ONEAPP_OPENNEBULA_PASSWORD:       "M|password|The password matching ONEAPP_OPENNEBULA_USERNAME"
-    ONEAPP_OPENNEBULA_INSECURE:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
-
-
-
-
-    oneapp_jenkins_username:                 "O|text|ONEAPP_JENKINS_USERNAME: The username for the Jenkins admin user| |admin"
-    oneapp_jenkins_password:                 "O|text|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user| |admin"
-    oneapp_jenkins_ansible_vault:            "M|password|ONEAPP_JENKINS_ANSIBLE_VAULT: Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    oneapp_jenkins_opennebula_endpoint:      "M|text|ONEAPP_JENKINS_OPENNEBULA_ENDPOINT: The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')| |"
-    oneapp_jenkins_opennebula_flow_endpoint: "M|text|ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT: The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')| |"
-    oneapp_jenkins_opennebula_username:      "M|text|ONEAPP_JENKINS_OPENNEBULA_USERNAME: The OpenNebula username used by Jenkins to deploy each component| |"
-    oneapp_jenkins_opennebula_password:      "M|password|ONEAPP_JENKINS_OPENNEBULA_PASSWORD: The password matching ONEAPP_JENKINS_OPENNEBULA_USERNAME"
-    oneapp_jenkins_opennebula_insecure:      "O|boolean|ONEAPP_JENKINS_OPENNEBULA_INSECURE: Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)| |YES"
-    oneapp_jenkins_aws_access_key_id:        "M|text|ONEAPP_JENKINS_AWS_ACCESS_KEY_ID: S3 Storage access key. Same as used in the MinIO instance| |"
-    oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance| |" 
-
-
-    oneapp_tnlcm_jenkins_host:      "M|text|ONEAPP_TNLCM_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
-    oneapp_tnlcm_jenkins_username:  "M|text|ONEAPP_TNLCM_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |admin"
-    oneapp_tnlcm_jenkins_password:  "M|text|ONEAPP_TNLCM_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |admin"
-    oneapp_tnlcm_jenkins_token:     "M|password|ONEAPP_TNLCM_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API"
-    oneapp_tnlcm_ansible_vault:     "M|password|ONEAPP_TNLCM_ANSIBLE_VAULT: Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    
-
+    # ONEAPP_JENKINS_HOST:     "O|text|IP address of the Jenkins server used to deploy the Trial Networks||${jenkins.TEMPLATE.CONTEXT.ETH0_IP}"
 
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
@@ -102,14 +71,6 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        TOKEN = "YES"
-        REPORT_READY = "YES"
-        ONEAPP_MINIO_HOSTNAME = "$ONEAPP_MINIO_HOSTNAME"
-        ONEAPP_MINIO_OPTS = "$ONEAPP_MINIO_OPTS"
-        ONEAPP_MINIO_ROOT_PASSWORD = "$ONEAPP_MINIO_ROOT_PASSWORD"
-        ONEAPP_MINIO_ROOT_USER = "$ONEAPP_MINIO_ROOT_USER"
-        ONEAPP_MINIO_TLS_CERT = "$ONEAPP_MINIO_TLS_CERT"
-        ONEAPP_MINIO_TLS_KEY = "$ONEAPP_MINIO_TLS_KEY"
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
 
     - name: jenkins           # letters, numbers or underscore
@@ -118,81 +79,20 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        TOKEN = "YES"
-        REPORT_READY = "YES"
+        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID = "$ONEAPP_MINIO_ROOT_USER"
+        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "$ONEAPP_MINIO_ROOT_PASSWORD"
+      cooldown: 120
 
-
-
-
-        ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
-        ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
-        ONEAPP_K8S_EXTRA_SANS = "$ONEAPP_K8S_EXTRA_SANS"
-        ONEAPP_K8S_MULTUS_ENABLED = "$ONEAPP_K8S_MULTUS_ENABLED"
-        ONEAPP_K8S_MULTUS_CONFIG = "$ONEAPP_K8S_MULTUS_CONFIG"
-        ONEAPP_K8S_CNI_PLUGIN = "$ONEAPP_K8S_CNI_PLUGIN"
-        ONEAPP_K8S_CNI_CONFIG = "$ONEAPP_K8S_CNI_CONFIG"
-        ONEAPP_K8S_CILIUM_RANGE = "$ONEAPP_K8S_CILIUM_RANGE"
-        ONEAPP_K8S_METALLB_ENABLED = "$ONEAPP_K8S_METALLB_ENABLED"
-        ONEAPP_K8S_METALLB_CONFIG = "$ONEAPP_K8S_METALLB_CONFIG"
-        ONEAPP_K8S_METALLB_RANGE = "$ONEAPP_K8S_METALLB_RANGE"
-        ONEAPP_K8S_LONGHORN_ENABLED = "$ONEAPP_K8S_LONGHORN_ENABLED"
-        ONEAPP_K8S_TRAEFIK_ENABLED = "$ONEAPP_K8S_TRAEFIK_ENABLED"
-        ONEAPP_VNF_HAPROXY_LB0_IP = "<ETH0_EP0>"
-        ONEAPP_VNF_HAPROXY_LB0_PORT = "$ONEAPP_VNF_HAPROXY_LB0_PORT"
-        ONEAPP_VNF_HAPROXY_LB1_IP = "<ETH0_EP0>"
-        ONEAPP_VNF_HAPROXY_LB1_PORT = "$ONEAPP_VNF_HAPROXY_LB1_PORT"
-        ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-      cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
-
-    - name: tnlcm           # letters, numbers or underscore
-      parents: [jenkins]         # Names of the roles that must be deployed before this one.
-      vm_template_contents: |
-        NIC = [
-          NAME = "NIC0",
-          NETWORK_ID = "$Public" ]
-
-
-        ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
-        ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
-        ONEAPP_K8S_MULTUS_ENABLED = "$ONEAPP_K8S_MULTUS_ENABLED"
-        ONEAPP_K8S_CNI_PLUGIN = "$ONEAPP_K8S_CNI_PLUGIN"
-        ONEAPP_K8S_METALLB_ENABLED = "$ONEAPP_K8S_METALLB_ENABLED"
-        ONEAPP_K8S_LONGHORN_ENABLED = "$ONEAPP_K8S_LONGHORN_ENABLED"
-        ONEAPP_K8S_TRAEFIK_ENABLED = "$ONEAPP_K8S_TRAEFIK_ENABLED"
-        ONEAPP_VNF_HAPROXY_LB0_PORT = "$ONEAPP_VNF_HAPROXY_LB0_PORT"
-        ONEAPP_VNF_HAPROXY_LB1_PORT = "$ONEAPP_VNF_HAPROXY_LB1_PORT"
-        ONEAPP_VNF_HAPROXY_LB2_IP = "<ETH0_EP0>"
-        ONEAPP_VNF_HAPROXY_LB2_PORT = "$ONEAPP_VNF_HAPROXY_LB2_PORT"
-        ONEAPP_VNF_HAPROXY_LB3_IP = "<ETH0_EP0>"
-        ONEAPP_VNF_HAPROXY_LB3_PORT = "$ONEAPP_VNF_HAPROXY_LB3_PORT"
-        ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-      cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
-
-    - name: storage          # letters, numbers or underscore
-      parents: [vnf]         # Names of the roles that must be deployed before this one.
-      vm_template_contents: |
-        NIC = [
-          NAME = "NIC0",
-          NETWORK_ID = "$Public" ]
-
-
-        ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
-        ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
-        ONEAPP_K8S_MULTUS_ENABLED = "$ONEAPP_K8S_MULTUS_ENABLED"
-        ONEAPP_K8S_CNI_PLUGIN = "$ONEAPP_K8S_CNI_PLUGIN"
-        ONEAPP_K8S_LONGHORN_ENABLED = "$ONEAPP_K8S_LONGHORN_ENABLED"
-        ONEAPP_STORAGE_DEVICE = "$ONEAPP_STORAGE_DEVICE"
-        ONEAPP_STORAGE_FILESYSTEM = "$ONEAPP_STORAGE_FILESYSTEM"
-        ONEAPP_VNF_HAPROXY_LB0_PORT = "$ONEAPP_VNF_HAPROXY_LB0_PORT"
-        ONEAPP_VNF_HAPROXY_LB1_PORT = "$ONEAPP_VNF_HAPROXY_LB1_PORT"
-        ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-      cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
+    # - name: tnlcm           # letters, numbers or underscore
+    #   parents: [jenkins]         # Names of the roles that must be deployed before this one.
+    #   vm_template_contents: |
+    #     NIC = [
+    #       NAME = "NIC0",
+    #       NETWORK_ID = "$Public" ]
+    #   cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
 
 logo: sandbox.png
 # images: []
 
 ########################
-# Una VM hace   PUT ${ONEGATE_ENDPOINT}/vm         con información atrribute=value, e.g. ACTIVE_TASK = 13
-# Otra VM hace  GET ${ONEGATE_ENDPOINT}/service    
-
 # Hijos heredan valores con "${vnf.template.context.ETH0_IP}"
