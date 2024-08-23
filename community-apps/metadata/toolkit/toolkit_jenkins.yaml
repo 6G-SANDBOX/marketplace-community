@@ -1,0 +1,61 @@
+---
+name: "[6G-Sandbox toolkit] Jenkins"
+version: "20240705-1102"   # SYNC
+publisher: Telefonica Innovacion Digital
+description: |-
+  Custom template of the [6G-Sandbox Jenkins appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_jenkins) for the 6G-Sandbox toolkit.
+
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  For appliance deployment logs, check /var/log/one-appliance/.
+short_description: 6G-Sandbox toolkit VM template for the Jenkins appliance
+tags:
+  - 6G-Sandbox
+  - toolkit
+  - jenkins
+  - ubuntu
+type: VMTEMPLATE
+format: qcow2
+creation_time: 1717151321  # SYNC
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    service_id: "$SERVICE_ID"
+    network: 'YES'
+    set_hostname: "$NAME"
+    token: "YES"
+    report_ready: "YES"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    oneapp_jenkins_username:                 "$ONEAPP_JENKINS_USERNAME"
+    oneapp_jenkins_password:                 "$ONEAPP_JENKINS_PASSWORD"
+    oneapp_jenkins_ansible_vault:            "$ONEAPP_JENKINS_ANSIBLE_VAULT"
+    oneapp_jenkins_opennebula_endpoint:      "$ONEAPP_JENKINS_OPENNEBULA_ENDPOINT"
+    oneapp_jenkins_opennebula_flow_endpoint: "$ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT"
+    oneapp_jenkins_opennebula_username:      "$ONEAPP_JENKINS_OPENNEBULA_USERNAME"
+    oneapp_jenkins_opennebula_password:      "$ONEAPP_JENKINS_OPENNEBULA_PASSWORD"
+    oneapp_jenkins_opennebula_insecure:      "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
+    oneapp_jenkins_aws_access_key_id:        "$ONEAPP_JENKINS_AWS_ACCESS_KEY_ID"
+    oneapp_jenkins_aws_secret_access_key:    "$ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs: {}
+logo: jenkins.png
+disks:
+- "6G-Sandbox Jenkins"

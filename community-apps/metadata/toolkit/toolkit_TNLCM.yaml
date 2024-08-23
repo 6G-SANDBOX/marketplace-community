@@ -1,0 +1,61 @@
+---
+name: "[6G-Sandbox toolkit] TNLCM"
+version: "20240705-1102"   # SYNC
+publisher: Telefonica Innovacion Digital
+description: |-
+  Custom template of the [6G-Sandbox TNLCM appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_TNLCM) for the 6G-Sandbox toolkit.
+
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  For appliance deployment logs, check /var/log/one-appliance/.
+
+  **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
+   change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+short_description: 6G-Sandbox toolkit VM template for the TNLCM appliance
+tags:
+  - 6G-Sandbox
+  - toolkit
+  - TNLCM
+  - ubuntu
+type: VMTEMPLATE
+format: qcow2
+creation_time: "1721640274"  # SYNC
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    service_id: "$SERVICE_ID"
+    network: 'YES'
+    set_hostname: "$NAME"
+    token: "YES"
+    report_ready: "YES"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    oneapp_tnlcm_jenkins_host:      "$ONEAPP_TNLCM_JENKINS_HOST"
+    oneapp_tnlcm_jenkins_username:  "$ONEAPP_TNLCM_JENKINS_USERNAME"
+    oneapp_tnlcm_jenkins_password:  "$ONEAPP_TNLCM_JENKINS_PASSWORD"
+    oneapp_tnlcm_jenkins_token:     "$ONEAPP_TNLCM_JENKINS_TOKEN"
+    oneapp_tnlcm_ansible_vault:     "$ONEAPP_TNLCM_ANSIBLE_VAULT"
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs: {}
+logo: tnlcm.png
+disks:
+- "6G-Sandbox TNLCM backend+frontend"

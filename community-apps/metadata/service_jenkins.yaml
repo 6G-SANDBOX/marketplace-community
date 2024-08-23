@@ -35,8 +35,6 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    # token: 'YES'
-    # report_ready: 'YES'
     oneapp_jenkins_username:                 "$ONEAPP_JENKINS_USERNAME"
     oneapp_jenkins_password:                 "$ONEAPP_JENKINS_PASSWORD"
     oneapp_jenkins_ansible_vault:            "$ONEAPP_JENKINS_ANSIBLE_VAULT"
