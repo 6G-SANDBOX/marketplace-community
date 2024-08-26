@@ -62,16 +62,16 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   lxd_security_privileged: 'true'
   user_inputs:
-    oneapp_jenkins_username:                 "O|text|ONEAPP_JENKINS_USERNAME: The username for the Jenkins admin user| |admin"
-    oneapp_jenkins_password:                 "O|text|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user| |admin"
+    oneapp_jenkins_username:                 "O|text|ONEAPP_JENKINS_USERNAME: The username for the Jenkins admin user||admin"
+    oneapp_jenkins_password:                 "O|password|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user"
     oneapp_jenkins_ansible_vault:            "M|password|ONEAPP_JENKINS_ANSIBLE_VAULT: Passphrase to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    oneapp_jenkins_opennebula_endpoint:      "M|text|ONEAPP_JENKINS_OPENNEBULA_ENDPOINT: The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')| |"
-    oneapp_jenkins_opennebula_flow_endpoint: "M|text|ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT: The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')| |"
-    oneapp_jenkins_opennebula_username:      "M|text|ONEAPP_JENKINS_OPENNEBULA_USERNAME: The OpenNebula username used by Jenkins to deploy each component| |"
-    oneapp_jenkins_opennebula_password:      "M|password|ONEAPP_JENKINS_OPENNEBULA_PASSWORD: The password matching ONEAPP_JENKINS_OPENNEBULA_USERNAME"
-    oneapp_jenkins_opennebula_insecure:      "O|boolean|ONEAPP_JENKINS_OPENNEBULA_INSECURE: Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)| |YES"
-    oneapp_jenkins_aws_access_key_id:        "M|text|ONEAPP_JENKINS_AWS_ACCESS_KEY_ID: S3 Storage access key. Same as used in the MinIO instance| |"
-    oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance| |" 
+    oneapp_jenkins_opennebula_endpoint:      "M|text|ONEAPP_JENKINS_OPENNEBULA_ENDPOINT: The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
+    oneapp_jenkins_opennebula_flow_endpoint: "M|text|ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT: The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
+    oneapp_jenkins_opennebula_username:      "M|text|ONEAPP_JENKINS_OPENNEBULA_USERNAME: The OpenNebula username used by Jenkins to deploy each component||"
+    oneapp_jenkins_opennebula_password:      "M|password|ONEAPP_JENKINS_OPENNEBULA_PASSWORD: The password for the OpenNebula user used by Jenkins to deploy each component"
+    oneapp_jenkins_opennebula_insecure:      "O|boolean|ONEAPP_JENKINS_OPENNEBULA_INSECURE: Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
+    oneapp_jenkins_aws_access_key_id:        "M|text|ONEAPP_JENKINS_AWS_ACCESS_KEY_ID: S3 Storage access key. Same as used in the MinIO instance||"
+    oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance||" 
 logo: jenkins.png
 images:
   - name: 6G-Sandbox Jenkins
