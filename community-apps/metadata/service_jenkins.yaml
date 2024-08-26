@@ -60,7 +60,6 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-  lxd_security_privileged: 'true'
   user_inputs:
     oneapp_jenkins_username:                 "O|text|ONEAPP_JENKINS_USERNAME: The username for the Jenkins admin user||admin"
     oneapp_jenkins_password:                 "O|password|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user"

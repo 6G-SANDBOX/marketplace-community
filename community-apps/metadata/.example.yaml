@@ -54,7 +54,6 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-  lxd_security_privileged: 'true'
   user_inputs:
     oneapp_example_jenkins_host:         "M|text|ONEAPP_EXAMPLE_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
     oneapp_example_jenkins_username:     "M|text|ONEAPP_EXAMPLE_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"

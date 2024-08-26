@@ -68,7 +68,6 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-  lxd_security_privileged: 'true'
   user_inputs:
     gnb_amf_address: "O|text|GNB_AMF_ADDRESS: gNB AMF IP Addresss| |"
     gnb_mcc: "O|text|GNB_MCC: gNB Mobile Country Code value| |999"
