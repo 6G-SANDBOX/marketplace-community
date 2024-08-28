@@ -29,7 +29,7 @@ ONE_SERVICE_VERSION='0.0.1'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
 ONE_SERVICE_SHORT_DESCRIPTION='Appliance with a NTP SERVER'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-Appliance with preinstalled NTP Server based on Chronyc and Docker.
+Appliance with preinstalled NTP Server based on Chrony and Docker.
 
 See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
 

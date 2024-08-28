@@ -3,7 +3,7 @@ name: NTP Server
 version: 20240828-1800
 publisher: Telefonica Innovacion Digital
 description: |-
-  Appliance with preinstalled NTP server based on Chronyc and Docker.
+  Appliance with preinstalled NTP server based on Chrony and Docker.
 
   See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
 
