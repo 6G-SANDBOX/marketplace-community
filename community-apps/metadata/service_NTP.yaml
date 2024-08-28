@@ -3,11 +3,11 @@ name: NTP Server
 version: 6.10.0-1-20240207
 publisher: Telefonica Innovacion Digital
 description: |-
-  Appliance with preinstalled NTP server and Docker.
+  Appliance with preinstalled NTP server based on Chronyc and Docker.
 
   See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
 
-  The parameters ONEAPP_NTP_SERVERS and ONEAPP_NTP_TZ are mandatory.
+  The ONEAPP_NTP_SERVERS and ONEAPP_TZ parameters are optinally configurable:
   - ONEAPP_NTP_SERVERS is the list of NTP servers that you want to use as Upstream servers.
   - ONEAPP_TZ is the timezone defined by IANAA.
 short_description: Appliance with preinstalled NTP server for KVM hosts
