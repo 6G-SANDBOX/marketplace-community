@@ -15,8 +15,8 @@ build {
 # Build VM image
 source "qemu" "ntp_server" {
   cpus        = 2
-  memory      = 2048
-  accelerator = "none"
+  memory      = 4096
+  accelerator = "kvm"
 
   iso_url      = "../one-apps/export/ubuntu2204.qcow2"
   iso_checksum = "none"
@@ -29,7 +29,8 @@ source "qemu" "ntp_server" {
   net_device       = "virtio-net"
   format           = "qcow2"
   disk_compression = false
-  disk_size        = "5000"
+  #skip_resize_disk = true
+  disk_size        = "5120"   # default size increased to 5G
 
   output_directory = var.output_dir
 

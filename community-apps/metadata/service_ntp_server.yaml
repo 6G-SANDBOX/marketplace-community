@@ -1,6 +1,6 @@
 ---
 name: NTP Server
-version: 6.10.0-1-20240207
+version: 20240828-1800
 publisher: Telefonica Innovacion Digital
 description: |-
   Appliance with preinstalled NTP server based on Chronyc and Docker.
@@ -12,12 +12,12 @@ description: |-
   - ONEAPP_TZ is the timezone defined by IANAA.
 short_description: Appliance with preinstalled NTP server for KVM hosts
 tags:
-- 6G-Sandbox
-- 6G-Library
-- ntp
-- ubuntu
+  - 6G-Sandbox
+  - 6G-Library
+  - ntp
+  - ubuntu
 format: qcow2
-creation_time: 1719946674
+creation_time: "1724860738"
 os-id: Ubuntu
 os-release: '22.04 LTS'
 os-arch: x86_64
@@ -30,7 +30,7 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
-    oneapp_ntp_tz:      "$ONEAPP_NTP_TZ"
+    oneapp_ntp_tz: "$ONEAPP_NTP_TZ"
   cpu: '1'
   vcpu: '1'
   graphics:
@@ -46,15 +46,15 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_ntp_servers: "O|text|List of NTP Servers to use as Upstream| |0.es.pool.ntp.org,1.es.pool.ntp.org,2.es.pool.ntp.org,3.es.pool.ntp.org"
-    oneapp_ntp_tz:      "O|text|Timezone defined by IANAA| |Europe/Madrid"
+    oneapp_ntp_tz: "O|text|Timezone defined by IANAA| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-- name: NTP Server
-  url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
-  type: OS
-  dev_prefix: vd
-  driver: qcow2
-  size: 755302400
-  checksum:
-    md5: a09b81492ab5243902623b4721d5880e
-    sha256: f7a17cc30f6d11c749822a3845a515097893c4640b3031b1db692601c76eb79c
+  - name: NTP Server
+    url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "5242880000"
+    checksum:
+      md5: a042b767a8e9ebf0acd55ee66bb43c2e
+      sha256: a3e8ba389a553a5cc5a1064e6daff5259f5cb9b39acc5325e41df7b4cec1a15d
