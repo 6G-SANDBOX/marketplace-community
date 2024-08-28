@@ -17,10 +17,9 @@ description: |-
   **Note**: Remember to update the template in order to add a network after importing it.
 short_description: 6G-Sandbox TNLCM backend+frontend for KVM
 tags:
-  - ubuntu
-  - TNLCM
   - 6G-Sandbox
-  - toolkit
+  - TNLCM
+  - ubuntu
 format: qcow2
 creation_time: "1721640274"
 os-id: Ubuntu

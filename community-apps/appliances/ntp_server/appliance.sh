@@ -17,7 +17,7 @@ set -o errexit -o pipefail
 # List of contextualization parameters
 ONE_SERVICE_PARAMS=(
     'ONEAPP_NTP_SERVERS'            'configure'  'List of NTP Servers to use as Upstream'                                      'O|text'
-    'ONEAPP_TZ'                    'configure'  'Timezone defined by IANAA https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab'   'O|text'
+    'ONEAPP_NTP_TZ'                 'configure'  'Timezone defined by IANAA https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab'   'O|text'
 )
 
 
@@ -29,11 +29,13 @@ ONE_SERVICE_VERSION='0.0.1'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
 ONE_SERVICE_SHORT_DESCRIPTION='Appliance with a NTP SERVER'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-Appliance with preinstalled NTP Server based on Chronyc.
+Appliance with preinstalled NTP Server based on Chronyc and Docker.
 
-The parameter ONEAPP_NTP_SERVERS and ONEAPP_TZ are mandatory.
+See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
+
+The ONEAPP_NTP_SERVERS and ONEAPP_NTP_TZ parameters are optinally configurable:
 - ONEAPP_NTP_SERVERS is the list of NTP servers that you want to use as Upstream servers.
-- ONEAPP_TZ is the timezone defined by IANAA.
+- ONEAPP_NTP_TZ is the timezone defined by IANAA.
 EOF
 )
 
@@ -41,8 +43,8 @@ ONE_SERVICE_RECONFIGURABLE=true
 
 ### Contextualization defaults #######################################
 
-ONEAPP_NTP_SERVERS="${ONEAPP_NTP_SERVERS:-time.cloudflare.com}"
-ONEAPP_TZ="${ONEAPP_TZ:-Europe/Madrid}"
+ONEAPP_NTP_SERVERS="${ONEAPP_NTP_SERVERS:-0.es.pool.ntp.org,1.es.pool.ntp.org,2.es.pool.ntp.org,3.es.pool.ntp.org}"
+ONEAPP_NTP_TZ="${ONEAPP_NTP_TZ:-Europe/Madrid}"
 
 ### Globals ##########################################################
 
@@ -58,15 +60,8 @@ DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 
 service_install()
 {
-    msg info "Checking internet access..."
-    check_internet_access
-    # ensuring that the setup directory exists
-    #TODO: move to service
-    mkdir -p "$ONE_SERVICE_SETUP_DIR"
     export DEBIAN_FRONTEND=noninteractive
-
-    #Upgrade Operating System
-    upgrade_ubuntu
+    systemctl stop unattended-upgrades
 
     # docker
     install_docker
@@ -84,14 +79,17 @@ service_install()
 
 service_configure()
 {
+    export DEBIAN_FRONTEND=noninteractive
+    
+    # Run docker container
+    run_ntp_server
+
     msg info "CONFIGURE FINISHED"
     return 0
 }
 
 service_bootstrap()
 {
-    run_ntp_server
-    msg info "BOOTSTRAP FINISHED"
     return 0
 }
 
@@ -102,24 +100,6 @@ service_bootstrap()
 #
 # functions
 #
-check_internet_access() {
-    # Ping Google's public DNS server
-    if ping -c 1 8.8.8.8 &> /dev/null; then
-        msg info "Internet access OK"
-        return 0
-    else
-        msg error "The VM does not have internet access. Aborting NTP Server deployment..."
-        exit 1
-    fi
-}
-
-upgrade_ubuntu()
-{
-    apt update -y
-    apt-get -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" dist-upgrade \
-    -q -y --allow-downgrades --allow-remove-essential --allow-change-held-packages
-}
-
 install_docker()
 {
     msg info "Add Docker official GPG key"

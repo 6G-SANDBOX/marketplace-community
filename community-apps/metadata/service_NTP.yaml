@@ -1,16 +1,21 @@
 ---
-name: Service NTP Server
+name: NTP Server
 version: 6.10.0-1-20240207
 publisher: Telefonica Innovacion Digital
 description: |-
   Appliance with preinstalled NTP server and Docker.
 
   See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
+
+  The parameters ONEAPP_NTP_SERVERS and ONEAPP_NTP_TZ are mandatory.
+  - ONEAPP_NTP_SERVERS is the list of NTP servers that you want to use as Upstream servers.
+  - ONEAPP_TZ is the timezone defined by IANAA.
 short_description: Appliance with preinstalled NTP server for KVM hosts
 tags:
+- 6G-Sandbox
+- 6G-Library
 - ntp
 - ubuntu
-- service
 format: qcow2
 creation_time: 1719946674
 os-id: Ubuntu
@@ -22,26 +27,30 @@ opennebula_version: >-
 opennebula_template:
   context:
     network: 'YES'
-    oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
-    oneapp_tz: "$ONEAPP_TZ"
+    set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
+    oneapp_ntp_tz:      "$ONEAPP_NTP_TZ"
   cpu: '1'
+  vcpu: '1'
   graphics:
     listen: 0.0.0.0
     type: vnc
   inputs_order: >-
-    ONEAPP_NTP_SERVERS,ONEAPP_TZ
+    ONEAPP_NTP_SERVERS,ONEAPP_NTP,TZ
   memory: '512'
-  disk: 
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
+  logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_ntp_servers: "O|text|List of NTP Servers to use as Upstream| |0.es.pool.ntp.org,1.es.pool.ntp.org,2.es.pool.ntp.org,3.es.pool.ntp.org"
-    oneapp_tz: "O|text|Timezone defined by IANAA| |Europe/Madrid"
+    oneapp_ntp_tz:      "O|text|Timezone defined by IANAA| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-- name: service_ntp_server
-  url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server-6.10.0-1-20240207.qcow2
+- name: NTP Server
+  url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
   type: OS
   dev_prefix: vd
   driver: qcow2

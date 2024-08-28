@@ -14,10 +14,10 @@ description: |-
   **Note**: Remember to update the template in order to add a network after importing it.
 short_description: UERANSIM 5G gNB & UE simulator
 tags:
-  - ubuntu
-  - UERANSIM
   - 6G-Sandbox
   - 6G-Library
+  - UERANSIM
+  - ubuntu
 format: qcow2
 creation_time: "1721838167"
 os-id: Ubuntu
