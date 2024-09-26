@@ -251,7 +251,7 @@ install_elcm_backend()
     msg info "Activate ELCM python virtual environment and install requirements"
     ${PYTHON_BACKEND_ELCM_BIN} -m venv /opt/ELCM/venv
     source /opt/ELCM/venv/bin/activate
-    ${PYTHON_BACKEND_ELCM_BIN} -m pip install -r /opt/ELCM/requirements.txt
+    pip install -r /opt/ELCM/requirements.txt
     deactivate
 
     msg info "Define ELCM backend systemd service"
@@ -262,7 +262,7 @@ Description=ELCM Backend
 [Service]
 Type=simple
 WorkingDirectory=/opt/ELCM
-ExecStart=/bin/bash -c 'source venv/bin/activate && ${PYTHON_BACKEND_ELCM_BIN} app.py'
+ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5001'
 Restart=always
 
 [Install]
@@ -278,7 +278,7 @@ install_elcm_frontend()
     msg info "Activate ELCM_FRONTEND python virtual environment and install requirements"
     ${PYTHON_FRONTEND_ELCM_BIN} -m venv /opt/ELCM_FRONTEND/venv
     source /opt/ELCM_FRONTEND/venv/bin/activate
-    ${PYTHON_FRONTEND_ELCM_BIN} -m pip install -r /opt/ELCM_FRONTEND/requirements.txt
+    pip install -r /opt/ELCM_FRONTEND/requirements.txt
     deactivate
 
     msg info "Define ELCM frontend systemd service"
@@ -289,7 +289,7 @@ Description=ELCM Frontend
 [Service]
 Type=simple
 WorkingDirectory=/opt/ELCM_FRONTEND
-ExecStart=/bin/bash -c 'source venv/bin/activate && ${PYTHON_FRONTEND_ELCM_VERSION} app.py'
+ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5000'
 Restart=always
 
 [Install]
