@@ -1,0 +1,70 @@
+---
+name: 6G-Sandbox ELCM backend+frontend
+version: "20240705-1102"
+publisher: Telefonica Innovacion Digital
+description: |-
+  This appliance installs the latest version of [ELCM](https://github.com/6G-SANDBOX/ELCM) and [ELCM_FRONTEND](https://github.com/6G-SANDBOX/portal) from the official repositories and configures them according to the input variables. Configuration of the ELCM can be made when instanciating the VM.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+  
+  **Note**: Remember to update the template in order to add a network after importing it.
+short_description: 6G-Sandbox ELCM backend+frontend for KVM
+tags:
+  - 6G-Sandbox
+  - ELCM
+  - ubuntu
+format: qcow2
+creation_time: "1721640274"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    oneapp_elcm_influxdb_user:      "$ONEAPP_ELCM_INFLUXDB_USER"
+    oneapp_elcm_influxdb_password:  "$ONEAPP_ELCM_INFLUXDB_PASSWORD"
+    oneapp_elcm_influxdb_database:  "$ONEAPP_ELCM_INFLUXDB_DATABASE"
+    oneapp_elcm_grafana_password:   "$ONEAPP_ELCM_GRAFANA_PASSWORD"
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_elcm_influxdb_user:      "M|text|ONEAPP_ELCM_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
+    oneapp_elcm_influxdb_password:  "M|password|ONEAPP_ELCM_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. | |admin"
+    oneapp_elcm_influxdb_database:  "M|text|ONEAPP_ELCM_INFLUXDB_DATABASE: Database name. | |elcmdb"
+    oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. | |admin"
+logo: tnlcm.png
+images:
+  - name: 6G-Sandbox ELCM
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "7516192768"
+    checksum:
+      md5: "490330ca6ee051cc7549cbdf80809e60"
+      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
