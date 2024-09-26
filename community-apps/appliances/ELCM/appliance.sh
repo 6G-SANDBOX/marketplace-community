@@ -49,7 +49,7 @@ ONEAPP_ELCM_GRAFANA_PORT="3000"
 # Global variables
 # ------------------------------------------------------------------------------
 
-DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common"
+DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
 
 PYTHON_BACKEND_ELCM_VERSION="3.10.12"
 PYTHON_FRONTEND_ELCM_VERSION="3.7.9"
@@ -229,7 +229,7 @@ install_influxdb()
     msg info "Install InfluxDB version ${INFLUXDB_VERSION}"
     wget https://dl.influxdata.com/influxdb/releases/influxdb_${INFLUXDB_VERSION}_amd64.deb
     dpkg -i influxdb_${INFLUXDB_VERSION}_amd64.deb
-    systemctl --now enable influxdb
+    systemctl enable --now influxdb
     rm -rf influxdb_${INFLUXDB_VERSION}*
 }
 
@@ -239,7 +239,7 @@ install_grafana()
     apt-get install -y adduser libfontconfig1 musl
     wget https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb
     dpkg -i grafana_${GRAFANA_VERSION}_amd64.deb
-    systemctl --now enable grafana-server
+    systemctl enable --now grafana-server
     rm -rf grafana_${GRAFANA_VERSION}*
 }
 
