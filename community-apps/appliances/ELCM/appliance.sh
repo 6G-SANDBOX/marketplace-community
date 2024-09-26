@@ -276,9 +276,9 @@ install_elcm_frontend()
     git clone https://github.com/6G-SANDBOX/portal /opt/ELCM_FRONTEND
 
     msg info "Activate ELCM_FRONTEND python virtual environment and install requirements"
-    ${PYTHON_FRONTEND_ELCM_VERSION} -m venv /opt/ELCM_FRONTEND/venv
+    ${PYTHON_FRONTEND_ELCM_BIN} -m venv /opt/ELCM_FRONTEND/venv
     source /opt/ELCM_FRONTEND/venv/bin/activate
-    ${PYTHON_FRONTEND_ELCM_VERSION} -m pip install -r /opt/ELCM_FRONTEND/requirements.txt
+    ${PYTHON_FRONTEND_ELCM_BIN} -m pip install -r /opt/ELCM_FRONTEND/requirements.txt
     deactivate
 
     msg info "Define ELCM frontend systemd service"
