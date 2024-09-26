@@ -262,6 +262,7 @@ Description=ELCM Backend
 [Service]
 Type=simple
 WorkingDirectory=/opt/ELCM
+Environment="SECRET_KEY=super secret"
 ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5001'
 Restart=always
 
@@ -289,6 +290,7 @@ Description=ELCM Frontend
 [Service]
 Type=simple
 WorkingDirectory=/opt/ELCM_FRONTEND
+Environment="SECRET_KEY=super secret"
 ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5000'
 Restart=always
 
