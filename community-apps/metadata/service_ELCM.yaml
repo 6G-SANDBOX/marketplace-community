@@ -60,7 +60,7 @@ logo: ubuntu.png
 images:
   - name: 6G-Sandbox ELCM
     url: >-
-      https://rawtest.mobilesandbox.cloud:9443/service_ELCM.qcow2
+      https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
@@ -68,4 +68,3 @@ images:
     checksum:
       md5: "490330ca6ee051cc7549cbdf80809e60"
       sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
-# TODO: https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
