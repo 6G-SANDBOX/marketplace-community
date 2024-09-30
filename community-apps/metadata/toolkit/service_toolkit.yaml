@@ -56,6 +56,9 @@ opennebula_template:
     oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component||"
     oneapp_jenkins_opennebula_password:       "M|password|The password for the OpenNebula user used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_insecure:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
+    oneapp_tnlcm_admin_user:                  "M|text|Name of the administrator user that is created by default.||tnlcm"
+    oneapp_tnlcm_admin_password:              "M|password|Administrator user password created by default.||tnlcm"
+    oneapp_tnlcm_admin_email:                 "M|text|Email of the administrator user that is created by default"
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
   roles:
