@@ -7,7 +7,7 @@ set -o errexit -o pipefail
 # ------------------------------------------------------------------------------
 
 ONE_SERVICE_NAME='6G-Sandbox TNLCM backend+frontend'
-ONE_SERVICE_VERSION='0.2.1'   #latest
+ONE_SERVICE_VERSION='0.3.0'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
 ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox TNLCM backend+frontend for KVM'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
@@ -35,6 +35,9 @@ ONE_SERVICE_PARAMS=(
     'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'    'M|text'
     'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'            'M|password'
     'ONEAPP_TNLCM_ANSIBLE_VAULT'           'configure'  'Password used to decrypt the contents of the 6G-Sandbox-Sites repository file'          'M|password'
+    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the administrator user that is created by default'                              'M|text'
+    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Administrator user password created by default'                                         'M|password'
+    'ONEAPP_TNLCM_ADMIN_EMAIL'             'configure'  'Email of the administrator user that is created by default'                             'M|text'
 )
 
 ONEAPP_TNLCM_JENKINS_HOST="${ONEAPP_TNLCM_JENKINS_HOST:-127.0.0.1}"
@@ -42,6 +45,8 @@ ONEAPP_TNLCM_JENKINS_USERNAME="${ONEAPP_TNLCM_JENKINS_USERNAME:-admin}"
 ONEAPP_TNLCM_JENKINS_PASSWORD="${ONEAPP_TNLCM_JENKINS_PASSWORD:-admin}"
 ONEAPP_TNLCM_MAIL_USERNAME="${ONEAPP_TNLCM_MAIL_USERNAME:-tnlcm.uma@gmail.com}"
 ONEAPP_TNLCM_MAIL_PASSWORD="${ONEAPP_TNLCM_MAIL_PASSWORD:-czrs rsdg ktpm rrlx}"
+ONEAPP_TNLCM_ADMIN_USER="${ONEAPP_TNLCM_ADMIN_USER:-tnlcm}"
+ONEAPP_TNLCM_ADMIN_PASSWORD="${ONEAPP_TNLCM_ADMIN_PASSWORD:-tnlcm}"
 
 
 # ------------------------------------------------------------------------------

@@ -38,6 +38,9 @@ opennebula_template:
     oneapp_tnlcm_jenkins_username:  "$ONEAPP_TNLCM_JENKINS_USERNAME"
     oneapp_tnlcm_jenkins_password:  "$ONEAPP_TNLCM_JENKINS_PASSWORD"
     oneapp_tnlcm_ansible_vault:     "$ONEAPP_TNLCM_ANSIBLE_VAULT"
+    oneapp_tnlcm_admin_user:        "$ONEAPP_TNLCM_ADMIN_USER"
+    oneapp_tnlcm_admin_password:    "$ONEAPP_TNLCM_ADMIN_PASSWORD"
+    oneapp_tnlcm_admin_email:       "$ONEAPP_TNLCM_ADMIN_EMAIL"
   cpu: '2'
   vcpu: '2'
   cpu_model:
