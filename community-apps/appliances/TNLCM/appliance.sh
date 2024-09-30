@@ -35,8 +35,8 @@ ONE_SERVICE_PARAMS=(
     'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'    'M|text'
     'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'            'M|password'
     'ONEAPP_TNLCM_ANSIBLE_VAULT'           'configure'  'Password used to decrypt the contents of the 6G-Sandbox-Sites repository file'          'M|password'
-    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the administrator user that is created by default'                              'M|text'
-    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Administrator user password created by default'                                         'M|password'
+    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the administrator user that is created by default'                              'O|text'
+    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Administrator user password created by default'                                         'O|password'
     'ONEAPP_TNLCM_ADMIN_EMAIL'             'configure'  'Email of the administrator user that is created by default'                             'M|text'
 )
 
