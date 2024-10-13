@@ -61,6 +61,7 @@ TNLCM_FOLDER="/opt/TNLCM"
 MONGODB_VERSION="7.0"
 MONGO_EXPRESS_VERSION="v1.0.2"
 MONGO_EXPRESS_FOLDER=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
+YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 
 
 # ------------------------------------------------------------------------------
@@ -92,8 +93,15 @@ service_install()
     # yarn
     install_yarn
 
+    # dotenv
+    install_dotenv
+
+    # TODO: load TNLCM database. First the TNLCM_ADMIN_USER and TNLCM_ADMIN_PASSWORD variables must be defined
+
     # mongo-express
     install_mongo_express
+
+    # TODO: activate mongo-express service. Ideally, it should be activated when you have all the variables set in the .env
 
     systemctl daemon-reload
 
@@ -123,14 +131,6 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
-
-    systemctl enable --now mongo-express.service
-    if [ $? -ne 0 ]; then
-        msg error "Error starting mongo-express.service, aborting..."
-        exit 1
-    else
-        msg info "mongo-express.service was started..."
-    fi
 
     systemctl enable --now tnlcm-backend.service
     if [ $? -ne 0 ]; then
@@ -267,18 +267,8 @@ install_mongo()
     sudo apt-get update
     sudo apt-get install -y mongodb-org
 
-    # TODO: check
-    msg info "Add variables in Ubuntu environment"
-    {
-        echo "# MONGO-EXPRESS"
-        grep -E '^\s*(TNLCM_ADMIN_USER|TNLCM_ADMIN_PASSWORD|TNLCM_ADMIN_EMAIL|MONGO_HOST|MONGO_PORT|MONGO_DATABASE|ME_CONFIG_MONGODB_ADMINUSERNAME|ME_CONFIG_MONGODB_ADMINPASSWORD|ME_CONFIG_MONGODB_ENABLE_ADMIN|ME_CONFIG_MONGODB_URL|ME_CONFIG_BASICAUTH|ME_CONFIG_SITE_SESSIONSECRET|VCAP_APP_HOST|ME_CONFIG_BASICAUTH_USERNAME|ME_CONFIG_BASICAUTH_PASSWORD)\s*=' ${TNLCM_FOLDER} | sed 's/^/export /'
-    } >> ~/.bashrc
-
     msg info "Start mongo service"
     sudo systemctl enable --now mongod
-
-    msg info "Load TNLCM database"
-    mongosh --file ${TNLCM_FOLDER}/core/database/tnlcm-structure.js
 }
 
 install_yarn()
@@ -288,6 +278,13 @@ install_yarn()
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
     sudo apt update
     sudo apt install yarn
+}
+
+install_dotenv()
+{
+    msg info "Install dotenv library"
+    yarn config set global-folder ${YARN_GLOBAL_LIBRARIES}
+    yarn global add dotenv
 }
 
 install_mongo_express()
@@ -307,7 +304,7 @@ Description=Mongo Express
 [Service]
 Type=simple
 WorkingDirectory=${MONGO_EXPRESS_FOLDER}
-ExecStart=/bin/bash -c 'yarn start'
+ExecStart=/bin/bash -c 'source ${TNLCM_ENV_FILE} && yarn start'
 Restart=always
 
 [Install]
