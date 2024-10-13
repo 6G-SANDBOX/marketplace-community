@@ -84,6 +84,9 @@ service_install()
     # tnlcm backend
     install_tnlcm_backend
 
+    #nodejs
+    install_nodejs
+
     # tnlcm frontend
     install_tnlcm_frontend
 
@@ -230,16 +233,20 @@ WantedBy=multi-user.target
 EOF
 }
 
+install_nodejs()
+{
+    msg info "Install Node.js and dependencies"
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - &&\
+    sudo apt-get install -y nodejs
+    npm install -g npm
+}
+
 install_tnlcm_frontend()
 {
     msg info "Clone TNLCM_FRONTEND Repository"
     git clone https://github.com/6G-SANDBOX/TNLCM_FRONTEND.git /opt/TNLCM_FRONTEND
     cp /opt/TNLCM_FRONTEND/.env.template /opt/TNLCM_FRONTEND/.env
 
-    msg info "Install Node.js and dependencies"
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - &&\
-    sudo apt-get install -y nodejs
-    npm install -g npm
     npm --prefix /opt/TNLCM_FRONTEND/ install
 
     msg info "Define TNLCM frontend systemd service"
@@ -261,7 +268,7 @@ EOF
 install_mongo()
 {
     msg info "Install mongo"
-    sudo apt-get install gnupg curl
+    sudo apt-get install -y gnupg curl
     curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
     echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
     sudo apt-get update
@@ -277,7 +284,7 @@ install_yarn()
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
     sudo apt update
-    sudo apt install yarn
+    sudo apt install -y yarn
 }
 
 install_dotenv()
@@ -291,10 +298,8 @@ install_mongo_express()
 {
     msg info "Clone mongo-express repository"
     git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_FOLDER}
-    cd /opt/mongo-express-${MONGO_EXPRESS_VERSION}
-    yarn install
-    yarn run build
-    cd 
+    yarn --cwd ${MONGO_EXPRESS_FOLDER} install
+    yarn --cwd ${MONGO_EXPRESS_FOLDER} run build
 
     msg info "Define mongo-express systemd service"
     cat > /etc/systemd/system/mongo-express.service << EOF
