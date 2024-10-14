@@ -179,7 +179,7 @@ start_pre() {
 start() {
     ebegin "Starting Route Manager"
     start-stop-daemon --start --background --make-pidfile --pidfile "${pidfile}" \
-    --stdout "${output_log}" --stderr "${output_log=}" --exec ${command} -- ${command_args}
+    --stdout "${output_log}" --stderr "${output_log}" --exec ${command} -- ${command_args}
     eend $?
 }
 

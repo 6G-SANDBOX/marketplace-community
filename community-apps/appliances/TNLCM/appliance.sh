@@ -57,10 +57,12 @@ DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev lib
 PYTHON_VERSION="3.13"
 PYTHON_BIN="python${PYTHON_VERSION}"
 # PYTHON_BIN="/usr/local/bin/python${PYTHON_VERSION%.*}"
-TNLCM_FOLDER="/opt/TNLCM"
+BACKEND_PATH="/opt/TNLCM_BACKEND"
+FRONTEND_PATH="/opt/TNLCM_FRONTEND"
+
 MONGODB_VERSION="7.0"
 MONGO_EXPRESS_VERSION="v1.0.2"
-MONGO_EXPRESS_FOLDER=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
+MONGO_EXPRESS_PATH=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
 YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 
 
@@ -127,6 +129,12 @@ service_configure()
     # update enviromental vars
     update_envfiles
 
+    # mongo-express service
+    create_mongo_express_service
+
+    # TNLCM database
+    load_tnlcm_database
+
     msg info "CONFIGURATION FINISHED"
     return 0
 }
@@ -134,6 +142,8 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
+
+    systemctl enable --now mongo-express.service
 
     systemctl enable --now tnlcm-backend.service
     if [ $? -ne 0 ]; then
@@ -208,13 +218,13 @@ install_python()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch release/${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${TNLCM_FOLDER}
-    cp ${TNLCM_FOLDER}/.env.template ${TNLCM_FOLDER}/.env
+    git clone --depth 1 --branch release/${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Activate TNLCM python virtual environment and install requirements"
-    ${PYTHON_BIN} -m venv ${TNLCM_FOLDER}/venv
-    source ${TNLCM_FOLDER}/venv/bin/activate
-    ${TNLCM_FOLDER}/venv/bin/pip install -r ${TNLCM_FOLDER}/requirements.txt
+    ${PYTHON_BIN} -m venv ${BACKEND_PATH}/venv
+    source ${BACKEND_PATH}/venv/bin/activate
+    ${BACKEND_PATH}/venv/bin/pip install -r ${BACKEND_PATH}/requirements.txt
     deactivate
 
     msg info "Define TNLCM backend systemd service"
@@ -224,7 +234,7 @@ Description=TNLCM Backend
 
 [Service]
 Type=simple
-WorkingDirectory=${TNLCM_FOLDER}
+WorkingDirectory=${BACKEND_PATH}/
 ExecStart=/bin/bash -c 'source venv/bin/activate && ${PYTHON_BIN} app.py'
 Restart=always
 
@@ -244,10 +254,10 @@ install_nodejs()
 install_tnlcm_frontend()
 {
     msg info "Clone TNLCM_FRONTEND Repository"
-    git clone https://github.com/6G-SANDBOX/TNLCM_FRONTEND.git /opt/TNLCM_FRONTEND
-    cp /opt/TNLCM_FRONTEND/.env.template /opt/TNLCM_FRONTEND/.env
+    git clone --depth 1 https://github.com/6G-SANDBOX/TNLCM_FRONTEND.git ${FRONTEND_PATH}
+    cp ${FRONTEND_PATH}/.env.template ${FRONTEND_PATH}/.env
 
-    npm --prefix /opt/TNLCM_FRONTEND/ install
+    npm --prefix ${FRONTEND_PATH}/ install
 
     msg info "Define TNLCM frontend systemd service"
     cat > /etc/systemd/system/tnlcm-frontend.service << EOF
@@ -256,7 +266,7 @@ Description=TNLCM Frontend
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/TNLCM_FRONTEND
+WorkingDirectory=${FRONTEND_PATH}/
 ExecStart=/bin/bash -c '/usr/bin/npm run dev'
 Restart=always
 
@@ -267,12 +277,15 @@ EOF
 
 install_mongo()
 {
-    msg info "Install mongo"
-    sudo apt-get install -y gnupg curl
+    msg info "Install mongoDB"
     curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+    echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
     sudo apt-get update
-    sudo apt-get install -y mongodb-org
+
+    if ! apt-get install -y mongodb-org; then
+        msg error "Error installing package 'mongo-org'"
+        exit 1
+    fi
 
     msg info "Start mongo service"
     sudo systemctl enable --now mongod
@@ -297,10 +310,14 @@ install_dotenv()
 install_mongo_express()
 {
     msg info "Clone mongo-express repository"
-    git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_FOLDER}
-    yarn --cwd ${MONGO_EXPRESS_FOLDER} install
-    yarn --cwd ${MONGO_EXPRESS_FOLDER} run build
+    git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_PATH}
+    yarn --cwd ${MONGO_EXPRESS_PATH} install
+    yarn --cwd ${MONGO_EXPRESS_PATH} run build
 
+}
+
+create_mongo_express_service()
+{
     msg info "Define mongo-express systemd service"
     cat > /etc/systemd/system/mongo-express.service << EOF
 [Unit]
@@ -308,13 +325,18 @@ Description=Mongo Express
 
 [Service]
 Type=simple
-WorkingDirectory=${MONGO_EXPRESS_FOLDER}
+WorkingDirectory=${MONGO_EXPRESS_PATH}
 ExecStart=/bin/bash -c 'source ${TNLCM_ENV_FILE} && yarn start'
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 EOF
+}
+
+load_tnlcm_database()
+{
+    mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js
 }
 
 update_envfiles()
@@ -339,14 +361,14 @@ update_envfiles()
         if [ -z "${!var_map[$env_var]}" ]; then
             msg warning "Variable ${var_map[$env_var]} is not defined or empty"
         else
-            sed -i "s%^${env_var}=.*%${env_var}=\"${!var_map[$env_var]}\"%" ${TNLCM_FOLDER}/.env
+            sed -i "s%^${env_var}=.*%${env_var}=\"${!var_map[$env_var]}\"%" ${BACKEND_PATH}/.env
             msg debug "Variable ${env_var} overwritten with value ${!var_map[$env_var]}"
         fi
 
     done
 
     msg info "Update enviromental variables of the TNLCM frontend"
-    sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" /opt/TNLCM_FRONTEND/.env
+    sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
     msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
 }
 
