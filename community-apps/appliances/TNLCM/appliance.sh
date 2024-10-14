@@ -207,14 +207,14 @@ install_mongodb()
 {
     msg info "Install mongoDB"
     curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
-    sudo apt-get update
+    echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+    apt-get update
     if ! apt-get install -y mongodb-org; then
         msg error "Error installing package 'mongo-org'"
         exit 1
     fi
     msg info "Start mongoDB service"
-    sudo systemctl enable --now mongod
+    systemctl enable --now mongod
 }
 
 
@@ -250,15 +250,23 @@ EOF
 install_nodejs()
 {
     msg info "Install Node.js and dependencies"
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - &&\
-    sudo apt-get install -y nodejs
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    apt-get install -y nodejs
     npm install -g npm
 
-    msg info "Enable nodejs corepack to add yarn to the path"
-    if ! corepack enable ; then
-        msg error "Error enabling corepack"
-        exit 1
-    fi
+    # msg info "Enable nodejs corepack to add yarn to the path"
+    # corepack enable
+    # if ! corepack prepare yarn@3.2.4 --activate ; then
+    #     msg error "Error preparing yarn"
+    #     exit 1
+    # fi
+
+    # Legacy
+    msg info "Install yarn"
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    apt-get update
+    apt-get install -y yarn
 }
 
 
@@ -286,18 +294,13 @@ WantedBy=multi-user.target
 EOF
 }
 
-# install_yarn()
-# {
-#     msg info "Install yarn"
-#     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-#     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-#     sudo apt update
-#     sudo apt install -y yarn
-# }
-
 install_dotenv()
 {
     msg info "Install dotenv library"
+
+    # yarn add dotenv
+
+    # Legacy
     yarn config set global-folder ${YARN_GLOBAL_LIBRARIES}
     yarn global add dotenv
 }
