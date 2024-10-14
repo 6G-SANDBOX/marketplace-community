@@ -56,14 +56,13 @@ DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev lib
 
 PYTHON_VERSION="3.13"
 PYTHON_BIN="python${PYTHON_VERSION}"
-# PYTHON_BIN="/usr/local/bin/python${PYTHON_VERSION%.*}"
+
 BACKEND_PATH="/opt/TNLCM_BACKEND"
 FRONTEND_PATH="/opt/TNLCM_FRONTEND"
-
 MONGODB_VERSION="8.0"
+YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 MONGO_EXPRESS_VERSION="v1.0.2"
 MONGO_EXPRESS_PATH=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
-YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 
 
 # ------------------------------------------------------------------------------
@@ -83,22 +82,22 @@ service_install()
     # python
     install_python
 
+    # mongodb
+    install_mongodb
+
     # tnlcm backend
     install_tnlcm_backend
 
-    #nodejs
+    # nodejs
     install_nodejs
 
     # tnlcm frontend
     install_tnlcm_frontend
 
-    # mongo
-    install_mongo
-
     # yarn
-    install_yarn
+    # install_yarn
 
-    # dotenv
+    # yarn dotenv
     install_dotenv
 
     # mongo-express
@@ -123,13 +122,7 @@ service_configure()
     export DEBIAN_FRONTEND=noninteractive
 
     # update enviromental vars
-    update_envfiles
-
-    # mongo-express service
-    create_mongo_express_service
-
-    # TNLCM database
-    load_tnlcm_database
+    update_envfiles   
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -138,6 +131,12 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
+
+    msg info "Load the TNLCM database from mongoDB"
+    if !  mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js ; then
+        msg error "Error loading the TNLCM database"
+        exit 1
+    fi
 
     systemctl enable --now mongo-express.service
 
@@ -195,21 +194,29 @@ install_pkg_deps()
     fi
 }
 
+
 install_python()
 {
     msg info "Install python version ${PYTHON_VERSION}"
     add-apt-repository ppa:deadsnakes/ppa -y
     apt-get install python${PYTHON_VERSION}-full -y
-    # wget "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
-    # tar xvf Python-${PYTHON_VERSION}.tgz
-    # cd Python-${PYTHON_VERSION}/
-    # ./configure --enable-optimizations
-    # make altinstall
-    # ${PYTHON_BIN} -m ensurepip --default-pip
-    # ${PYTHON_BIN} -m pip install --upgrade pip setuptools wheel
-    # cd
-    # rm -rf Python-${PYTHON_VERSION}*
 }
+
+
+install_mongodb()
+{
+    msg info "Install mongoDB"
+    curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+    sudo apt-get update
+    if ! apt-get install -y mongodb-org; then
+        msg error "Error installing package 'mongo-org'"
+        exit 1
+    fi
+    msg info "Start mongo service"
+    sudo systemctl enable --now mongod
+}
+
 
 install_tnlcm_backend()
 {
@@ -239,13 +246,21 @@ WantedBy=multi-user.target
 EOF
 }
 
+
 install_nodejs()
 {
     msg info "Install Node.js and dependencies"
     curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - &&\
     sudo apt-get install -y nodejs
     npm install -g npm
+
+    msg info "Enable nodejs corepack to add yarn to the path"
+    if ! corepack enable ; then
+        msg error "Error enabling corepack"
+        exit 1
+    fi
 }
+
 
 install_tnlcm_frontend()
 {
@@ -271,30 +286,14 @@ WantedBy=multi-user.target
 EOF
 }
 
-install_mongo()
-{
-    msg info "Install mongoDB"
-    curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
-    sudo apt-get update
-
-    if ! apt-get install -y mongodb-org; then
-        msg error "Error installing package 'mongo-org'"
-        exit 1
-    fi
-
-    msg info "Start mongo service"
-    sudo systemctl enable --now mongod
-}
-
-install_yarn()
-{
-    msg info "Install yarn"
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-    sudo apt update
-    sudo apt install -y yarn
-}
+# install_yarn()
+# {
+#     msg info "Install yarn"
+#     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+#     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+#     sudo apt update
+#     sudo apt install -y yarn
+# }
 
 install_dotenv()
 {
@@ -303,16 +302,14 @@ install_dotenv()
     yarn global add dotenv
 }
 
+
 install_mongo_express()
 {
     msg info "Clone mongo-express repository"
     git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_PATH}
     yarn --cwd ${MONGO_EXPRESS_PATH} install
     yarn --cwd ${MONGO_EXPRESS_PATH} run build
-}
 
-create_mongo_express_service()
-{
     msg info "Define mongo-express systemd service"
     cat > /etc/systemd/system/mongo-express.service << EOF
 [Unit]
@@ -321,7 +318,7 @@ Description=Mongo Express
 [Service]
 Type=simple
 WorkingDirectory=${MONGO_EXPRESS_PATH}
-ExecStart=/bin/bash -c 'source ${TNLCM_ENV_FILE} && yarn start'
+ExecStart=/bin/bash -c 'source ${TNLCM_BACKEND}/.env && yarn start'
 Restart=always
 
 [Install]
@@ -329,10 +326,6 @@ WantedBy=multi-user.target
 EOF
 }
 
-load_tnlcm_database()
-{
-    mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js
-}
 
 update_envfiles()
 {
@@ -366,6 +359,7 @@ update_envfiles()
     sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
     msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
 }
+
 
 postinstall_cleanup()
 {
