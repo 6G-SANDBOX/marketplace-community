@@ -213,7 +213,7 @@ install_mongodb()
         msg error "Error installing package 'mongo-org'"
         exit 1
     fi
-    msg info "Start mongo service"
+    msg info "Start mongoDB service"
     sudo systemctl enable --now mongod
 }
 
@@ -221,7 +221,7 @@ install_mongodb()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch release/${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Activate TNLCM python virtual environment and install requirements"
