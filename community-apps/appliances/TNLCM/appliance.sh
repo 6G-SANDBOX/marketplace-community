@@ -60,7 +60,7 @@ PYTHON_BIN="python${PYTHON_VERSION}"
 BACKEND_PATH="/opt/TNLCM_BACKEND"
 FRONTEND_PATH="/opt/TNLCM_FRONTEND"
 
-MONGODB_VERSION="7.0"
+MONGODB_VERSION="8.0"
 MONGO_EXPRESS_VERSION="v1.0.2"
 MONGO_EXPRESS_PATH=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
 YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
@@ -101,12 +101,8 @@ service_install()
     # dotenv
     install_dotenv
 
-    # TODO: load TNLCM database. First the TNLCM_ADMIN_USER and TNLCM_ADMIN_PASSWORD variables must be defined
-
     # mongo-express
     install_mongo_express
-
-    # TODO: activate mongo-express service. Ideally, it should be activated when you have all the variables set in the .env
 
     systemctl daemon-reload
 
@@ -278,8 +274,8 @@ EOF
 install_mongo()
 {
     msg info "Install mongoDB"
-    curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
-    echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+    curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
     sudo apt-get update
 
     if ! apt-get install -y mongodb-org; then
@@ -313,7 +309,6 @@ install_mongo_express()
     git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_PATH}
     yarn --cwd ${MONGO_EXPRESS_PATH} install
     yarn --cwd ${MONGO_EXPRESS_PATH} run build
-
 }
 
 create_mongo_express_service()
