@@ -1,0 +1,97 @@
+---
+name: "XRext"
+# version + date "%Y%M%d-%h%m"
+version: "1.0.2"
+publisher: NOKIA
+description: |-
+  Appliance with preinstalled XRext. Run with default values and manually
+  configure it, or use contextualization variables to automate the bootstrap.
+
+  After deploying the appliance, check the status of the deployment in
+  /etc/one-appliance/status. You chan check the appliance logs in
+  /var/log/one-appliance/.
+
+  In order to configure data persistency, please attach a secondary disk to the
+  VM, indicate the disk label in ONEAPP_XR_REGISTRY_DEV (TBD) and launch the appliance.
+
+  **WARNING: Do not use localhost or loopback for \`ONEAPP_HARBOR_HOSTNAME\`, it
+  breaks the service bootstrap. It's necessary to provide a routable name
+  or IP. If not provided, it will use the main VM IP.**
+
+  **WARNING: The appliance does not permit recontextualization. Modifying the
+  context variables will not have any real efects on the running instance.**
+short_description: 6G-SANDBOX TNLCM appliance for KVM
+tags:
+  - 6G-Sandbox
+  - nokia
+  - XRext
+  - ubuntu
+format: qcow2
+# stat -c %W <file>
+creation_time: "1724834325"
+os-id: Ubuntu
+os-release: '22.04'
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    oneapp_xr_nac_server_ip:       "$ONEAPP_XR_NAC_SERVER_IP"
+    oneapp_xr_nac_server_port:     "$ONEAPP_XR_NAC_SERVER_PORT"
+    oneapp_xr_nac_server_uname:    "$ONEAPP_XR_NAC_SERVER_UNAME"
+    oneapp_xr_nac_server_password: "$ONEAPP_XR_NAC_SERVER_PASSWORD"
+    oneapp_xr_capif_http_host:     "$ONEAPP_XR_CAPIF_HTTP_HOST"
+    oneapp_xr_capif_http_port:     "$ONEAPP_XR_CAPIF_HTTP_PORT"
+    oneapp_xr_capif_https_host:    "$ONEAPP_XR_CAPIF_HTTPS_HOST"
+    oneapp_xr_capif_https_port:    "$ONEAPP_XR_CAPIF_HTTPS_PORT"
+    oneapp_xr_capif_uname:         "$ONEAPP_XR_CAPIF_UNAME"
+    oneapp_xr_capif_password:      "$ONEAPP_XR_CAPIF_PASSWORD"
+    oneapp_xr_capif_invoker_id:    "$ONEAPP_XR_CAPIF_INVOKER_ID"
+    oneapp_xr_capif_api_name:      "$ONEAPP_XR_CAPIF_API_NAME"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_xr_nac_server_ip:       "O|text|NaC server IP address||10.182.32.52"
+    oneapp_xr_nac_server_port:     "O|text|NaC server port||8005"
+    oneapp_xr_nac_server_uname:    "O|text|NaC server username||uma"
+    oneapp_xr_nac_server_password: "O|password|NaC server password"  # 123456
+    oneapp_xr_capif_http_host:     "O|text|CAPIF http URL||capifcore"
+    oneapp_xr_capif_http_port:     "O|text|CAPIF http port||8080"
+    oneapp_xr_capif_https_host:    "O|text|CAPIF https URL||capifcore"
+    oneapp_xr_capif_https_port:    "O|text|CAPIF https port||443"
+    oneapp_xr_capif_uname:         "O|text|CAPIF register username||api_user_1"
+    oneapp_xr_capif_password:      "O|password|CAPIF register password"  # api_user_1_ABC
+    oneapp_xr_capif_invoker_id:    "O|text|CAPIF invoker ID||08433b4cd09fe6f741f23e12e5f652"
+    oneapp_xr_capif_api_name:      "O|text|CAPIF API name||nac_api"
+logo: nokia.png
+images:
+  - name: "XRext"
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/service_XRext.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    # qemu-img info <file> | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g'
+    size: "21474836480"
+    checksum:
+      # md5sum <file> | cut -d' ' -f1
+      md5: "747817d4450a8554792680c38075fe7c"
+      # sha256sum <file> | cut -d' ' -f1
+      sha256: "c3d7ef1b23d6dfbf6b6b30da0c19b759670aaea0daf5b4bba83e137ade9f3046"
