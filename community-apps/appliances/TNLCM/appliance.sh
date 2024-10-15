@@ -100,6 +100,13 @@ service_install()
     # yarn dotenv
     install_dotenv
 
+    # load tnlcm database
+    msg info "Load the TNLCM database from mongoDB"
+    if ! mongosh --file ${BACKEND_PATH}/core/database/tnlcm-structure.js ; then
+        msg error "Error loading the TNLCM database"
+        exit 1
+    fi
+
     # mongo-express
     install_mongo_express
 
@@ -211,7 +218,7 @@ install_mongodb()
     systemctl enable --now mongod
 
     msg info "Load the TNLCM database from mongoDB"
-    if ! mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js ; then
+    if ! mongosh --file ${BACKEND_PATH}/core/database/tnlcm-structure.js ; then
         msg error "Error loading the TNLCM database"
         exit 1
     fi
@@ -221,7 +228,8 @@ install_mongodb()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch dev -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Activate TNLCM python virtual environment and install requirements"
@@ -316,7 +324,7 @@ Description=Mongo Express
 [Service]
 Type=simple
 WorkingDirectory=${MONGO_EXPRESS_PATH}
-ExecStart=/bin/bash -ac 'source ${TNLCM_BACKEND}/.env && yarn start'
+ExecStart=/bin/bash -ac 'source ${BACKEND_PATH}/.env && yarn start'
 Restart=always
 
 [Install]
