@@ -6,12 +6,12 @@ set -o errexit -o pipefail
 # Appliance metadata
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_NAME='6G-Sandbox routemanager'
+ONE_SERVICE_NAME='6G-Sandbox route-manager-api'
 ONE_SERVICE_VERSION='v0.3.2'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox routemanager appliance for KVM'
+ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox route-manager-api appliance for KVM'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of [routemanager](https://github.com/6G-SANDBOX/route-manager-api), a REST API in port 8172/tcp developed with FastAPI for managing network routes on a Linux machine using the ip command.
+This appliance installs the latest version of [route-manager-api](https://github.com/6G-SANDBOX/route-manager-api), a REST API in port 8172/tcp developed with FastAPI for managing network routes on a Linux machine using the ip command.
 
 The image is based on an Alpine 3.20 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 

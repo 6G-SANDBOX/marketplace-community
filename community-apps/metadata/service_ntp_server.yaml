@@ -10,7 +10,7 @@ description: |-
   The ONEAPP_NTP_SERVERS and ONEAPP_TZ parameters are optinally configurable:
   - ONEAPP_NTP_SERVERS is the list of NTP servers that you want to use as Upstream servers.
   - ONEAPP_TZ is the timezone defined by IANAA.
-short_description: Appliance with preinstalled NTP server for KVM hosts
+short_description: NTP server appliance for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library

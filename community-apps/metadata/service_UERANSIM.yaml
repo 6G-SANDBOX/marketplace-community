@@ -12,7 +12,7 @@ description: |-
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 
   **Note**: Remember to update the template in order to add a network after importing it.
-short_description: UERANSIM 5G gNB & UE simulator
+short_description: UERANSIM 5G gNB & UE simulator for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library

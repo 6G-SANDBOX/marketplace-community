@@ -12,10 +12,10 @@ description: |-
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
   
   **Note**: Remember to update the template in order to add a network after importing it.
-short_description: 6G-Sandbox routemanager appliance for KVM
+short_description: 6G-Sandbox route-manager-api appliance for KVM
 tags:
   - 6G-Sandbox
-  - routemanager
+  - route-manager-api
   - alpine
 format: qcow2
 creation_time: 20241010
@@ -53,7 +53,7 @@ opennebula_template:
     oneapp_routemanager_port:  "O|number|ONEAPP_ROUTEMANAGER_PORT: TCP port where the route-manager-api service will be exposed| |8172"
 logo: routemanager.png
 images:
-  - name: 6G-Sandbox routemanager
+  - name: 6G-Sandbox route-manager-api
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_routemanager.qcow2
     type: OS

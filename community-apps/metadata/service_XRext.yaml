@@ -20,7 +20,7 @@ description: |-
 
   **WARNING: The appliance does not permit recontextualization. Modifying the
   context variables will not have any real efects on the running instance.**
-short_description: 6G-SANDBOX TNLCM appliance for KVM
+short_description: XRext appliance for KVM
 tags:
   - 6G-Sandbox
   - nokia
