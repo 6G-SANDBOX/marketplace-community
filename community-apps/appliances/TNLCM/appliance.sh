@@ -310,8 +310,10 @@ install_mongo_express()
 {
     msg info "Clone mongo-express repository"
     git clone --depth 1 --branch release/${MONGO_EXPRESS_VERSION} -c advice.detachedHead=false https://github.com/mongo-express/mongo-express.git ${MONGO_EXPRESS_PATH}
-    yarn --cwd ${MONGO_EXPRESS_PATH} install
-    yarn --cwd ${MONGO_EXPRESS_PATH} run build
+    cd ${MONGO_EXPRESS_PATH}
+    yarn install
+    yarn build
+    cd
 
     msg info "Define mongo-express systemd service"
     cat > /etc/systemd/system/mongo-express.service << EOF
