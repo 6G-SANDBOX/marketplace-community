@@ -95,7 +95,7 @@ service_install()
     install_tnlcm_frontend
 
     # yarn
-    # install_yarn
+    install_yarn
 
     # yarn dotenv
     install_dotenv
@@ -122,7 +122,7 @@ service_configure()
     export DEBIAN_FRONTEND=noninteractive
 
     # update enviromental vars
-    update_envfiles   
+    update_envfiles
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -131,12 +131,6 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
-
-    msg info "Load the TNLCM database from mongoDB"
-    if !  mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js ; then
-        msg error "Error loading the TNLCM database"
-        exit 1
-    fi
 
     systemctl enable --now mongo-express.service
 
@@ -215,6 +209,12 @@ install_mongodb()
     fi
     msg info "Start mongoDB service"
     systemctl enable --now mongod
+
+    msg info "Load the TNLCM database from mongoDB"
+    if ! mongosh --file ${TNLCM_BACKEND}/core/database/tnlcm-structure.js ; then
+        msg error "Error loading the TNLCM database"
+        exit 1
+    fi
 }
 
 
@@ -253,15 +253,11 @@ install_nodejs()
     curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
     apt-get install -y nodejs
     npm install -g npm
+}
 
-    # msg info "Enable nodejs corepack to add yarn to the path"
-    # corepack enable
-    # if ! corepack prepare yarn@3.2.4 --activate ; then
-    #     msg error "Error preparing yarn"
-    #     exit 1
-    # fi
 
-    # Legacy
+install_yarn()
+{
     msg info "Install yarn"
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
@@ -294,13 +290,10 @@ WantedBy=multi-user.target
 EOF
 }
 
+
 install_dotenv()
 {
     msg info "Install dotenv library"
-
-    # yarn add dotenv
-
-    # Legacy
     yarn config set global-folder ${YARN_GLOBAL_LIBRARIES}
     yarn global add dotenv
 }
@@ -323,7 +316,7 @@ Description=Mongo Express
 [Service]
 Type=simple
 WorkingDirectory=${MONGO_EXPRESS_PATH}
-ExecStart=/bin/bash -c 'source ${TNLCM_BACKEND}/.env && yarn start'
+ExecStart=/bin/bash -ac 'source ${TNLCM_BACKEND}/.env && yarn start'
 Restart=always
 
 [Install]
