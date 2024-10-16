@@ -7,7 +7,7 @@ set -o errexit -o pipefail
 # ------------------------------------------------------------------------------
 
 ONE_SERVICE_NAME='6G-Sandbox TNLCM'
-ONE_SERVICE_VERSION='v0.3.2'   #latest
+ONE_SERVICE_VERSION='v0.4.0'   #latest
 ONE_SERVICE_BUILD=$(date +%s)
 ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox TNLCM appliance for KVM'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
@@ -222,8 +222,8 @@ install_mongodb()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
-    git clone --depth 1 --branch dev -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch dev -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Activate TNLCM python virtual environment and install requirements"
