@@ -216,12 +216,6 @@ install_mongodb()
     fi
     msg info "Start mongoDB service"
     systemctl enable --now mongod
-
-    msg info "Load the TNLCM database from mongoDB"
-    if ! mongosh --file ${BACKEND_PATH}/core/database/tnlcm-structure.js ; then
-        msg error "Error loading the TNLCM database"
-        exit 1
-    fi
 }
 
 
