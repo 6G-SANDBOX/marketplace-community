@@ -206,6 +206,7 @@ generate_token()
     elif [[ "${TEMP}" != null ]] ; then
         msg info "Using provided or previously generated TOKEN"
         ONEAPP_ROUTEMANAGER_TOKEN="${TEMP}"
+    fi
 }
 
 
