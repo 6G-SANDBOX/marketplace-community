@@ -89,12 +89,6 @@ service_configure()
 
 service_bootstrap()
 {
-    if ! rc-service route-manager-api restart ; then
-        msg error "Error restarting service route-manager-api"
-        exit 1
-    fi
-    msg info "Service route-manager-api restarted"
-
     msg info "BOOTSTRAP FINISHED"
     return 0
 }
@@ -219,7 +213,11 @@ update_config()
     sed -i "s%^TOKEN = .*%TOKEN = ${ONEAPP_ROUTEMANAGER_TOKEN}%" /opt/route-manager-api/config/config.conf
     sed -i "s%^PORT = .*%PORT = ${ONEAPP_ROUTEMANAGER_PORT}%" /opt/route-manager-api/config/config.conf
 
-    sleep 1
+    msg info "Restart service route-manager-api"
+    if ! rc-service route-manager-api restart ; then
+        msg error "Error restarting service route-manager-api"
+        exit 1
+    fi
 }
 
 postinstall_cleanup()
