@@ -196,7 +196,7 @@ EOF
 
 generate_token()
 {
-    TEMP="$(onegate vm show --json |jq .VM.USER_TEMPLATE.ONEAPP_ROUTEMANAGER_TOKEN)"
+    TEMP="$(onegate vm show --json |jq -r .VM.USER_TEMPLATE.ONEAPP_ROUTEMANAGER_TOKEN)"
 
     if [[ -z "${ONEAPP_ROUTEMANAGER_TOKEN}" && "${TEMP}" == null ]] ; then
         msg info "TOKEN not provided. Generating one"
