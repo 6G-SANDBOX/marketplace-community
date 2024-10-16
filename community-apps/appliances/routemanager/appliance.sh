@@ -60,6 +60,9 @@ service_install()
     # service
     define_service
 
+    # enable routing
+    echo net.ipv4.ip_forward=1 | tee -a /etc/sysctl.d/local.conf
+
     # service metadata
     create_one_service_metadata
 
@@ -215,6 +218,8 @@ update_config()
     msg info "Update application config file"
     sed -i "s%^TOKEN = .*%TOKEN = ${ONEAPP_ROUTEMANAGER_TOKEN}%" /opt/route-manager-api/config/config.conf
     sed -i "s%^PORT = .*%PORT = ${ONEAPP_ROUTEMANAGER_PORT}%" /opt/route-manager-api/config/config.conf
+
+    sleep 1
 }
 
 postinstall_cleanup()
