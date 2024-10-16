@@ -210,7 +210,7 @@ generate_token()
 update_config()
 {
     msg info "Update application config file"
-    sed -i "s%^TOKEN = .*%TOKEN = ${ONEAPP_ROUTEMANAGER_TOKEN}%" /opt/route-manager-api/config/config.conf
+    sed -i "s%^APITOKEN = .*%APITOKEN = ${ONEAPP_ROUTEMANAGER_TOKEN}%" /opt/route-manager-api/config/config.conf
     sed -i "s%^PORT = .*%PORT = ${ONEAPP_ROUTEMANAGER_PORT}%" /opt/route-manager-api/config/config.conf
 
     msg info "Restart service route-manager-api"
