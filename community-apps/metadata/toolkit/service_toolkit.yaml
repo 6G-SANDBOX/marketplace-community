@@ -68,6 +68,7 @@ opennebula_template:
           NETWORK_ID = "$Public" ]
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
       max_vms: 1
+      cardinality: 1
     - name: jenkins
       parents: [minio]         # Names of the roles that must be deployed before this one.
       vm_template_contents: |
@@ -78,6 +79,7 @@ opennebula_template:
         ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "${minio.template.context.oneapp_minio_root_password}"
       cooldown: 120
       max_vms: 1
+      cardinality: 1
     - name: tnlcm
       parents: [jenkins]
       vm_template_contents: |
@@ -90,4 +92,5 @@ opennebula_template:
         ONEAPP_TNLCM_SITES_TOKEN      = "${jenkins.template.context.oneapp_jenkins_sites_token}"
       cooldown: 120
       max_vms: 1
+      cardinality: 1
 logo: sandbox.png
