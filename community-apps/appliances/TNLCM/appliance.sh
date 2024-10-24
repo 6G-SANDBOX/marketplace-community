@@ -58,7 +58,7 @@ PYTHON_VERSION="3.13"
 PYTHON_BIN="python${PYTHON_VERSION}"
 
 BACKEND_PATH="/opt/TNLCM_BACKEND"
-FRONTEND_PATH="/opt/TNLCM_FRONTEND"
+# FRONTEND_PATH="/opt/TNLCM_FRONTEND"
 MONGODB_VERSION="8.0"
 YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 MONGO_EXPRESS_VERSION="v1.0.2"
@@ -92,7 +92,7 @@ service_install()
     install_nodejs
 
     # tnlcm frontend
-    install_tnlcm_frontend
+    # install_tnlcm_frontend
 
     # yarn
     install_yarn
@@ -149,13 +149,13 @@ service_bootstrap()
         msg info "tnlcm-backend.service was started..."
     fi
 
-    systemctl enable --now tnlcm-frontend.service
-    if [ $? -ne 0 ]; then
-        msg error "Error starting tnlcm-frontend.service, aborting..."
-        exit 1
-    else
-        msg info "tnlcm-frontend.service was started..."
-    fi
+    # systemctl enable --now tnlcm-frontend.service
+    # if [ $? -ne 0 ]; then
+    #     msg error "Error starting tnlcm-frontend.service, aborting..."
+    #     exit 1
+    # else
+    #     msg info "tnlcm-frontend.service was started..."
+    # fi
 
     msg info "BOOTSTRAP FINISHED"
     return 0
@@ -222,9 +222,8 @@ install_mongodb()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    # TODO
-    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
-    git clone --depth 1 --branch dev -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch dev -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Activate TNLCM python virtual environment and install requirements"
@@ -356,9 +355,9 @@ update_envfiles()
 
     done
 
-    msg info "Update enviromental variables of the TNLCM frontend"
-    sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
-    msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
+    # msg info "Update enviromental variables of the TNLCM frontend"
+    # sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
+    # msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
 }
 
 
