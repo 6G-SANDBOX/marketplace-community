@@ -32,7 +32,7 @@ ONE_SERVICE_RECONFIGURABLE=true
 ONE_SERVICE_PARAMS=(
     'ONEAPP_TNLCM_JENKINS_HOST'            'configure'  'IP address of the Jenkins server used to deploy the Trial Networks'                                       'M|text'
     'ONEAPP_TNLCM_JENKINS_USERNAME'        'configure'  'Username used to login into the Jenkins server to access and retrieve pipeline info'                      'M|text'
-    'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'                      'M|text'
+    'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'                      'M|password'
     'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'                              'M|password'
     'ONEAPP_TNLCM_SITES_TOKEN'             'configure'  'Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'     'M|password'
     'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the TNLCM admin user. Default: tnlcm'                                                             'O|text'
