@@ -130,6 +130,12 @@ service_configure()
     msg info "Start mongoDB service"
     systemctl enable --now mongod
 
+    msg info "Wait for MongoDB service to be active"
+    while ! systemctl is-active --quiet mongod; do
+        msg debug "MongoDB service is not active yet, waiting..."
+        sleep 2s
+    done
+
     msg info "Start mongo-express service"
     systemctl enable --now mongo-express.service
 
@@ -366,11 +372,6 @@ load_tnlcm_database()
     msg info "Load TNLCM database"
     msg info "Extract mongo database name from .env file"
     tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
-    msg info "Wait for MongoDB service to be active"
-    while ! systemctl is-active --quiet mongod; do
-        msg debug "MongoDB service is not active yet, waiting..."
-        sleep 2s
-    done
     msg info "Check TNLCM database is created"
     db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
     msg info "If database does not exist, create it"
