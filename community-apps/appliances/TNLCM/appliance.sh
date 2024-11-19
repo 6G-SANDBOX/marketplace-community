@@ -129,9 +129,6 @@ service_configure()
     # update enviromental vars
     update_envfiles
 
-    # load tnlcm database
-    load_tnlcm_database
-
     msg info "CONFIGURATION FINISHED"
     return 0
 }
@@ -157,6 +154,9 @@ service_bootstrap()
     # else
     #     msg info "tnlcm-frontend.service was started..."
     # fi
+
+    # load tnlcm database
+    load_tnlcm_database
 
     msg info "BOOTSTRAP FINISHED"
     return 0
