@@ -139,6 +139,11 @@ service_configure()
     msg info "Start mongo-express service"
     systemctl enable --now mongo-express.service
 
+    while ! systemctl is-active --quiet mongo-express.service; do
+        msg debug "mongo-express service is not active yet, waiting..."
+        sleep 2s
+    done
+
     msg info "Start tnlcm backend service"
     systemctl enable --now tnlcm-backend.service
     if [ $? -ne 0 ]; then
