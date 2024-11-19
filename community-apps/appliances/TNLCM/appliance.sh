@@ -127,8 +127,13 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
+    msg info "Start mongoDB service"
+    systemctl enable --now mongod
+
+    msg info "Start mongo-express service"
     systemctl enable --now mongo-express.service
 
+    msg info "Start tnlcm backend service"
     systemctl enable --now tnlcm-backend.service
     if [ $? -ne 0 ]; then
         msg error "Error starting tnlcm-backend.service, aborting..."
@@ -214,8 +219,6 @@ install_mongodb()
         msg error "Error installing package 'mongo-org'"
         exit 1
     fi
-    msg info "Start mongoDB service"
-    systemctl enable --now mongod
 }
 
 install_poetry()
