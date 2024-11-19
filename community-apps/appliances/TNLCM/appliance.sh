@@ -127,6 +127,18 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
+    # update enviromental vars
+    update_envfiles
+
+    msg info "CONFIGURATION FINISHED"
+    return 0
+}
+
+# Se ejecuta cada vez que se arranca la VM por poweroff o undeploy
+service_bootstrap()
+{
+    export DEBIAN_FRONTEND=noninteractive
+
     msg info "Start mongoDB service"
     systemctl enable --now mongod
 
@@ -135,6 +147,8 @@ service_configure()
         msg debug "MongoDB service is not active yet, waiting..."
         sleep 2s
     done
+
+    load_tnlcm_database
 
     msg info "Start mongo-express service"
     systemctl enable --now mongo-express.service
@@ -160,21 +174,6 @@ service_configure()
     # else
     #     msg info "tnlcm-frontend.service was started..."
     # fi
-
-    msg info "CONFIGURATION FINISHED"
-    return 0
-}
-
-# Se ejecuta cada vez que se arranca la VM por poweroff o undeploy
-service_bootstrap()
-{
-    export DEBIAN_FRONTEND=noninteractive
-
-    # update enviromental vars
-    update_envfiles
-
-    # load tnlcm database
-    load_tnlcm_database
 
     msg info "BOOTSTRAP FINISHED"
     return 0
