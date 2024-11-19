@@ -363,6 +363,10 @@ load_tnlcm_database()
     msg info "Load TNLCM database"
     msg info "Extract mongo database name from .env file"
     tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+    msg info "Waiting for MongoDB service to be active"
+    while ! systemctl is-active --quiet mongod; do
+        sleep 2s
+    done
     msg info "Checking and creating TNLCM database if needed"
     db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
     if [[ ${db_exists} == "false" ]]; then
@@ -371,6 +375,8 @@ load_tnlcm_database()
             msg error "Error creating the TNLCM database"
             exit 1
         fi
+    else
+        msg info "Database ${tnlcm_database} already exists"
     fi
 }
 
