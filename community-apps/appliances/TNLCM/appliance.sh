@@ -105,13 +105,6 @@ service_install()
     # yarn dotenv
     install_dotenv
 
-    # load tnlcm database
-    msg info "Load the TNLCM database from mongoDB"
-    if ! mongosh --file ${BACKEND_PATH}/core/database/tnlcm-structure.js ; then
-        msg error "Error loading the TNLCM database"
-        exit 1
-    fi
-
     # mongo-express
     install_mongo_express
 
@@ -135,6 +128,9 @@ service_configure()
 
     # update enviromental vars
     update_envfiles
+
+    # load tnlcm database
+    load_tnlcm_database
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -181,7 +177,6 @@ service_cleanup()
     :
 }
 
-
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Function Definitions
@@ -200,14 +195,12 @@ install_pkg_deps()
     fi
 }
 
-
 install_python()
 {
     msg info "Install python version ${PYTHON_VERSION}"
     add-apt-repository ppa:deadsnakes/ppa -y
     apt-get install python${PYTHON_VERSION}-full -y
 }
-
 
 install_mongodb()
 {
@@ -257,7 +250,6 @@ WantedBy=multi-user.target
 EOF
 }
 
-
 install_nodejs()
 {
     msg info "Install Node.js and dependencies"
@@ -265,7 +257,6 @@ install_nodejs()
     apt-get install -y nodejs
     npm install -g npm
 }
-
 
 install_yarn()
 {
@@ -275,7 +266,6 @@ install_yarn()
     apt-get update
     apt-get install -y yarn
 }
-
 
 install_tnlcm_frontend()
 {
@@ -301,14 +291,12 @@ WantedBy=multi-user.target
 EOF
 }
 
-
 install_dotenv()
 {
     msg info "Install dotenv library"
     yarn config set global-folder ${YARN_GLOBAL_LIBRARIES}
     yarn global add dotenv
 }
-
 
 install_mongo_express()
 {
@@ -334,7 +322,6 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 }
-
 
 update_envfiles()
 {
@@ -369,6 +356,21 @@ update_envfiles()
     # msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
 }
 
+load_tnlcm_database()
+{
+    msg info "Load TNLCM database"
+    msg info "Extract mongo database name from .env file"
+    tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+    msg info "Checking and creating TNLCM database if needed"
+    db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
+    if [[ ${db_exists} == "false" ]]; then
+        msg info "Database ${tnlcm_database} not found, creating..."
+        if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
+            msg error "Error creating the TNLCM database"
+            exit 1
+        fi
+    fi
+}
 
 postinstall_cleanup()
 {

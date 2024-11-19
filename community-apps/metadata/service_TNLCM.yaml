@@ -1,5 +1,5 @@
 ---
-name: "6G-Sandbox TNLCM"
+name: "[Testing] service_TNLCM"
 version: "20240705-1102"
 publisher: Telefonica Innovacion Digital
 description: |-
@@ -67,9 +67,9 @@ opennebula_template:
     oneapp_tnlcm_admin_password:    "O|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. Default: tnlcm| |tnlcm"
 logo: tnlcm.png
 images:
-  - name: 6G-Sandbox TNLCM
+  - name: "[Testing] service_TNLCM"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_TNLCM.qcow2
+      https://rawtest.mobilesandbox.cloud:9443/service_TNLCM.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
@@ -77,3 +77,5 @@ images:
     checksum:
       md5: "490330ca6ee051cc7549cbdf80809e60"
       sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+
+# https://rawimages.mobilesandbox.cloud:9443/service_TNLCM.qcow2
