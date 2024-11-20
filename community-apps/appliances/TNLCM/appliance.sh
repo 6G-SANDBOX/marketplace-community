@@ -130,8 +130,8 @@ service_configure()
     # update enviromental vars
     update_envfiles
 
-    sleep 2m
-    
+    exec_ping_mongo
+
     load_tnlcm_database
 
     msg info "Start mongo-express service"
@@ -361,6 +361,15 @@ update_envfiles()
     # msg info "Update enviromental variables of the TNLCM frontend"
     # sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
     # msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
+}
+
+exec_ping_mongo() {
+    echo "Waiting for MongoDB to be ready..."
+    while ! mongo --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+        echo "MongoDB is not ready yet. Retrying in 10 seconds..."
+        sleep 10s
+    done
+    echo "MongoDB is ready"
 }
 
 load_tnlcm_database()
