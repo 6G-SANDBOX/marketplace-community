@@ -215,14 +215,10 @@ install_mongodb()
         exit 1
     fi
 
-    msg info "Start mongoDB service"
-    systemctl enable --now mongod
+    sudo systemctl daemon-reload
 
-    msg info "Wait for MongoDB service to be active"
-    while ! systemctl is-active --quiet mongod; do
-        msg debug "MongoDB service is not active yet, waiting..."
-        sleep 2s
-    done
+    msg info "Start mongoDB service"
+    systemctl enable --now mongod.service
 }
 
 install_poetry()
