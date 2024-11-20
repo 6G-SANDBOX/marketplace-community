@@ -22,7 +22,7 @@ change it to a CPU model similar to your host's CPU that supports [x86-64v2 or h
 EOF
 )
 
-ONE_SERVICE_RECONFIGURABLE=true
+ONE_SERVICE_RECONFIGURABLE=false
 
 
 # ------------------------------------------------------------------------------
