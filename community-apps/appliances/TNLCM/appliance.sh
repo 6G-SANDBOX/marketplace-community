@@ -130,6 +130,8 @@ service_configure()
     # update enviromental vars
     update_envfiles
 
+    sleep 2m
+    
     load_tnlcm_database
 
     msg info "Start mongo-express service"
