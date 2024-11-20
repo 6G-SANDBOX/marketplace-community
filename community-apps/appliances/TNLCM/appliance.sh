@@ -116,28 +116,8 @@ service_install()
     # cleanup
     postinstall_cleanup
 
-    msg info "INSTALLATION FINISHED"
-
-    return 0
-}
-
-# Si ONE_SERVICE_RECONFIGURABLE=false solo se ejecuta cuando se arranca por primera vez la VM
-# Si ONE_SERVICE_RECONFIGURABLE=true se ejecuta cada vez que se arranca la VM por poweroff o undeploy
-service_configure()
-{
-    export DEBIAN_FRONTEND=noninteractive
-
     # update enviromental vars
     update_envfiles
-
-    msg info "CONFIGURATION FINISHED"
-    return 0
-}
-
-# Se ejecuta cada vez que se arranca la VM por poweroff o undeploy
-service_bootstrap()
-{
-    export DEBIAN_FRONTEND=noninteractive
 
     load_tnlcm_database
 
@@ -165,6 +145,26 @@ service_bootstrap()
     # else
     #     msg info "tnlcm-frontend.service was started..."
     # fi
+
+    msg info "INSTALLATION FINISHED"
+
+    return 0
+}
+
+# Si ONE_SERVICE_RECONFIGURABLE=false solo se ejecuta cuando se arranca por primera vez la VM
+# Si ONE_SERVICE_RECONFIGURABLE=true se ejecuta cada vez que se arranca la VM por poweroff o undeploy
+service_configure()
+{
+    export DEBIAN_FRONTEND=noninteractive
+
+    msg info "CONFIGURATION FINISHED"
+    return 0
+}
+
+# Se ejecuta cada vez que se arranca la VM por poweroff o undeploy
+service_bootstrap()
+{
+    export DEBIAN_FRONTEND=noninteractive
 
     msg info "BOOTSTRAP FINISHED"
     return 0
