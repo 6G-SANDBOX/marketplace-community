@@ -105,6 +105,9 @@ service_install()
     # yarn dotenv
     install_dotenv
 
+    # load tnlcm database
+    load_tnlcm_database
+
     # mongo-express
     install_mongo_express
 
@@ -227,13 +230,10 @@ install_mongodb()
 
     msg info "Start mongoDB service"
     systemctl enable --now mongod
+}
 
-    msg info "Wait for MongoDB service to be active"
-    while ! systemctl is-active --quiet mongod; do
-        msg debug "MongoDB service is not active yet, waiting..."
-        sleep 2s
-    done
-
+load_tnlcm_database()
+{
     msg info "Create TNLCM database"
     if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
         msg error "Error creating the TNLCM database"
