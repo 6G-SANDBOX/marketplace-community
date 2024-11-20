@@ -139,15 +139,6 @@ service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
 
-    msg info "Start mongoDB service"
-    systemctl enable --now mongod
-
-    msg info "Wait for MongoDB service to be active"
-    while ! systemctl is-active --quiet mongod; do
-        msg debug "MongoDB service is not active yet, waiting..."
-        sleep 2s
-    done
-
     load_tnlcm_database
 
     msg info "Start mongo-express service"
@@ -229,6 +220,15 @@ install_mongodb()
         msg error "Error installing package 'mongo-org'"
         exit 1
     fi
+
+    msg info "Start mongoDB service"
+    systemctl enable --now mongod
+
+    msg info "Wait for MongoDB service to be active"
+    while ! systemctl is-active --quiet mongod; do
+        msg debug "MongoDB service is not active yet, waiting..."
+        sleep 2s
+    done
 }
 
 install_poetry()
@@ -242,8 +242,8 @@ install_poetry()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
-    git clone --depth 1 --branch develop -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch develop -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Generate .venv/ directory and install dependencies"
@@ -375,19 +375,19 @@ load_tnlcm_database()
 {
     msg info "Load TNLCM database"
     msg info "Extract mongo database name from .env file"
-    tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
-    msg info "Check TNLCM database is created"
-    db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
-    msg info "If database does not exist, create it"
-    if [[ "${db_exists}" == "false" ]]; then
-        msg info "Database ${tnlcm_database} not found, creating..."
-        if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
-            msg error "Error creating the TNLCM database"
-            exit 1
-        fi
-    else
-        msg info "Database ${tnlcm_database} already exists"
+    # tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+    # msg info "Check TNLCM database is created"
+    # db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
+    # msg info "If database does not exist, create it"
+    # if [[ "${db_exists}" == "false" ]]; then
+    msg info "Database ${tnlcm_database} not found, creating..."
+    if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
+        msg error "Error creating the TNLCM database"
+        exit 1
     fi
+    # else
+    #     msg info "Database ${tnlcm_database} already exists"
+    # fi
 }
 
 postinstall_cleanup()
