@@ -52,7 +52,7 @@ ONEAPP_TNLCM_ADMIN_PASSWORD="${ONEAPP_TNLCM_ADMIN_PASSWORD:-tnlcm}"
 # Global variables
 # ------------------------------------------------------------------------------
 
-DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common"
+DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common openssl"
 
 PYTHON_VERSION="3.13"
 PYTHON_BIN="python${PYTHON_VERSION}"
@@ -127,10 +127,39 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
+    tnlcm_current_admin_user=$(grep -oP 'TNLCM_ADMIN_USER=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+
     # update enviromental vars
     update_envfiles
 
-    load_tnlcm_database
+    # restart services
+    systemctl restart tnlcm-backend.service
+
+    # systemctl restart tnlcm-frontend.service
+
+    msg info "Extract mongo database name from .env file"
+    tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+    msg info "Check TNLCM database is created"
+    db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
+    msg debug "Database ${tnlcm_database} exists: ${db_exists}"
+    if [[ "${db_exists}" == "true" ]]; then
+        msg info "Update default user in the TNLCM database"
+        tnlcm_admin_user=$(grep -oP 'TNLCM_ADMIN_USER=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+        tnlcm_admin_password=$(grep -oP 'TNLCM_ADMIN_PASSWORD=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
+        salt=$(openssl rand -hex 16)
+        iterations=600000
+        key_length=32
+        digest="sha256"
+        hash=$(echo -n "${tnlcm_admin_password}${salt}" | openssl dgst -sha256 -binary | openssl base64)
+        hashed_password="pbkdf2:${digest}:${iterations}$${salt}$${hash}"
+        tnlcm_admin_password=$(echo -n "${tnlcm_admin_password}" | sha256sum | cut -d' ' -f1)
+        if ! mongosh --quiet --eval "db.users.updateOne({username: '${tnlcm_current_admin_user}'}, { \$set: { username: '${tnlcm_admin_user}', password: '${hashed_password}' } })"; then
+            msg error "Error updating the default user in the TNLCM database"
+            exit 1
+        fi
+    fi
+
+    systemctl restart mongo-express.service
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -140,31 +169,6 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
-
-    msg info "Start mongo-express service"
-    systemctl enable --now mongo-express.service
-
-    while ! systemctl is-active --quiet mongo-express.service; do
-        msg debug "mongo-express service is not active yet, waiting..."
-        sleep 2s
-    done
-
-    msg info "Start tnlcm backend service"
-    systemctl enable --now tnlcm-backend.service
-    if [ $? -ne 0 ]; then
-        msg error "Error starting tnlcm-backend.service, aborting..."
-        exit 1
-    else
-        msg info "tnlcm-backend.service was started..."
-    fi
-
-    # systemctl enable --now tnlcm-frontend.service
-    # if [ $? -ne 0 ]; then
-    #     msg error "Error starting tnlcm-frontend.service, aborting..."
-    #     exit 1
-    # else
-    #     msg info "tnlcm-frontend.service was started..."
-    # fi
 
     msg info "BOOTSTRAP FINISHED"
     return 0
@@ -229,6 +233,12 @@ install_mongodb()
         msg debug "MongoDB service is not active yet, waiting..."
         sleep 2s
     done
+
+    msg info "Create TNLCM database"
+    if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
+        msg error "Error creating the TNLCM database"
+        exit 1
+    fi
 }
 
 install_poetry()
@@ -263,6 +273,15 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    msg info "Start tnlcm backend service"
+    systemctl enable --now tnlcm-backend.service
+    if [ $? -ne 0 ]; then
+        msg error "Error starting tnlcm-backend.service, aborting..."
+        exit 1
+    else
+        msg info "tnlcm-backend.service was started..."
+    fi
 }
 
 install_nodejs()
@@ -304,6 +323,14 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    # systemctl enable --now tnlcm-frontend.service
+    # if [ $? -ne 0 ]; then
+    #     msg error "Error starting tnlcm-frontend.service, aborting..."
+    #     exit 1
+    # else
+    #     msg info "tnlcm-frontend.service was started..."
+    # fi
 }
 
 install_dotenv()
@@ -336,6 +363,14 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    msg info "Start mongo-express service"
+    systemctl enable --now mongo-express.service
+
+    while ! systemctl is-active --quiet mongo-express.service; do
+        msg debug "mongo-express service is not active yet, waiting..."
+        sleep 2s
+    done
 }
 
 update_envfiles()
@@ -369,30 +404,6 @@ update_envfiles()
     # msg info "Update enviromental variables of the TNLCM frontend"
     # sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
     # msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
-}
-
-load_tnlcm_database()
-{
-    msg info "Load TNLCM database"
-    msg info "Extract mongo database name from .env file"
-    tnlcm_database=$(grep -oP 'MONGO_DATABASE=.*' ${BACKEND_PATH}/.env | cut -d'=' -f2)
-    msg info "Wait for MongoDB service to be active"
-    while ! systemctl is-active --quiet mongod; do
-        msg debug "MongoDB service is not active yet, waiting..."
-        sleep 2s
-    done
-    msg info "Check TNLCM database is created"
-    db_exists=$(mongosh --quiet --eval "db.adminCommand('listDatabases').databases.map(db => db.name).includes(${tnlcm_database})")
-    msg info "If database does not exist, create it"
-    if [[ "${db_exists}" == "false" ]]; then
-        msg info "Database ${tnlcm_database} not found, creating..."
-        if ! mongosh --file "${BACKEND_PATH}/core/database/tnlcm-structure.js"; then
-            msg error "Error creating the TNLCM database"
-            exit 1
-        fi
-    else
-        msg info "Database ${tnlcm_database} already exists"
-    fi
 }
 
 postinstall_cleanup()
