@@ -365,7 +365,7 @@ update_envfiles()
 
 exec_ping_mongo() {
     msg info "Waiting for MongoDB to be ready..."
-    while ! mongo --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+    while ! mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
         msg info "MongoDB is not ready yet. Retrying in 10 seconds..."
         sleep 10s
     done
