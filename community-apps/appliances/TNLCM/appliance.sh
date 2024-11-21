@@ -76,7 +76,6 @@ MONGO_EXPRESS_PATH=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
 service_install()
 {
     export DEBIAN_FRONTEND=noninteractive
-    systemctl stop unattended-upgrades
 
     # packages
     install_pkg_deps DEP_PKGS
@@ -190,9 +189,11 @@ service_cleanup()
 install_pkg_deps()
 {
     msg info "Run apt-get update"
+    wait_for_dpkg_lock_release
     apt-get update
 
     msg info "Install required packages for TNLCM"
+    wait_for_dpkg_lock_release
     if ! apt-get install -y ${!1} ; then
         msg error "Package(s) installation failed"
         exit 1
@@ -203,6 +204,7 @@ install_python()
 {
     msg info "Install python version ${PYTHON_VERSION}"
     add-apt-repository ppa:deadsnakes/ppa -y
+    wait_for_dpkg_lock_release
     apt-get install python${PYTHON_VERSION}-full -y
 }
 
@@ -211,6 +213,7 @@ install_mongodb()
     msg info "Install mongoDB"
     curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor
     echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -sc 2> /dev/null)/mongodb-org/${MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+    wait_for_dpkg_lock_release
     apt-get update
     if ! apt-get install -y mongodb-org; then
         msg error "Error installing package 'mongo-org'"
@@ -261,6 +264,7 @@ install_nodejs()
 {
     msg info "Install Node.js and dependencies"
     curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    wait_for_dpkg_lock_release
     apt-get install -y nodejs
     npm install -g npm
 }
@@ -270,6 +274,7 @@ install_yarn()
     msg info "Install yarn"
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    wait_for_dpkg_lock_release
     apt-get update
     apt-get install -y yarn
 }
@@ -379,6 +384,24 @@ load_tnlcm_database()
         msg error "Error creating the TNLCM database"
         exit 1
     fi
+}
+
+wait_for_dpkg_lock_release()
+{
+  local lock_file="/var/lib/dpkg/lock-frontend"
+  local timeout=600  # Tiempo máximo para esperar en segundos
+  local interval=5   # Intervalo entre intentos en segundos
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if ! lsof "${lock_file}" &>/dev/null; then
+      return 0
+    fi
+    echo "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  echo "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  exit 1
 }
 
 postinstall_cleanup()
