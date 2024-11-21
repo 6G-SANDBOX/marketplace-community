@@ -8,3 +8,4 @@ community-apps/appliances/UERANSIM/UERANSIM
 marketplace/appliances/*
 !marketplace/appliances/
 
+.vscode/
