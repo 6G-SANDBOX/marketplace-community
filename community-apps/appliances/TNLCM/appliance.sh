@@ -189,7 +189,6 @@ service_cleanup()
 install_pkg_deps()
 {
     msg info "Run apt-get update"
-    wait_for_dpkg_lock_release
     apt-get update
 
     msg info "Install required packages for TNLCM"
@@ -389,8 +388,8 @@ load_tnlcm_database()
 wait_for_dpkg_lock_release()
 {
   local lock_file="/var/lib/dpkg/lock-frontend"
-  local timeout=600  # Tiempo máximo para esperar en segundos
-  local interval=5   # Intervalo entre intentos en segundos
+  local timeout=600
+  local interval=5
 
   for ((i=0; i<timeout; i+=interval)); do
     if ! lsof "${lock_file}" &>/dev/null; then
