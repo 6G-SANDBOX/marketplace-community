@@ -35,15 +35,14 @@ ONE_SERVICE_PARAMS=(
     'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'                      'M|password'
     'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'                              'M|password'
     'ONEAPP_TNLCM_SITES_TOKEN'             'configure'  'Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'     'M|password'
-    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the TNLCM admin user. Default: tnlcm'                                                             'O|text'
-    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Password of the TNLCM admin user. Default: tnlcm'                                                         'O|password'
+    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the TNLCM admin user'                                                                             'O|text'
+    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Password of the TNLCM admin user'                                                                         'O|password'
 )
 
 ONEAPP_TNLCM_JENKINS_HOST="${ONEAPP_TNLCM_JENKINS_HOST:-127.0.0.1}"
 ONEAPP_TNLCM_JENKINS_USERNAME="${ONEAPP_TNLCM_JENKINS_USERNAME:-admin}"
 ONEAPP_TNLCM_JENKINS_PASSWORD="${ONEAPP_TNLCM_JENKINS_PASSWORD:-admin}"
 ONEAPP_TNLCM_ADMIN_USER="${ONEAPP_TNLCM_ADMIN_USER:-tnlcm}"
-ONEAPP_TNLCM_ADMIN_PASSWORD="${ONEAPP_TNLCM_ADMIN_PASSWORD:-tnlcm}"
 
 
 # ------------------------------------------------------------------------------
