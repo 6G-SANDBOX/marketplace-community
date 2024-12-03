@@ -59,7 +59,7 @@ opennebula_template:
     oneapp_tnlcm_admin_user:                  "O|text|Name of the TNLCM admin user||tnlcm"
     oneapp_tnlcm_admin_password:              "O|password|Password of the TNLCM admin user||"
   networks:                        # Hash of virtual networks to use in the service.
-    Public: "M|network|Public||id"
+    Public: "M|network|Public||id:"
   roles:
     - name: minio           # letters, numbers or underscore
       vm_template_contents: |
