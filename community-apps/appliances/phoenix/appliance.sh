@@ -103,7 +103,7 @@ install_dependencies()
     fi
 
     msg info "Install dependencies"
-    if ! apt-get install -y mariadb-server bmon tmux jq ; then
+    if ! apt-get install -y bmon tmux jq ; then
         msg error "installation failed"
         exit 1
     fi
