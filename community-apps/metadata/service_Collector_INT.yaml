@@ -1,0 +1,68 @@
+---
+name: Service Collector_INT P4 - KVM
+# version + date "%Y%M%d-%h%m"
+version: "001-20241205-1000"
+publisher: UMA
+description: |-
+  This appliance includes pre-installed INT-Collector P4, InfluxDB, and Grafana.
+
+  The appliance collects P4 telemetry reports, processes them, and stores them in InfluxDB for visualization in Grafana.
+
+  Key Features:
+
+  - Automatic collection of P4 telemetry data
+  - Optimized storage in InfluxDB
+  - Real-time visualization with Grafana dashboards
+  - Based on the INT-Collector project: https://github.com/GEANT-DataPlaneProgramming/int-collector
+
+
+short_description: Appliance that includes pre-installed INT-Collector P4, InfluxDB and Grafana
+tags:
+  - ubuntu
+  - p4
+  - telemetry
+  - influxdb
+  - grafana
+format: qcow2
+creation_time: "1733393580"
+os-id: Ubuntu
+os-release: '18.04'
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png     #TODO: Add telemetry P4 custom logo
+  user_inputs:
+logo: collector-p4.png
+images:
+  - name: Collector INT P4
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/service_Collector_INT.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "10737418240"
+    checksum:
+      md5: "e68ce09564f4e31f15843d0f7247165f"
+      sha256: "e017428bf899e84eb75dcafea50ab5bc0b3883c1a094f306dff4802fd64b8c99"
