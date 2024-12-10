@@ -52,7 +52,7 @@ opennebula_template:
   memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
-  logo: images/logos/ubuntu.png     #TODO: Add telemetry P4 custom logo
+  logo: images/logos/INT-P4_Collector.png
   user_inputs:
 logo: collector-p4.png
 images:
