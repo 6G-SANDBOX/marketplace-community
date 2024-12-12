@@ -21,7 +21,7 @@ set -o errexit -o pipefail
 
 # Appliance metadata
 ONE_SERVICE_NAME='Open5GS - KVM'
-ONE_SERVICE_VERSION='9.0.x'   #latest
+ONE_SERVICE_VERSION='2.7.2'
 ONE_SERVICE_BUILD=$(date +%F_%H%M)
 ONE_SERVICE_SHORT_DESCRIPTION='Appliance with Open5GS and MongoDB preinstalled'
 ONE_SERVICE_DESCRIPTION=$(cat <<EOF
@@ -128,8 +128,8 @@ install_open5gs()
         exit 1
     fi
 
-    msg info "Installing open5gs 2.7.2~*..."
-    if ! apt install -y open5gs=2.7.2~* ; then
+    msg info "Installing open5gs ${ONE_SERVICE_VERSION}~*..."
+    if ! apt install -y open5gs=${ONE_SERVICE_VERSION}~* ; then
         msg error "open5gs installation failed"
         exit 1
     fi
