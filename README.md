@@ -8,3 +8,9 @@ This repository (as well as [its parent repository](https://github.com/OpenNebul
 ```bash
 $ git clone --recurse-submodules https://github.com/6G-SANDBOX/marketplace-community.git
 ```
+
+## Appliance Specific Notes
+
+### Open5gcore / phoenix
+This appliance needs access to the .deb file containing the binaries of the (licensed) open5gcore to be build.
+If you have access to the License then add the Download url and the deploy token into the `community-apps/appliances/phoenix/appliance.sh` and build with `make appliance_phoenix`. The Resulting image has to be manually added to OpenNebula.

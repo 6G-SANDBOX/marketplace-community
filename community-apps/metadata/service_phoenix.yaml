@@ -1,0 +1,46 @@
+---
+name: Fraunhofer Open5GCore
+version: 20240828-1800
+publisher: Fraunhofer FOKUS
+description: |-
+  Appliance with preinstalled Open5gCore and mariadb.
+  ***Note*** This appliance is subject to a license which is bound to a Facility.
+  In order to build this Appliance you need to add your download url and deploy token 
+  for the Open5gcore.deb file into `appliances/phoenix/appliance.sh` as
+  DEPLOY_TOKEN='' and DOWNLOAD_URL='' and then manually upload this image in the OpenNebula.
+
+short_description: Open5gcore appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - 5G-core
+  - open5gcore
+  - ubuntu
+format: qcow2
+creation_time: "xx"
+os-id: Ubuntu
+os-release: '22.04 LTS'
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+  cpu: '1'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs: {}
+logo: https://cdn0.scrvt.com/fokus/d9859d6f8b785685/4d3f99755ad3/v/96292ff212e8/NGNI_logo_open5gcore_02.jpg
+images:
+  - name: Open5gCore
