@@ -52,9 +52,9 @@ opennebula_template:
   memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
-  logo: images/logos/INT-P4_Collector.png
+  logo: images/logos/ubuntu.png
   user_inputs:
-logo: collector-p4.png
+logo: INT-P4_Collector.png
 images:
   - name: Collector INT P4
     url: >-
