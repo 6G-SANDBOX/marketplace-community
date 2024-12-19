@@ -1,0 +1,55 @@
+---
+name: Open5GS VM
+version: 20241219-1000
+publisher: Fraunhofer Fokus
+description: |-
+  Appliance with preinstalled Open5GS and MongoDB.
+
+  See the Official [documentation](https://open5gs.org/open5gs/docs).
+
+  **Note:** There are no configuration parameters for this Appliance as it is meant
+  to be used by the [Open5GS_vm](https://github.com/6G-SANDBOX/6G-Library/tree/develop/open5gs_vm) 6g-Library component.
+short_description: Open5GS and MongoDB appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - 5G-Core
+  - Open5GS
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: '22.04 LTS'
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  inputs_order:
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+logo: https://open5gs.org/assets/img/open5gs-logo.png
+images:
+  - name: Open5GS VM
+    url: autofill
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: autofill
+      sha256: autofill
