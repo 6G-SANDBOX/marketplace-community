@@ -66,6 +66,12 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
+        ONEAPP_MINIO_HOSTNAME = "${minio.template.context.oneapp_minio_hostname}"
+        ONEAPP_MINIO_OPTS = "${minio.template.context.oneapp_minio_opts}"
+        ONEAPP_MINIO_ROOT_USER = "${minio.template.context.oneapp_minio_root_user}"
+        ONEAPP_MINIO_ROOT_PASSWORD = "${minio.template.context.oneapp_minio_root_password}"
+        ONEAPP_MINIO_TLS_CERT = "${minio.template.context.oneapp_minio_tls_cert}"
+        ONEAPP_MINIO_TLS_KEY = "${minio.template.context.oneapp_minio_tls_key}"
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
       max_vms: 1
       cardinality: 1
@@ -77,6 +83,14 @@ opennebula_template:
           NETWORK_ID = "$Public" ]
         ONEAPP_JENKINS_AWS_ACCESS_KEY_ID = "${minio.template.context.oneapp_minio_root_user}"
         ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "${minio.template.context.oneapp_minio_root_password}"
+        ONEAPP_JENKINS_USERNAME = "${jenkins.template.context.oneapp_jenkins_username}"
+        ONEAPP_JENKINS_PASSWORD = "${jenkins.template.context.oneapp_jenkins_password}"
+        ONEAPP_JENKINS_SITES_TOKEN = "${jenkins.template.context.oneapp_jenkins_sites_token}"
+        ONEAPP_JENKINS_OPENNEBULA_ENDPOINT = "${jenkins.template.context.oneapp_jenkins_opennebula_endpoint}"
+        ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT = "${jenkins.template.context.oneapp_jenkins_opennebula_flow_endpoint}"
+        ONEAPP_JENKINS_OPENNEBULA_USERNAME = "${jenkins.template.context.oneapp_jenkins_opennebula_username}"
+        ONEAPP_JENKINS_OPENNEBULA_PASSWORD = "${jenkins.template.context.oneapp_jenkins_opennebula_password}"
+        ONEAPP_JENKINS_OPENNEBULA_INSECURE = "${jenkins.template.context.oneapp_jenkins_opennebula_insecure}"
       cooldown: 120
       max_vms: 1
       cardinality: 1
@@ -90,6 +104,8 @@ opennebula_template:
         ONEAPP_TNLCM_JENKINS_USERNAME = "${jenkins.template.context.oneapp_jenkins_username}"
         ONEAPP_TNLCM_JENKINS_PASSWORD = "${jenkins.template.context.oneapp_jenkins_password}"
         ONEAPP_TNLCM_SITES_TOKEN      = "${jenkins.template.context.oneapp_jenkins_sites_token}"
+        ONEAPP_TNLCM_ADMIN_USER       = "${tnlcm.template.context.oneapp_tnlcm_admin_user}"
+        ONEAPP_TNLCM_ADMIN_PASSWORD   = "${tnlcm.template.context.oneapp_tnlcm_admin_password}"
       cooldown: 120
       max_vms: 1
       cardinality: 1
