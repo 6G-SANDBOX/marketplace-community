@@ -232,8 +232,8 @@ install_uv()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
-    # git clone --depth 1 --branch develop -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch main -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Generate .venv/ directory and install dependencies"
