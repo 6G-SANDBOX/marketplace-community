@@ -1,3 +1,4 @@
 [submodule "one-apps"]
 	path = one-apps
 	url = https://github.com/OpenNebula/one-apps.git
+	branch = "master"
