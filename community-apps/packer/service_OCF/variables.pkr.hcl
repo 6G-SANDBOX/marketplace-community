@@ -1,6 +1,6 @@
 variable "appliance_name" {
   type    = string
-  default = "service_example
+  default = "service_example"
 }
 
 variable "input_dir" {
