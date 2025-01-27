@@ -18,5 +18,5 @@ variable "headless" {
 
 variable "version" {
   type    = string
-  default = "v2.0.0-release"
+  default = "1"
 }
