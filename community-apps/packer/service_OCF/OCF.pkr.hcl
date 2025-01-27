@@ -16,7 +16,7 @@ build {
 
 # A Virtual Machine is created with qemu in order to run the setup from the ISO on the CD-ROM
 # Here are the details about the VM virtual hardware
-source "qemu" "example" "ocf" {
+source "qemu" "ocf" {
   cpus        = 2 
   memory      = 2048
   accelerator = "kvm"
