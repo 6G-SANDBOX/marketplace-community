@@ -7,9 +7,7 @@ description: |-
   Appliance with preinstalled XRext. Run with default values and manually
   configure it, or use contextualization variables to automate the bootstrap.
 
-  After deploying the appliance, check the status of the deployment in
-  /etc/one-appliance/status. You chan check the appliance logs in
-  /var/log/one-appliance/.
+  After deploying the appliance, check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
 
   In order to configure data persistency, please attach a secondary disk to the
   VM, indicate the disk label in ONEAPP_XR_REGISTRY_DEV (TBD) and launch the appliance.

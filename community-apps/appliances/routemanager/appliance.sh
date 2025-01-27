@@ -28,7 +28,7 @@ ONE_SERVICE_RECONFIGURABLE=true
 
 ONE_SERVICE_PARAMS=(
     'ONEAPP_ROUTEMANAGER_TOKEN'       'configure'  'Token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`' 'O|password'
-    'ONEAPP_ROUTEMANAGER_PORT'        'configure'  'TCP port where the route-manager-api service will be exposed'    'O|text'
+    'ONEAPP_ROUTEMANAGER_PORT'        'configure'  'TCP port where the route-manager-api service will be exposed.'    'O|text'
 )
 
 ONEAPP_ROUTEMANAGER_PORT="${ONEAPP_ROUTEMANAGER_PORT:-8172}"

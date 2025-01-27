@@ -7,11 +7,14 @@ description: |-
 
   The image is based on an Alpine 3.20 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
-  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  After deploying the appliance, check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
 
-  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_ROUTEMANAGER_TOKEN` - Token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.
+  * `ONEAPP_ROUTEMANAGER_PORT` - TCP port where the route-manager-api service will be exposed.
   
-  **Note**: Remember to update the template in order to add a network after importing it.
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 short_description: 6G-Sandbox route-manager-api appliance for KVM
 tags:
   - 6G-Sandbox

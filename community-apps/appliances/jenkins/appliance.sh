@@ -54,7 +54,7 @@ ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 # ------------------------------------------------------------------------------
 
 DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip"
-DEP_PIP="boto3 botocore pyone==6.8.3"
+DEP_PIP="boto3 botocore pyone==6.8.3 netaddr"
 ANSIBLE_COLLECTIONS="amazon.aws kubernetes.core community.general"
 CONSULT_ME_DIR="/var/lib/jenkins/consult_me/"
 
@@ -464,4 +464,3 @@ postinstall_cleanup()
     apt-get autoremove
     rm -rf /var/lib/apt/lists/*
 }
-

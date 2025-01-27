@@ -1,0 +1,74 @@
+---
+name: "Technitium DNS"
+version: "20241126-1224"
+publisher: Telefonica Innovacion Digital
+description: |-
+  This appliance installs Technitium DNS, an open source authoritative as well as recursive DNS server that can be used for self hosting a DNS server for privacy & security.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_DNS_PASSWORD` - Admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.
+  * `ONEAPP_DNS_FORWARDERS` - Comma separated list of forwarders to be used by the DNS server.
+  * `ONEAPP_DNS_DOMAIN` - Domain name for creating the new zone.
+
+  **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
+
+short_description: Technitium DNS appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - DNS
+  - ubuntu
+format: qcow2
+creation_time: "1721838167"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    netcfg_type: "interfaces"
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    token: 'YES'
+    oneapp_dns_password:       "$ONEAPP_DNS_PASSWORD"
+    oneapp_dns_forwarders:     "$ONEAPP_DNS_FORWARDERS"
+    oneapp_dns_domain:         "$ONEAPP_DNS_DOMAIN"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_dns_password:       "O|password|ONEAPP_DNS_PASSWORD: Admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
+    oneapp_dns_forwarders:     "O|text|ONEAPP_DNS_FORWARDERS: Comma separated list of forwarders to be used by the DNS server.| |8.8.8.8,1.1.1.1"
+    oneapp_dns_domain:         "M|text|ONEAPP_DNS_DOMAIN: Domain name for creating the new zone."
+logo: technitium.png
+images:
+  - name: "Technitium DNS"
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/service_dns.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "10737418240"
+    checksum:
+      md5: "16da388980a2e575c09cf3f4a2a40180"
+      sha256: "79477b99b9d7e7ef4158cf17614d1e626c166fe0da8a1d5d5a766a40facfda18"

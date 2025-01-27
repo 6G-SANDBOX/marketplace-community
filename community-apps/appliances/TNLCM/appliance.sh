@@ -334,7 +334,7 @@ EOF
 
 update_envfiles()
 {
-    TNLCM_HOST=$(ip addr show eth0 | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -n 1)
+    TNLCM_HOST=$(hostname -I | awk '{print $1}')
     declare -A var_map=(
         ["JENKINS_HOST"]="ONEAPP_TNLCM_JENKINS_HOST"
         ["JENKINS_USERNAME"]="ONEAPP_TNLCM_JENKINS_USERNAME"

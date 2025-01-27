@@ -7,14 +7,24 @@ description: |-
 
   The image is based on an Ubuntu 24.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
-  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  After deploying the appliance, check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_TNLCM_JENKINS_HOST` - IP address of the Jenkins server used to deploy the Trial Networks.
+  * `ONEAPP_TNLCM_JENKINS_USERNAME` - Username used to login into the Jenkins server to access and retrieve pipeline info.
+  * `ONEAPP_TNLCM_JENKINS_PASSWORD` - Password used to login into the Jenkins server to access and retrieve pipeline info.
+  * `ONEAPP_TNLCM_JENKINS_TOKEN` - Token to authenticate while sending POST requests to the Jenkins Server API.
+  * `ONEAPP_TNLCM_SITES_TOKEN` - Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault.
+  * `ONEAPP_TNLCM_ADMIN_USER` - Name of the TNLCM admin user. Default: `tnlcm`
+  * `ONEAPP_TNLCM_ADMIN_PASSWORD` - ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. Default: `tnlcm`
+
+  **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
+  
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 
   **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
    change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
-
-  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
-  
-  **Note**: Remember to update the template in order to add a network after importing it.
 short_description: 6G-Sandbox TNLCM appliance for KVM
 tags:
   - 6G-Sandbox

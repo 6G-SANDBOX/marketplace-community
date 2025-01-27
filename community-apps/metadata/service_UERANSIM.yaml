@@ -7,11 +7,34 @@ description: |-
 
   The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
-  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  After deploying the appliance, check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
 
+  The appliance configuration can be customized via parameters:
+
+  * `GNB_AMF_ADDRESS` - gNB AMF IP Addresss.
+  * `GNB_MCC` - gNB Mobile Country Code value.
+  * `GNB_MNC` - gNB Mobile Network Code value (2 or 3 digits).
+  * `GNB_SLICES_SD` - gNB SD of the supported S-NSSAI. Minimum length of 6.
+  * `GNB_SLICES_SST` - gNB SST of the supported S-NSSAI.
+  * `GNB_TAC` - gNB Tracking Area Code.
+  * `ONEKE_VNF` - If specified, gateway IP where the gNB will route the traffic in order to reach the `gnb_amf_address`.
+  * `RUN_GNB` - Whether to start the gNB service or not.
+  * `RUN_UE` - Wether to start the UE service or not.
+  * `UE_CONFIGURED_NSSAI_SD` - UE SD of the NSSAI configured by HPLMN. Minimum length of 6.
+  * `UE_CONFIGURED_NSSAI_SST` - UE SST of the NSSAI configured by HPLMN.
+  * `UE_DEFAULT_NSSAI_SD` - SD of the default Configured NSSAI. Minimum length of 6.
+  * `UE_DEFAULT_NSSAI_SST` - SST of the default Configured NSSAI.
+  * `UE_GNBSEARCHLIST` - UE comma separated list of gNB IP addresses for Radio Link Simulation.
+  * `UE_KEY` - UE permanent subscription key.
+  * `UE_MCC` - UE Mobile Country Code value of HPLMN.
+  * `UE_MNC` - UE Mobile Network Code value of HPLMN (2 or 3 digits).
+  * `UE_OP` - UE_OP: UE Operator code (OP or OPC)
+  * `UE_SESSION_APN` - UE APN of the initial PDU session to be stablished.
+  * `UE_SESSION_SD` - UE SD of the initial PDU session to be stablished. Minimum length of 6.
+  * `UE_SESSION_SST` - UE SST of the initial PDU session to be stablished.
+  * `UE_SUPI` - UE IMSI number. IMSI = [MCC|MNC|MSISDN] (In total 15 digits).
+  
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
-
-  **Note**: Remember to update the template in order to add a network after importing it.
 short_description: UERANSIM 5G gNB & UE simulator for KVM
 tags:
   - 6G-Sandbox

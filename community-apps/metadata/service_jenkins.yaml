@@ -9,13 +9,18 @@ description: |-
   Run with default values and manually configure the credentials from Jenkins WebUI, or use contextualization variables to automate the bootstrap.
   Default Jenkins credentials (if ONEAPP_JENKINS_USERNAME and ONEAPP_JENKINS_PASSWORD are unspecified) are admin:admin
 
-  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
 
-  **WARNING: The appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.**
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_ELCM_INFLUXDB_USER` - Username used to login into the InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_DATABASE` - Database name.
+  * `ONEAPP_ELCM_GRAFANA_PASSWORD` - Password used to login into the Grafana.
+
+  **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
   
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
-  
-  **Note**: Remember to update the template in order to add a network after importing it.
 short_description: 6G-Sandbox Jenkins appliance for KVM
 tags:
   - 6G-Sandbox

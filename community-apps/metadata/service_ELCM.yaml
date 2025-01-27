@@ -7,11 +7,16 @@ description: |-
 
   The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
-  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_ELCM_INFLUXDB_USER` - Username used to login into the InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_DATABASE` - Database name.
+  * `ONEAPP_ELCM_GRAFANA_PASSWORD` - Password used to login into the Grafana.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
-  
-  **Note**: Remember to update the template in order to add a network after importing it.
 short_description: ELCM appliance for KVM
 tags:
   - 6G-Sandbox

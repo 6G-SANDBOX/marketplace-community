@@ -7,9 +7,15 @@ description: |-
 
   See the dedicated [documentation](https://hub.docker.com/r/cturra/ntp).
 
-  The ONEAPP_NTP_SERVERS and ONEAPP_TZ parameters are optinally configurable:
-  - ONEAPP_NTP_SERVERS is the list of NTP servers that you want to use as Upstream servers.
-  - ONEAPP_TZ is the timezone defined by IANAA.
+  After deploying the appliance, check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_NTP_SERVERS` - List of NTP servers that you want to use as Upstream servers.
+  * `ONEAPP_TZ` - Timezone defined by IANAA.
+  
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+
 short_description: NTP server appliance for KVM
 tags:
   - 6G-Sandbox
