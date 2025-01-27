@@ -247,7 +247,7 @@ Description=TNLCM Backend
 [Service]
 Type=simple
 WorkingDirectory=${BACKEND_PATH}/
-ExecStart=/bin/bash -c 'gunicorn -c conf/gunicorn_conf.py'
+ExecStart=/bin/bash -c 'uv run gunicorn -c conf/gunicorn_conf.py'
 Restart=always
 
 [Install]
