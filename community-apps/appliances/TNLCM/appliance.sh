@@ -57,6 +57,8 @@ PYTHON_BIN="python${PYTHON_VERSION}"
 
 BACKEND_PATH="/opt/TNLCM_BACKEND"
 # FRONTEND_PATH="/opt/TNLCM_FRONTEND"
+UV_PATH="/opt/uv"
+UV_BIN="${UV_PATH}/uv"
 MONGODB_VERSION="8.0"
 YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
 MONGO_EXPRESS_VERSION="v1.0.3"
@@ -224,9 +226,7 @@ install_mongodb()
 install_uv()
 {
     msg info "Install uv"
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    msg info "Add uv to PATH"
-    source ${HOME}/.local/bin/env
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=${UV_PATH} sh
 }
 
 install_tnlcm_backend()
@@ -237,7 +237,7 @@ install_tnlcm_backend()
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Generate .venv/ directory and install dependencies"
-    uv --directory ${BACKEND_PATH} sync
+    ${UV_BIN} --directory ${BACKEND_PATH} sync
 
     msg info "Define TNLCM backend systemd service"
     cat > /etc/systemd/system/tnlcm-backend.service << EOF
@@ -247,7 +247,7 @@ Description=TNLCM Backend
 [Service]
 Type=simple
 WorkingDirectory=${BACKEND_PATH}/
-ExecStart=/bin/bash -c 'uv run gunicorn -c conf/gunicorn_conf.py'
+ExecStart=/bin/bash -c '${UV_BIN} run gunicorn -c conf/gunicorn_conf.py'
 Restart=always
 
 [Install]
