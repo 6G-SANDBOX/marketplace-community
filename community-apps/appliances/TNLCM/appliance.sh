@@ -55,13 +55,13 @@ DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev lib
 PYTHON_VERSION="3.13"
 PYTHON_BIN="python${PYTHON_VERSION}"
 
-POETRY_FOLDER="/opt/poetry"
-POETRY_BIN="/opt/poetry/bin/poetry"
 BACKEND_PATH="/opt/TNLCM_BACKEND"
 # FRONTEND_PATH="/opt/TNLCM_FRONTEND"
+UV_PATH="/opt/uv"
+UV_BIN="${UV_PATH}/uv"
 MONGODB_VERSION="8.0"
 YARN_GLOBAL_LIBRARIES="/opt/yarn_global"
-MONGO_EXPRESS_VERSION="v1.0.2"
+MONGO_EXPRESS_VERSION="v1.0.3"
 MONGO_EXPRESS_PATH=/opt/mongo-express-${MONGO_EXPRESS_VERSION}
 
 
@@ -84,8 +84,8 @@ service_install()
     # mongodb
     install_mongodb
 
-    # poetry
-    install_poetry
+    # uv
+    install_uv
 
     # tnlcm backend
     install_tnlcm_backend
@@ -223,23 +223,21 @@ install_mongodb()
     systemctl enable --now mongod.service
 }
 
-install_poetry()
+install_uv()
 {
-    msg info "Install poetry"
-    curl -sSL https://install.python-poetry.org | POETRY_HOME=${POETRY_FOLDER} python3 -
-    msg info "Config poetry"
-    ${POETRY_BIN} config virtualenvs.in-project true
+    msg info "Install uv"
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=${UV_PATH} sh
 }
 
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
-    # git clone --depth 1 --branch develop -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    # git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch main -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
     msg info "Generate .venv/ directory and install dependencies"
-    ${POETRY_BIN} install --no-root --directory ${BACKEND_PATH}
+    ${UV_BIN} --directory ${BACKEND_PATH} sync
 
     msg info "Define TNLCM backend systemd service"
     cat > /etc/systemd/system/tnlcm-backend.service << EOF
@@ -249,7 +247,7 @@ Description=TNLCM Backend
 [Service]
 Type=simple
 WorkingDirectory=${BACKEND_PATH}/
-ExecStart=/bin/bash -c '${POETRY_BIN} run gunicorn -c conf/gunicorn_conf.py'
+ExecStart=/bin/bash -c '${UV_BIN} run gunicorn -c conf/gunicorn_conf.py'
 Restart=always
 
 [Install]
