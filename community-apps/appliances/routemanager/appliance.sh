@@ -3,37 +3,10 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='6G-Sandbox route-manager-api'
-ONE_SERVICE_VERSION='v0.1.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox route-manager-api appliance for KVM'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of [route-manager-api](https://github.com/6G-SANDBOX/route-manager-api), a REST API in port 8172/tcp developed with FastAPI for managing network routes on a Linux machine using the ip command.
-
-The image is based on Debian 18 with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-EOF
-)
 
 ONE_SERVICE_RECONFIGURABLE=true
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_ROUTEMANAGER_APITOKEN'       'configure'  'Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`' 'O|password'
-)
-
-
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
 
 DEP_PKGS="git"
 
@@ -64,9 +37,6 @@ service_install()
     msg info "Enable ipv4 forwarding"
     echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/99-ipv4-ip_forward.conf
 
-    # service metadata
-    create_one_service_metadata
-
     # cleanup
     postinstall_cleanup
 
@@ -75,7 +45,6 @@ service_install()
     return 0
 }
 
-# Runs when VM is first started, and every time 
 service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -94,21 +63,6 @@ service_bootstrap()
     return 0
 }
 
-# This one is not really mandatory, however it is a handled function
-service_help()
-{
-    msg info "Example appliance how to use message. If missing it will default to the generic help"
-
-    return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_cleanup()
-{
-    msg info "CLEANUP logic goes here in case of install failure"
-    :
-}
-
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -121,8 +75,9 @@ install_pkg_deps()
     msg info "Run apt-get update"
     apt-get update
 
-    msg info "Install required packages for route-manager-api"
-    if ! apt-get install -y "${DEP_PKGS}" ; then
+    msg info "Install required .deb packages"
+    wait_for_dpkg_lock_release
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
@@ -205,6 +160,24 @@ configure_token()
         msg error "Error restarting service route-manager-api"
         exit 1
     fi
+}
+
+wait_for_dpkg_lock_release()
+{
+  local lock_file="/var/lib/dpkg/lock-frontend"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if ! lsof "${lock_file}" &>/dev/null; then
+      return 0
+    fi
+    msg info "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  exit 1
 }
 
 postinstall_cleanup()

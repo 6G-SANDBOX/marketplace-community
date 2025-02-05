@@ -3,58 +3,19 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='6G-Sandbox TNLCM'
-ONE_SERVICE_VERSION='v0.4.5'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox TNLCM appliance for KVM'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of [TNLCM](https://github.com/6G-SANDBOX/TNLCM) and [TNLCM_FRONTEND](https://github.com/6G-SANDBOX/TNLCM_FRONTEND) from the official repositories and configures them according to the input variables. Configuration of the TNLCM can be made when instanciating the VM.
-
-The image is based on an Ubuntu 24.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-
-**Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
-change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/i386/cpu.html).
-EOF
-)
-
-ONE_SERVICE_RECONFIGURABLE=false
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_TNLCM_JENKINS_HOST'            'configure'  'IP address of the Jenkins server used to deploy the Trial Networks'                                       'M|text'
-    'ONEAPP_TNLCM_JENKINS_USERNAME'        'configure'  'Username used to login into the Jenkins server to access and retrieve pipeline info'                      'M|text'
-    'ONEAPP_TNLCM_JENKINS_PASSWORD'        'configure'  'Password used to login into the Jenkins server to access and retrieve pipeline info'                      'M|password'
-    'ONEAPP_TNLCM_JENKINS_TOKEN'           'configure'  'Token to authenticate while sending POST requests to the Jenkins Server API'                              'M|password'
-    'ONEAPP_TNLCM_SITES_TOKEN'             'configure'  'Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'     'M|password'
-    'ONEAPP_TNLCM_ADMIN_USER'              'configure'  'Name of the TNLCM admin user. Default: tnlcm'                                                             'O|text'
-    'ONEAPP_TNLCM_ADMIN_PASSWORD'          'configure'  'Password of the TNLCM admin user'                                                                         'O|password'
-)
 
 ONEAPP_TNLCM_JENKINS_HOST="${ONEAPP_TNLCM_JENKINS_HOST:-127.0.0.1}"
 ONEAPP_TNLCM_JENKINS_USERNAME="${ONEAPP_TNLCM_JENKINS_USERNAME:-admin}"
-# ONEAPP_TNLCM_JENKINS_PASSWORD="${ONEAPP_TNLCM_JENKINS_PASSWORD:-admin}"
+ONEAPP_TNLCM_JENKINS_PASSWORD="${ONEAPP_TNLCM_JENKINS_PASSWORD:-admin}"
 ONEAPP_TNLCM_ADMIN_USER="${ONEAPP_TNLCM_ADMIN_USER:-tnlcm}"
-# ONEAPP_TNLCM_ADMIN_PASSWORD="${ONEAPP_TNLCM_ADMIN_PASSWORD:-tnlcm}"
-
-
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
+ONEAPP_TNLCM_ADMIN_PASSWORD="${ONEAPP_TNLCM_ADMIN_PASSWORD:-tnlcm}"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common"
-
 PYTHON_VERSION="3.13"
-PYTHON_BIN="python${PYTHON_VERSION}"
-
+# PYTHON_BIN="python${PYTHON_VERSION}"   # unused
+TNLCM_VERSION='v0.4.5'
 BACKEND_PATH="/opt/TNLCM_BACKEND"
 # FRONTEND_PATH="/opt/TNLCM_FRONTEND"
 UV_PATH="/opt/uv"
@@ -76,7 +37,7 @@ service_install()
     export DEBIAN_FRONTEND=noninteractive
 
     # packages
-    install_pkg_deps DEP_PKGS
+    install_pkg_deps
 
     # python
     install_python
@@ -107,9 +68,6 @@ service_install()
 
     systemctl daemon-reload
 
-    # service metadata
-    create_one_service_metadata
-
     # cleanup
     postinstall_cleanup
 
@@ -118,8 +76,6 @@ service_install()
     return 0
 }
 
-# Si ONE_SERVICE_RECONFIGURABLE=false solo se ejecuta cuando se arranca por primera vez la VM
-# Si ONE_SERVICE_RECONFIGURABLE=true se ejecuta cada vez que se arranca la VM por poweroff o undeploy
 service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -155,27 +111,11 @@ service_configure()
     return 0
 }
 
-# Se ejecuta cada vez que se arranca la VM por poweroff o undeploy
 service_bootstrap()
 {
-
+    export DEBIAN_FRONTEND=noninteractive
     msg info "BOOTSTRAP FINISHED"
     return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_help()
-{
-    msg info "Example appliance how to use message. If missing it will default to the generic help"
-
-    return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_cleanup()
-{
-    msg info "CLEANUP logic goes here in case of install failure"
-    :
 }
 
 # ------------------------------------------------------------------------------
@@ -191,7 +131,7 @@ install_pkg_deps()
 
     msg info "Install required packages for TNLCM"
     wait_for_dpkg_lock_release
-    if ! apt-get install -y ${!1} ; then
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
@@ -232,7 +172,7 @@ install_uv()
 install_tnlcm_backend()
 {
     msg info "Clone TNLCM Repository"
-    git clone --depth 1 --branch ${ONE_SERVICE_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
+    git clone --depth 1 --branch ${TNLCM_VERSION} -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     # git clone --depth 1 --branch main -c advice.detachedHead=false https://github.com/6G-SANDBOX/TNLCM.git ${BACKEND_PATH}
     cp ${BACKEND_PATH}/.env.template ${BACKEND_PATH}/.env
 
@@ -389,11 +329,11 @@ wait_for_dpkg_lock_release()
     if ! lsof "${lock_file}" &>/dev/null; then
       return 0
     fi
-    echo "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    msg info "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
     sleep "${interval}"
   done
 
-  echo "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  msg error "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
   exit 1
 }
 

@@ -1,7 +1,8 @@
 ---
-name: "6G-Sandbox TNLCM v0.4.0"
-version: "20240705-1102"
-publisher: Telefonica Innovacion Digital
+name: "6G-Sandbox TNLCM"
+version: "v0.4.5-20241125-1624"
+software_version: "v0.4.5"
+publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of [TNLCM](https://github.com/6G-SANDBOX/TNLCM) and [TNLCM_FRONTEND](https://github.com/6G-SANDBOX/TNLCM_FRONTEND) from the official repositories and configures them according to the input variables. Configuration of the TNLCM can be made when instanciating the VM.
 
@@ -11,9 +12,9 @@ description: |-
 
   The appliance configuration can be customized via parameters:
 
-  * `ONEAPP_TNLCM_JENKINS_HOST` - IP address of the Jenkins server used to deploy the Trial Networks.
-  * `ONEAPP_TNLCM_JENKINS_USERNAME` - Username used to login into the Jenkins server to access and retrieve pipeline info.
-  * `ONEAPP_TNLCM_JENKINS_PASSWORD` - Password used to login into the Jenkins server to access and retrieve pipeline info.
+  * `ONEAPP_TNLCM_JENKINS_HOST` - IP address of the Jenkins server used to deploy the Trial Networks. Default `127.0.0.1`
+  * `ONEAPP_TNLCM_JENKINS_USERNAME` - Username used to login into the Jenkins server to access and retrieve pipeline info. Default: `admin`
+  * `ONEAPP_TNLCM_JENKINS_PASSWORD` - Password used to login into the Jenkins server to access and retrieve pipeline info. Default: `admin`
   * `ONEAPP_TNLCM_JENKINS_TOKEN` - Token to authenticate while sending POST requests to the Jenkins Server API.
   * `ONEAPP_TNLCM_SITES_TOKEN` - Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault.
   * `ONEAPP_TNLCM_ADMIN_USER` - Name of the TNLCM admin user. Default: `tnlcm`
@@ -68,16 +69,16 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs:
-    oneapp_tnlcm_jenkins_host:      "M|text|ONEAPP_TNLCM_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
-    oneapp_tnlcm_jenkins_username:  "M|text|ONEAPP_TNLCM_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info| |admin"
-    oneapp_tnlcm_jenkins_password:  "M|password|ONEAPP_TNLCM_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info| |admin"
+    oneapp_tnlcm_jenkins_host:      "O|text|ONEAPP_TNLCM_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks||127.0.0.1"
+    oneapp_tnlcm_jenkins_username:  "O|text|ONEAPP_TNLCM_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info||admin"
+    oneapp_tnlcm_jenkins_password:  "O|password|ONEAPP_TNLCM_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info||admin"
     oneapp_tnlcm_jenkins_token:     "M|password|ONEAPP_TNLCM_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API"
     oneapp_tnlcm_sites_token:       "M|password|ONEAPP_TNLCM_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
     oneapp_tnlcm_admin_user:        "O|text|ONEAPP_TNLCM_ADMIN_USER: Name of the TNLCM admin user| |tnlcm"
-    oneapp_tnlcm_admin_password:    "O|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user"
+    oneapp_tnlcm_admin_password:    "O|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user| |tnlcm"
 logo: tnlcm.png
 images:
-  - name: "6G-Sandbox TNLCM v0.4.0"
+  - name: "6G-Sandbox TNLCM v0.4.0-20241125-1624"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_TNLCM.qcow2
     type: OS

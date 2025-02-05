@@ -3,41 +3,10 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='Technitium DNS'
-ONE_SERVICE_VERSION='v0.3.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Technitium DNS appliance for KVM'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs Technitium DNS, an open source authoritative as well as recursive DNS server that can be used for self hosting a DNS server for privacy & security.
-
-The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-EOF
-)
-
-ONE_SERVICE_RECONFIGURABLE=false
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_DNS_PASSWORD'    'configure'  'Admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.' 'O|password'
-    'ONEAPP_DNS_FORWARDERS'  'configure'  'Comma separated list of forwarders to be used by the DNS server.'    'O|text'
-    'ONEAPP_DNS_DOMAIN'      'configure'  'Domain name for creating the new zone.'                              'M|text'
-)
 
 ONEAPP_DNS_FORWARDERS="${ONEAPP_DNS_FORWARDERS:-'8.8.8.8,1.1.1.1'}"
-
-
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
@@ -53,9 +22,6 @@ service_install()
     # Technitium DNS
     install_dns
 
-    # service metadata
-    create_one_service_metadata
-
     # cleanup
     postinstall_cleanup
 
@@ -64,7 +30,6 @@ service_install()
     return 0
 }
 
-# Runs when VM is first started, and every time 
 service_configure()
 {
     # Technitium DNS
@@ -78,21 +43,6 @@ service_bootstrap()
 {
     msg info "BOOTSTRAP FINISHED"
     return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_help()
-{
-    msg info "Example appliance how to use message. If missing it will default to the generic help"
-
-    return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_cleanup()
-{
-    msg info "CLEANUP logic goes here in case of install failure"
-    :
 }
 
 
@@ -188,24 +138,6 @@ dns_api()
         exit 1
     fi
     echo "${body}"
-}
-
-wait_for_dpkg_lock_release()
-{
-  local lock_file="/var/lib/dpkg/lock-frontend"
-  local timeout=600
-  local interval=5
-
-  for ((i=0; i<timeout; i+=interval)); do
-    if ! lsof "${lock_file}" &>/dev/null; then
-      return 0
-    fi
-    echo "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
-    sleep "${interval}"
-  done
-
-  echo "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
-  exit 1
 }
 
 postinstall_cleanup()

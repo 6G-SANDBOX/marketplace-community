@@ -1,8 +1,8 @@
 ---
-name: Service Collector_INT P4 - KVM
-# version + date "%Y%M%d-%h%m"
-version: "001-20241205-1000"
-publisher: UMA
+name: "INT-Collector P4"
+version: "v1.0.0-20241125-1624"
+software_version: "v1.0.0"
+publisher: "University of Malaga"
 description: |-
   This appliance includes pre-installed INT-Collector P4, InfluxDB, and Grafana.
 
@@ -14,8 +14,6 @@ description: |-
   - Optimized storage in InfluxDB
   - Real-time visualization with Grafana dashboards
   - Based on the INT-Collector project: https://github.com/GEANT-DataPlaneProgramming/int-collector
-
-
 short_description: Appliance that includes pre-installed INT-Collector P4, InfluxDB and Grafana
 tags:
   - ubuntu
@@ -56,7 +54,7 @@ opennebula_template:
   user_inputs:
 logo: INT-P4_Collector.png
 images:
-  - name: Collector INT P4
+  - name: "INT-Collector P4 1.0.0-20241125-1624"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_Collector_INT.qcow2
     type: OS

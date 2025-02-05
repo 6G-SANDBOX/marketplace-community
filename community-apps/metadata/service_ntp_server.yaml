@@ -1,7 +1,8 @@
 ---
-name: NTP Server
-version: 20240828-1800
-publisher: Telefonica Innovacion Digital
+name: "NTP Server"
+version: "v0.0.1-20241125-1624"
+software_version: "v0.0.1"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   Appliance with preinstalled NTP server based on Chrony and Docker.
 
@@ -52,10 +53,10 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_ntp_servers: "O|text|List of NTP Servers to use as Upstream| |0.es.pool.ntp.org,1.es.pool.ntp.org,2.es.pool.ntp.org,3.es.pool.ntp.org"
-    oneapp_ntp_tz: "O|text|Timezone defined by IANAA| |Europe/Madrid"
+    oneapp_ntp_tz: "O|text|Timezone defined by IANAA: https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-  - name: NTP Server
+  - name: "NTP Server v0.0.1-20241125-1624"
     url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
     type: OS
     dev_prefix: vd

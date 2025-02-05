@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # ---------------------------------------------------------------------------- #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may      #
 # not use this file except in compliance with the License. You may obtain      #
@@ -11,40 +13,15 @@
 # See the License for the specific language governing permissions and          #
 # limitations under the License.                                               #
 # ---------------------------------------------------------------------------- #
+
 set -o errexit -o pipefail
 
 
-# List of contextualization parameters
-
-
-### Appliance metadata ###############################################
-
-# Appliance metadata
-ONE_SERVICE_NAME='Open5GS - KVM'
-ONE_SERVICE_VERSION='2.7.2'
-ONE_SERVICE_BUILD=$(date +%F_%H%M)
-ONE_SERVICE_SHORT_DESCRIPTION='Appliance with Open5GS and MongoDB preinstalled'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-Appliance with Open5GS and MongoDB preinstalled.
-
-EOF
-)
-
-ONE_SERVICE_RECONFIGURABLE=true
-
-### Contextualization defaults #######################################
-
-
-### Globals ##########################################################
-
-
-###############################################################################
-###############################################################################
-###############################################################################
-
-#
-# service implementation
-#
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Mandatory Functions
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 service_install()
 {
@@ -54,9 +31,6 @@ service_install()
     # install
     install_dependencies
     install_open5gs
-
-    # service metadata
-    create_one_service_metadata
 
     # cleanup
     postinstall_cleanup
@@ -79,13 +53,13 @@ service_bootstrap()
     return 0
 }
 
-###############################################################################
-###############################################################################
-###############################################################################
 
-#
-# functions
-#
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Function Definitions
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 install_dependencies()
 {
     msg info "update apt"

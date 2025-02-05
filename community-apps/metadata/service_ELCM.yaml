@@ -1,7 +1,8 @@
 ---
-name: ELCM
-version: "20241010-1249"
-publisher: University of Malaga
+name: "ELCM"
+version: "v3.6.3-20241125-1624"
+software_version: "v3.6.3"
+publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of [ELCM](https://github.com/6G-SANDBOX/ELCM) and [ELCM_FRONTEND](https://github.com/6G-SANDBOX/portal) from the official repositories and configures them according to the input variables. Configuration of the ELCM can be made when instanciating the VM.
 
@@ -63,7 +64,7 @@ opennebula_template:
     oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. | |admin"
 logo: ubuntu.png
 images:
-  - name: ELCM
+  - name: "ELCM v3.6.3-20241125-1624"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
     type: OS

@@ -1,7 +1,8 @@
 ---
-name: "route-manager-api v0.1.0"
-version: "20241010-1255"
-publisher: Telefonica Innovacion Digital
+name: "route-manager-api"
+version: "v0.1.0-20241125-1624"
+software_version: "v0.1.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of [route-manager-api](https://github.com/6G-SANDBOX/route-manager-api), a REST API in port 8172/tcp developed with FastAPI for managing network routes on a Linux machine using the ip command.
 
@@ -54,7 +55,7 @@ opennebula_template:
     oneapp_routemanager_apitoken: "O|password|ONEAPP_ROUTEMANAGER_APITOKEN: Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
 logo: routemanager.png
 images:
-  - name: "route-manager-api v0.1.0"
+  - name: "route-manager-api v0.1.0-20241125-1624"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_routemanager.qcow2
     type: OS

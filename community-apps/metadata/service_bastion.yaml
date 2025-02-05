@@ -1,8 +1,8 @@
 ---
 name: "6G-Sandbox bastion"
 version: "v0.4.0-20241125-1624"
-software_version: "v0.4.0"         # Custom parameter for the 6GL marketplace
-publisher: Telefonica Innovacion Digital
+software_version: "v0.4.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of the bastion, the entrypoint of every Virtual Network, with additional services such as:
   - Technitium DNS
@@ -72,7 +72,7 @@ opennebula_template:
     oneapp_bastion_routemanager_apitoken: "O|password|ONEAPP_BASTION_ROUTEMANAGER_APITOKEN: For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
 logo: ubuntu.png
 images:
-  - name: "6G-Sandbox bastion v0.4.0"
+  - name: "6G-Sandbox bastion v0.4.0-20250205-1444"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_bastion.qcow2
     type: OS
