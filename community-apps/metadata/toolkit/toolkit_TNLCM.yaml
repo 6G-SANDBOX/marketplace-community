@@ -1,7 +1,8 @@
 ---
-name: "[6G-Sandbox toolkit] TNLCM v0.4.0"
-version: 1725448126   # date +%s
-publisher: Telefonica Innovacion Digital
+name: "[6G-Sandbox toolkit] TNLCM"
+version: "v0.4.5-20241125-1624"
+software_version: "v0.4.5"
+publisher: "University of Malaga"
 description: |-
   Custom template of the [6G-Sandbox TNLCM appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_TNLCM) for the 6G-Sandbox toolkit.
 
@@ -14,6 +15,7 @@ short_description: 6G-Sandbox toolkit VM template for the TNLCM appliance
 tags:
 - 6G-Sandbox
 - toolkit
+- service
 - TNLCM
 - ubuntu
 type: VMTEMPLATE
@@ -60,4 +62,4 @@ opennebula_template:
   user_inputs: {}
 logo: tnlcm.png
 disks:
-- "6G-Sandbox TNLCM v0.4.0"
+- "6G-Sandbox TNLCM"

@@ -1,7 +1,8 @@
 ---
-name: "[6G-Sandbox toolkit] Jenkins v0.4.0"
-version: 1725448126   # date +%s
-publisher: Telefonica Innovacion Digital
+name: "[6G-Sandbox toolkit] Jenkins"
+version: "v0.4.0-20241125-1624"
+software_version: "v0.4.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   Custom template of the [6G-Sandbox Jenkins appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_jenkins) for the 6G-Sandbox toolkit.
 
@@ -11,6 +12,7 @@ short_description: 6G-Sandbox toolkit VM template for the Jenkins appliance
 tags:
 - 6G-Sandbox
 - toolkit
+- service
 - jenkins
 - ubuntu
 type: VMTEMPLATE
@@ -59,4 +61,4 @@ opennebula_template:
   user_inputs: {}
 logo: jenkins.png
 disks:
-- "6G-Sandbox Jenkins v0.4.0"
+- "6G-Sandbox Jenkins"

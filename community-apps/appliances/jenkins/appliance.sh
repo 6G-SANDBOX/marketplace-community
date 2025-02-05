@@ -7,7 +7,6 @@ set -o errexit -o pipefail
 # ------------------------------------------------------------------------------
 
 ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
-ONEAPP_JENKINS_PASSWORD="${ONEAPP_JENKINS_PASSWORD:-admin}"
 ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 
 DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip"

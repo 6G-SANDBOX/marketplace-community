@@ -1,21 +1,24 @@
 ---
-name: "6G-Sandbox Toolkit v0.4.0"
-version: 1725448126   # date +%s
-publisher: Telefonica Innovacion Digital
+name: "6G-Sandbox Toolkit"
+version: "v0.4.0-20241125-1624"
+software_version: "v0.4.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
-  OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer).
+  OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer) orchestrated by
+  [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/appflow_elasticity.html)
   This service automatically deploys and configures one MinIO VM, one Jenkins VM, and one TNLCM VM, all ready to be used in your 6G-Sandbox site.
 
-  All multi-VM OpenNebula Services need to have running the following services:
-    - [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/overview.html)
-    - [OneGate](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/onegate_usage.html)
+  Requires
+  [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/overview.html)
+  and
+  [OneGate](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/onegate_usage.html)
+  OpenNebula components.
 
-  See the dedicated [documentation](https://github.com/OpenNebula/one-apps/wiki).
-
-  The 6G-Sandbox toolkit service makes use of these VM templates
-  - [6G-Sandbox Jenkins](https://marketplace.mobilesandbox.cloud:9443/appliance/service_jenkins)
-  - [6G-Sandbox TNLCM](https://marketplace.mobilesandbox.cloud:9443/appliance/service_TNLCM)
+  Based on VM templates
+  - [6G-Sandbox Jenkins](/appliance/service_jenkins)
+  - [6G-Sandbox TNLCM](/appliance/service_TNLCM)
   - [Service MinIO](https://marketplace.opennebula.io/appliance/e2c4538a-1e7a-11ef-949c-97e1d7dcfb6f)
+
 short_description: Multi-VM Service that deploys and configures the the MinIO, Jenkins and TNLCM of a 6G-Sandbox site.
 tags:
 - 6G-Sandbox
@@ -24,17 +27,17 @@ tags:
 - oneflow
 - onegate
 type: SERVICE_TEMPLATE        # Choices are <none> (default), SERVICE_TEMPLATE and VMTEMPLATE (shown in Sunstone as IMAGE, SERVICE and VM respectively)
-format: qcow2
+# format: qcow2
 creation_time: 1725448126   # date +%s
-os-id: Ubuntu
-os-release: 22.04 LTS
+# os-id: Ubuntu
+# os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: 6.0, 6.2, 6.4, 6.6, 6.8, 6.10
 roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
-  minio: "[6G-Sandbox toolkit] MinIO v0.4.0"
-  jenkins: "[6G-Sandbox toolkit] Jenkins v0.4.0"
-  tnlcm: "[6G-Sandbox toolkit] TNLCM v0.4.0"
+  minio: "[6G-Sandbox toolkit] MinIO"
+  jenkins: "[6G-Sandbox toolkit] Jenkins"
+  tnlcm: "[6G-Sandbox toolkit] TNLCM"
 opennebula_template:
   name: 6G-Sandbox toolkit installer
   description: This service is ment to be deployed once per site. You can effectively delete this template after checking that the MinIO, Jenkins and TNLCM appliances are RUNNING.
@@ -48,54 +51,60 @@ opennebula_template:
     oneapp_minio_root_password:  "M|password|MinIO root user password for MinIO server. At least 8 characters"
     oneapp_minio_tls_cert:       "O|text64|MinIO TLS certificate (.crt)||"
     oneapp_minio_tls_key:        "O|text64|MinIO TLS key (.key)||"
-    oneapp_jenkins_username:                  "O|text|The username for the Jenkins admin user. At least 8 characters||admin"
-    oneapp_jenkins_password:                  "M|password|The password for the Jenkins admin user. At least 8 characters"
+    oneapp_jenkins_username:                  "O|text|The username for the Jenkins admin user. At least 3 characters||admin"
+    oneapp_jenkins_password:                  "M|password|The password for the Jenkins admin user. At least 5 characters"
     oneapp_jenkins_sites_token:               "M|password|Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    oneapp_jenkins_opennebula_endpoint:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
-    oneapp_jenkins_opennebula_flow_endpoint:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
-    oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component||"
+    oneapp_jenkins_opennebula_endpoint:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')"
+    oneapp_jenkins_opennebula_flow_endpoint:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')"
+    oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_password:       "M|password|The password for the OpenNebula user used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_insecure:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
-    oneapp_tnlcm_admin_user:                  "O|text|Name of the TNLCM admin user||tnlcm"
-    oneapp_tnlcm_admin_password:              "O|password|Password of the TNLCM admin user"
+    oneapp_tnlcm_admin_user:                  "O|text|Name of the TNLCM admin user. At least 3 characters||tnlcm"
+    oneapp_tnlcm_admin_password:              "M|password|Password of the TNLCM admin user. At least 5 characters"
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
   roles:
     - name: minio           # letters, numbers or underscore
+      cardinality: 1
+      max_vms: 1
       vm_template_contents: |
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_MINIO_HOSTNAME = "$oneapp_minio_hostname"
-        ONEAPP_MINIO_OPTS = "$oneapp_minio_opts"
-        ONEAPP_MINIO_ROOT_USER = "$oneapp_minio_root_user"
+        ONEAPP_MINIO_HOSTNAME      = "$oneapp_minio_hostname"
+        ONEAPP_MINIO_OPTS          = "$oneapp_minio_opts"
+        ONEAPP_MINIO_ROOT_USER     = "$oneapp_minio_root_user"
         ONEAPP_MINIO_ROOT_PASSWORD = "$oneapp_minio_root_password"
-        ONEAPP_MINIO_TLS_CERT = "$oneapp_minio_tls_cert"
-        ONEAPP_MINIO_TLS_KEY = "$oneapp_minio_tls_key"
+        ONEAPP_MINIO_TLS_CERT      = "$oneapp_minio_tls_cert"
+        ONEAPP_MINIO_TLS_KEY       = "$oneapp_minio_tls_key"
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
-      max_vms: 1
-      cardinality: 1
+      elasticity_policies: []
+      scheduled_policies: []
     - name: jenkins
       parents: [minio]         # Names of the roles that must be deployed before this one.
+      cardinality: 1
+      max_vms: 1
       vm_template_contents: |
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID = "$oneapp_minio_root_user"
-        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY = "$oneapp_minio_root_password"
-        ONEAPP_JENKINS_USERNAME = "$oneapp_jenkins_username"
-        ONEAPP_JENKINS_PASSWORD = "$oneapp_jenkins_password"
-        ONEAPP_JENKINS_SITES_TOKEN = "$oneapp_jenkins_sites_token"
-        ONEAPP_JENKINS_OPENNEBULA_ENDPOINT = "$oneapp_jenkins_opennebula_endpoint"
+        ONEAPP_JENKINS_USERNAME                 = "$oneapp_jenkins_username"
+        ONEAPP_JENKINS_PASSWORD                 = "$oneapp_jenkins_password"
+        ONEAPP_JENKINS_SITES_TOKEN              = "$oneapp_jenkins_sites_token"
+        ONEAPP_JENKINS_OPENNEBULA_ENDPOINT      = "$oneapp_jenkins_opennebula_endpoint"
         ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT = "$oneapp_jenkins_opennebula_flow_endpoint"
-        ONEAPP_JENKINS_OPENNEBULA_USERNAME = "$oneapp_jenkins_opennebula_username"
-        ONEAPP_JENKINS_OPENNEBULA_PASSWORD = "$oneapp_jenkins_opennebula_password"
-        ONEAPP_JENKINS_OPENNEBULA_INSECURE = "$oneapp_jenkins_opennebula_insecure"
+        ONEAPP_JENKINS_OPENNEBULA_USERNAME      = "$oneapp_jenkins_opennebula_username"
+        ONEAPP_JENKINS_OPENNEBULA_PASSWORD      = "$oneapp_jenkins_opennebula_password"
+        ONEAPP_JENKINS_OPENNEBULA_INSECURE      = "$oneapp_jenkins_opennebula_insecure"
+        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID        = "$oneapp_minio_root_user"
+        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY    = "$oneapp_minio_root_password"
       cooldown: 120
-      max_vms: 1
-      cardinality: 1
+      elasticity_policies: []
+      scheduled_policies: []
     - name: tnlcm
       parents: [jenkins]
+      cardinality: 1
+      max_vms: 1
       vm_template_contents: |
         NIC = [
           NAME = "NIC0",
@@ -107,6 +116,7 @@ opennebula_template:
         ONEAPP_TNLCM_ADMIN_USER       = "$oneapp_tnlcm_admin_user"
         ONEAPP_TNLCM_ADMIN_PASSWORD   = "$oneapp_tnlcm_admin_password"
       cooldown: 120
-      max_vms: 1
-      cardinality: 1
+      elasticity_policies: []
+      scheduled_policies: []
 logo: sandbox.png
+images: []   # ?? found in https://github.com/OpenNebula/marketplace/blob/master/appliances/MinIOMulti/54e46892-6315-456b-9bfe-5ebd7cff2662.yaml
