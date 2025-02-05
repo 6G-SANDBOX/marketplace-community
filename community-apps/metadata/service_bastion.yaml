@@ -1,6 +1,7 @@
 ---
-name: "6G-Sandbox bastion v0.4.0"
-version: "20241125-1624"
+name: "6G-Sandbox bastion"
+version: "v0.4.0-20241125-1624"
+software_version: "v0.4.0"         # Custom parameter for the 6GL marketplace
 publisher: Telefonica Innovacion Digital
 description: |-
   This appliance installs the latest version of the bastion, the entrypoint of every Virtual Network, with additional services such as:

@@ -9,8 +9,9 @@ set -o errexit -o pipefail
 # Appliance metadata
 # ------------------------------------------------------------------------------
 
-# If your "service_install" function includes the "create_one_service_metadata" function
-# The same metadata as in the marketplace yaml file will be placed in /etc/one-appliance/metadata inside the appliance
+# Complete this fields with the same metadata as in the marketplace yaml file
+# If your "service_install" function includes the "create_one_service_metadata" function,
+# this information will be placed in /etc/one-appliance/metadata inside the appliance
 ONE_SERVICE_NAME='Service example - KVM'
 ONE_SERVICE_VERSION=''   #latest
 ONE_SERVICE_BUILD=$(date +%s)
@@ -22,7 +23,9 @@ After deploying the appliance, check the status of the deployment in /etc/one-ap
 EOF
 )
 
-# Whether service_configure() and service_bootstrap() can run again
+# Whether steps in service_configure() should run at every reboot instead of only on the first one
+# Virtually, service_configure() will run at the same cases that service_bootstrap() so just put the repeatable code there instead
+# Default value is empty=false 
 ONE_SERVICE_RECONFIGURABLE=true
 
 

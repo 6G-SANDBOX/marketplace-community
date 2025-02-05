@@ -6,37 +6,37 @@ set -o errexit -o pipefail
 # Appliance metadata
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_NAME='6G-Sandbox bastion'
-ONE_SERVICE_VERSION='v0.3.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox bastion appliance for KVM'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of the bastion, the entrypoint of every Virtual Network, with additional services such as:
-- Technitium DNS
-- [route-manager-api](https://github.com/6G-SANDBOX/route-manager-api)
-- Wireguard VPN
+# ONE_SERVICE_NAME='6G-Sandbox bastion'
+# ONE_SERVICE_VERSION='v0.3.0'   #latest
+# ONE_SERVICE_BUILD=$(date +%s)
+# ONE_SERVICE_SHORT_DESCRIPTION='6G-Sandbox bastion appliance for KVM'
+# ONE_SERVICE_DESCRIPTION=$(cat <<EOF
+# This appliance installs the latest version of the bastion, the entrypoint of every Virtual Network, with additional services such as:
+# - Technitium DNS
+# - [route-manager-api](https://github.com/6G-SANDBOX/route-manager-api)
+# - Wireguard VPN
 
-The Bastion has IPv4 routing enabled by default, with all private IPs forbidden by default, unless explictly specified.
+# The Bastion has IPv4 routing enabled by default, with all private IPs forbidden by default, unless explictly specified.
 
-The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+# The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-EOF
-)
+# After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+# EOF
+# )
 
-ONE_SERVICE_RECONFIGURABLE=false
+# ONE_SERVICE_RECONFIGURABLE=false
 
 
 # ------------------------------------------------------------------------------
 # List of contextualization parameters
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_BASTION_DNS_PASSWORD'           'configure'  'For the Technitium DNS, admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.' 'O|password'
-    'ONEAPP_BASTION_DNS_FORWARDERS'         'configure'  'For the Technitium DNS, comma separated list of forwarders to be used by the DNS server.'    'O|text'
-    'ONEAPP_BASTION_DNS_DOMAIN'             'configure'  'For the Technitium DNS, domain name for creating the new zone.'   'M|text'
-    'ONEAPP_BASTION_ROUTEMANAGER_APITOKEN'  'configure'  'For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.' 'O|password'
-)
+# ONE_SERVICE_PARAMS=(
+#     'ONEAPP_BASTION_DNS_PASSWORD'           'configure'  'For the Technitium DNS, admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.' 'O|password'
+#     'ONEAPP_BASTION_DNS_FORWARDERS'         'configure'  'For the Technitium DNS, comma separated list of forwarders to be used by the DNS server.'    'O|text'
+#     'ONEAPP_BASTION_DNS_DOMAIN'             'configure'  'For the Technitium DNS, domain name for creating the new zone.'   'M|text'
+#     'ONEAPP_BASTION_ROUTEMANAGER_APITOKEN'  'configure'  'For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.' 'O|password'
+# )
 
 ONEAPP_BASTION_DNS_FORWARDERS="${ONEAPP_BASTION_DNS_FORWARDERS:-'8.8.8.8,1.1.1.1'}"
 
@@ -126,9 +126,9 @@ install_pkg_deps()
     msg info "Run apt-get update"
     apt-get update
 
-    msg info "Install required packages for ${ONE_SERVICE_NAME}"
+    msg info "Install required .deb packages"
     wait_for_dpkg_lock_release
-    if ! apt-get install -y ${DEP_PKGS} ; then
+    if ! apt-get install -y "${DEP_PKGS}" ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
