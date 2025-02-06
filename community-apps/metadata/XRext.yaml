@@ -25,7 +25,6 @@ tags:
   - XRext
   - ubuntu
 format: qcow2
-# stat -c %W <file>
 creation_time: "1724834325"
 os-id: Ubuntu
 os-release: '22.04'
@@ -86,14 +85,11 @@ logo: nokia.png
 images:
   - name: "XRext v1.0.2-20250206-1009"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_XRext.qcow2
+      https://rawimages.mobilesandbox.cloud:9443/XRext_v1.0.2.qcow
     type: OS
     dev_prefix: vd
     driver: qcow2
-    # qemu-img info <file> | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g'
     size: "21474836480"
     checksum:
-      # md5sum <file> | cut -d' ' -f1
       md5: "747817d4450a8554792680c38075fe7c"
-      # sha256sum <file> | cut -d' ' -f1
       sha256: "c3d7ef1b23d6dfbf6b6b30da0c19b759670aaea0daf5b4bba83e137ade9f3046"

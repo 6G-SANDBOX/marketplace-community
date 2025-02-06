@@ -63,7 +63,7 @@ logo: keysight.png
 images:
   - name: "LoadCore Agent Test Tool + hugepages v4.3.0.23-20250206-1009"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_4.3.0.23_hugepages.raw
+      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_hugepages_4.3.0.23.raw
     type: OS
     dev_prefix: vd
     driver: qcow2

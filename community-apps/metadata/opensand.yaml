@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox OpenSAND"
-version: "v0.4.0-20250206-1009"
+version: "v0.4.0-20240619-1009"
 software_version: "v0.4.0"
 publisher: 6G-SANDBOX
 description: |-
@@ -43,9 +43,9 @@ opennebula_template:
   lxd_security_privileged: 'true'
 logo: opensand.png
 images:
-- name: "6G-Sandbox OpenSAND v0.4.0-20250206-1009"
+- name: "6G-Sandbox OpenSAND v0.4.0-20240619-1009"
   url: >-
-    https://rawimages.mobilesandbox.cloud:9443/opensand-19-06-2024.qcow
+    https://rawimages.mobilesandbox.cloud:9443/opensand_v0.4.0.qcow
   type: OS
   dev_prefix: vd
   driver: qcow2

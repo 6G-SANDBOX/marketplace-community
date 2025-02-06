@@ -22,12 +22,12 @@ if ! ls "${BUILD_PATH}"/build/nr-* &> /dev/null; then
     
     echo "Build UERANSIM"
     cd ${BUILD_PATH}
-    if ! make ; then
+    if ! make -j ; then
        echo "ERROR: Error building UERANSIM binaries"
        exit 1
     fi
 
-    chmod +x ${BUILD_PATH}/build/nr-*
+    chmod +x build/nr-*
 
 else
     echo "UERANSIM binaries found. Proceeding..."

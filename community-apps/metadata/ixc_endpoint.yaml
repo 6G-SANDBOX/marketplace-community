@@ -50,7 +50,7 @@ logo: keysight.png
 images:
   - name: "IxChariot endpoint v0.1.0-20250206-1009"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/ixc_endpoint.qcow2
+      https://rawimages.mobilesandbox.cloud:9443/ixc_endpoint_v0.1.0-20250206-1009.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
