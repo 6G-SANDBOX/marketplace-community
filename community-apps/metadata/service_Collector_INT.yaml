@@ -1,10 +1,10 @@
 ---
-name: "INT-Collector P4"
+name: "INT-P4 Collector"
 version: "autofill"
 software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
-  This appliance includes pre-installed INT-Collector P4, InfluxDB, and Grafana.
+  This appliance includes pre-installed INT-P4 Collector, InfluxDB, and Grafana.
 
   The appliance collects P4 telemetry reports, processes them, and stores them in InfluxDB for visualization in Grafana.
 
