@@ -1,6 +1,6 @@
 ---
 name: "XRext"
-version: "v1.0.2-20250206-1009"
+version: "autofill"
 software_version: "v1.0.2"
 publisher: NOKIA
 description: |-
@@ -25,7 +25,7 @@ tags:
   - XRext
   - ubuntu
 format: qcow2
-creation_time: "1724834325"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
@@ -83,13 +83,12 @@ opennebula_template:
     oneapp_xr_capif_api_name:      "O|text|CAPIF API name||nac_api"
 logo: nokia.png
 images:
-  - name: "XRext v1.0.2-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/XRext_v1.0.2.qcow
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "21474836480"
+    size: "autofill"
     checksum:
-      md5: "747817d4450a8554792680c38075fe7c"
-      sha256: "c3d7ef1b23d6dfbf6b6b30da0c19b759670aaea0daf5b4bba83e137ade9f3046"
+      md5: "autofill"
+      sha256: "autofill"

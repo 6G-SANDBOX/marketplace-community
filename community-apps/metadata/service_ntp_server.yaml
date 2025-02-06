@@ -1,6 +1,6 @@
 ---
 name: "NTP Server"
-version: "v0.0.1-20250206-1009"
+version: "autofill"
 software_version: "v0.0.1"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -24,7 +24,7 @@ tags:
   - ntp
   - ubuntu
 format: qcow2
-creation_time: "1724860738"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '22.04 LTS'
 os-arch: x86_64
@@ -56,12 +56,12 @@ opennebula_template:
     oneapp_ntp_tz: "O|text|Timezone defined by IANAA: https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-  - name: "NTP Server v0.0.1-20250206-1009"
-    url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "5242880000"
+    size: "autofill"
     checksum:
-      md5: a042b767a8e9ebf0acd55ee66bb43c2e
-      sha256: a3e8ba389a553a5cc5a1064e6daff5259f5cb9b39acc5325e41df7b4cec1a15d
+      md5: "autofill"
+      sha256: "autofill"

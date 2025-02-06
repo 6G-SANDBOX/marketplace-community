@@ -1,6 +1,6 @@
 ---
 name: "Open5GS VM"
-version: "v2.7.2-20250206-1009"
+version: "autofill"
 software_version: "v2.7.2"
 publisher: "Fraunhofer FOKUS"
 description: |-
@@ -45,12 +45,12 @@ opennebula_template:
   user_inputs:
 logo: https://open5gs.org/assets/img/open5gs-logo.png
 images:
-  - name: "Open5GS VM v2.7.2-20250206-1009"
-    url: autofill
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
     size: "autofill"
     checksum:
-      md5: autofill
-      sha256: autofill
+      md5: "autofill"
+      sha256: "autofill"

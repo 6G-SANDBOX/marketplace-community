@@ -1,6 +1,6 @@
 ---
 name: "route-manager-api"
-version: "v0.1.0-20250206-1009"
+version: "autofill"
 software_version: "v0.1.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -21,7 +21,7 @@ tags:
   - route-manager-api
   - debian
 format: qcow2
-creation_time: 20241010
+creation_time: "autofill"
 os-id: Debian
 os-release: 12
 os-arch: x86_64
@@ -55,13 +55,12 @@ opennebula_template:
     oneapp_routemanager_apitoken: "O|password|ONEAPP_ROUTEMANAGER_APITOKEN: Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
 logo: routemanager.png
 images:
-  - name: "route-manager-api v0.1.0-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_routemanager.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10516192768"
+    size: "autofill"
     checksum:
-      md5: "490330ca6ee051cc7549cbdf80809e60"
-      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+      md5: "autofill"
+      sha256: "autofill"

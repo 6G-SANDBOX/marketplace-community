@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox Jenkins"
-version: "v0.4.0-20250206-1009"
+version: "autofill"
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -34,7 +34,7 @@ tags:
   - jenkins
   - ubuntu
 format: qcow2
-creation_time: "1720169901"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -89,13 +89,12 @@ opennebula_template:
     oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance" 
 logo: jenkins.png
 images:
-  - name: "6G-Sandbox Jenkins v0.4.0-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_jenkins.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10737418240"
+    size: "autofill"
     checksum:
-      md5: "63ee6cdb02526748c93a91d000c47052"
-      sha256: "b70b679ccabb840f34f43e3563cdf1a9e7ca009350c5505c0502e5c307e394ce"
+      md5: "autofill"
+      sha256: "autofill"

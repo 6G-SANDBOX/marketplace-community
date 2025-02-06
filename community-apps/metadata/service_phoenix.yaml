@@ -1,6 +1,6 @@
 ---
 name: "Fraunhofer Open5GCore"
-version: "v9.0.x-20250206-1009"
+version: "autofill"
 software_version: "v9.0.x"
 publisher: "Fraunhofer FOKUS"
 description: |-
@@ -18,7 +18,7 @@ tags:
   - open5gcore
   - ubuntu
 format: qcow2
-creation_time: "xx"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '22.04 LTS'
 os-arch: x86_64
@@ -44,4 +44,12 @@ opennebula_template:
   user_inputs: {}
 logo: https://cdn0.scrvt.com/fokus/d9859d6f8b785685/4d3f99755ad3/v/96292ff212e8/NGNI_logo_open5gcore_02.jpg
 images:
-  - name: "Fraunhofer Open5GCore v9.0.x-20250206-1009"
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"

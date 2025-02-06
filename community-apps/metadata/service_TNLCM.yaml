@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox TNLCM"
-version: "v0.4.5-20250206-1009"
+version: "autofill"
 software_version: "v0.4.5"
 publisher: "University of Malaga"
 description: |-
@@ -32,7 +32,7 @@ tags:
   - TNLCM
   - ubuntu
 format: qcow2
-creation_time: "1721640274"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -81,13 +81,12 @@ opennebula_template:
     oneapp_tnlcm_admin_password:    "M|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. At least 8 characters"
 logo: tnlcm.png
 images:
-  - name: "6G-Sandbox TNLCM v0.4.0-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_TNLCM.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "7516192768"
+    size: "autofill"
     checksum:
-      md5: "490330ca6ee051cc7549cbdf80809e60"
-      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+      md5: "autofill"
+      sha256: "autofill"

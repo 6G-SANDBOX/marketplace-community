@@ -62,6 +62,7 @@ IMAGE_CHK_SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
 
 ### Log build variables
 {
+  echo "DESTINATION=\"${DESTINATION}\""
   echo "BUILD_VERSION=\"${BUILD_VERSION}\""
   echo "IMAGE_NAME=\"${IMAGE_NAME}\""
   echo "IMAGE_TIMESTAMP=\"${IMAGE_TIMESTAMP}\""
@@ -76,6 +77,7 @@ cat "metadata/${APP}.yaml" | yq eval "
   .version = \"${BUILD_VERSION}\" |
   .creation_time = \"${IMAGE_TIMESTAMP}\" |
   .images[0].name = \"${IMAGE_NAME}\" |
+  .images[0].url = \"${DESTINATION}\" |
   .images[0].size = \"${IMAGE_SIZE}\" |
   .images[0].checksum.md5 = \"${IMAGE_CHK_MD5}\" |
   .images[0].checksum.sha256 = \"${IMAGE_CHK_SHA256}\"

@@ -1,6 +1,6 @@
 ---
 name: "ELCM"
-version: "v3.6.3-20250206-1009"
+version: "autofill"
 software_version: "v3.6.3"
 publisher: "University of Malaga"
 description: |-
@@ -24,7 +24,7 @@ tags:
   - ELCM
   - ubuntu
 format: qcow2
-creation_time: "1721640274"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -66,13 +66,12 @@ opennebula_template:
     oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. | |admin"
 logo: ubuntu.png
 images:
-  - name: "ELCM v3.6.3-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10516192768"
+    size: "autofill"
     checksum:
-      md5: "490330ca6ee051cc7549cbdf80809e60"
-      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+      md5: "autofill"
+      sha256: "autofill"

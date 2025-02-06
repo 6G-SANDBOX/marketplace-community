@@ -1,6 +1,6 @@
 ---
 name: "UERANSIM"
-version: "v3.2.6-20250206-1009"
+version: "autofill"
 software_version: "v3.2.6"
 publisher: Telefonica Innovacion Digital
 description: |-
@@ -43,7 +43,7 @@ tags:
   - UERANSIM
   - ubuntu
 format: qcow2
-creation_time: "1721838167"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -121,13 +121,12 @@ opennebula_template:
     ue_supi:        "O|text|UE_SUPI: UE IMSI number. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)| |imsi-999700000000001"
 logo: ueransim.png
 images:
-  - name: "UERANSIM v3.2.6-20250206-1009"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_UERANSIM.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10737418240"
+    size: "autofill"
     checksum:
-      md5: "16da388980a2e575c09cf3f4a2a40180"
-      sha256: "79477b99b9d7e7ef4158cf17614d1e626c166fe0da8a1d5d5a766a40facfda18"
+      md5: "autofill"
+      sha256: "autofill"
