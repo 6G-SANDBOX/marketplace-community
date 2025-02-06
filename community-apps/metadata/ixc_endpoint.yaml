@@ -1,0 +1,60 @@
+---
+name: "IxChariot endpoint"
+version: "v0.1.0-20250206-1009"
+software_version: "v0.1.0"
+publisher: "Telefonica Innovacion Digital"
+description: |-
+    IxChariot Performance Endpoints act as controlled traffic sources and receivers, simulating real-world applications like web browsing, video streaming, or file transfers to evaluate how a network handles different traffic types.
+
+    After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+    The appliance configuration can be customized via parameters:
+
+    * `ONEAPP_IXCHARIOT_ENDPOINT_RS_ADDRESS` - Registration Server IP Address to register the endpoint. It should match the IP of your IxChariot deployment.
+short_description: Endpoint for IxChariot
+tags:
+  - 6G-Sandbox
+  - Keysight
+  - "IxChariot endpoint"
+format: qcow2
+creation_time: "1737149773"
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    oneapp_ixchariot_endpoint_rs_address: "$ONEAPP_IXCHARIOT_ENDPOINT_RS_ADDRESS"
+  cpu: '1'
+  vcpu: '1'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_ixchariot_endpoint_rs_address: "M|text|ONEAPP_IXCHARIOT_ENDPOINT_RS_ADDRESS: Registration Server IP Address to register the endpoint. It should match the IP of your IxChariot deployment.| |"
+logo: keysight.png
+images:
+  - name: "IxChariot endpoint v0.1.0-20250206-1009"
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/ixc_endpoint.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "3328600064"
+    checksum:
+      md5: "fee92332a169d442de1ea45e2117895a"
+      sha256: "82567deb70d83381a4321c31828fb4632ca916926076c5fb1725d5a0bf1bfa51"

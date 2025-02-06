@@ -1,6 +1,6 @@
 ---
 name: "UERANSIM"
-version: "v3.2.6-20241125-1624"
+version: "v3.2.6-20250206-1009"
 software_version: "v3.2.6"
 publisher: Telefonica Innovacion Digital
 description: |-
@@ -77,6 +77,10 @@ opennebula_template:
     ue_session_sd: "$UE_SESSION_SD"
     ue_session_sst: "$UE_SESSION_SST"
     ue_supi: "$UE_SUPI"
+  inputs_order: >-
+    RUN_GNB,RUN_UE,GNB_MCC,GNB_MNC,GNB_TAC,GNB_AMF_ADDRESS,ONEKE_VNF,GNB_SLICES_SST,GNB_SLICES_SD,
+    UE_SUPI,UE_MCC,UE_MNC,UE_KEY,UE_OP,UE_GNBSEARCHLIST,UE_SESSION_APN,UE_SESSION_SST,UE_SESSION_SD
+    UE_CONFIGURED_NSSAI_SST,UE_CONFIGURED_NSSAI_SD,UE_DEFAULT_NSSAI_SST,UE_DEFAULT_NSSAI_SD
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -117,7 +121,7 @@ opennebula_template:
     ue_supi:        "O|text|UE_SUPI: UE IMSI number. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)| |imsi-999700000000001"
 logo: ueransim.png
 images:
-  - name: "UERANSIM v3.2.6-20241126-1534"
+  - name: "UERANSIM v3.2.6-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_UERANSIM.qcow2
     type: OS

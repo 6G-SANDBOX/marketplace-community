@@ -39,6 +39,8 @@ opennebula_template:
     oneapp_minio_root_user:     "$ONEAPP_MINIO_ROOT_USER"
     oneapp_minio_tls_cert:      "$ONEAPP_MINIO_TLS_CERT"
     oneapp_minio_tls_key:       "$ONEAPP_MINIO_TLS_KEY"
+  inputs_order: >-
+    ONEAPP_MINIO_ROOT_USER,ONEAPP_MINIO_ROOT_PASSWORD,ONEAPP_MINIO_OPTS,ONEAPP_MINIO_HOSTNAME,ONEAPP_MINIO_TLS_CERT,ONEAPP_MINIO_TLS_KEY
   cpu: '1'
   vcpu: '1'
   graphics:

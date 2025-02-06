@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox bastion"
-version: "v0.4.0-20241125-1624"
+version: "v0.4.0-20250206-1009"
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -50,6 +50,8 @@ opennebula_template:
     oneapp_bastion_dns_forwarders:     "$ONEAPP_BASTION_DNS_FORWARDERS"
     oneapp_bastion_dns_domain:         "$ONEAPP_BASTION_DNS_DOMAIN"
     oneapp_bastion_routemanager_apitoken: "$ONEAPP_BASTION_ROUTEMANAGER_APITOKEN"
+  inputs_order: >-
+    ONEAPP_BASTION_DNS_DOMAIN,ONEAPP_BASTION_DNS_PASSWORD,ONEAPP_BASTION_DNS_FORWARDERS,ONEAPP_BASTION_ROUTEMANAGER_APITOKEN
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -72,7 +74,7 @@ opennebula_template:
     oneapp_bastion_routemanager_apitoken: "O|password|ONEAPP_BASTION_ROUTEMANAGER_APITOKEN: For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
 logo: ubuntu.png
 images:
-  - name: "6G-Sandbox bastion v0.4.0-20250205-1444"
+  - name: "6G-Sandbox bastion v0.4.0-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_bastion.qcow2
     type: OS

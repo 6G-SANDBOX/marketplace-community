@@ -1,6 +1,6 @@
 ---
 name: "XRext"
-version: "v1.0.2-20241125-1624"
+version: "v1.0.2-20250206-1009"
 software_version: "v1.0.2"
 publisher: NOKIA
 description: |-
@@ -50,6 +50,10 @@ opennebula_template:
     oneapp_xr_capif_password:      "$ONEAPP_XR_CAPIF_PASSWORD"
     oneapp_xr_capif_invoker_id:    "$ONEAPP_XR_CAPIF_INVOKER_ID"
     oneapp_xr_capif_api_name:      "$ONEAPP_XR_CAPIF_API_NAME"
+  inputs_order: >-
+    ONEAPP_XR_NAC_SERVER_IP,ONEAPP_XR_NAC_SERVER_PORT,ONEAPP_XR_NAC_SERVER_UNAME,ONEAPP_XR_NAC_SERVER_PASSWORD,
+    ONEAPP_XR_CAPIF_HTTP_HOST,ONEAPP_XR_CAPIF_HTTP_PORT,ONEAPP_XR_CAPIF_HTTPS_HOST,ONEAPP_XR_CAPIF_HTTPS_PORT,
+    ONEAPP_XR_CAPIF_UNAME,ONEAPP_XR_CAPIF_PASSWORD,ONEAPP_XR_CAPIF_INVOKER_ID,ONEAPP_XR_CAPIF_API_NAME
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -80,7 +84,7 @@ opennebula_template:
     oneapp_xr_capif_api_name:      "O|text|CAPIF API name||nac_api"
 logo: nokia.png
 images:
-  - name: "XRext v1.0.2"
+  - name: "XRext v1.0.2-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_XRext.qcow2
     type: OS

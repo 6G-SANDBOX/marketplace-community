@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox Jenkins"
-version: "v0.4.0-20241125-1624"
+version: "v0.4.0-20250206-1009"
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -13,7 +13,17 @@ description: |-
   After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
 
   The appliance configuration can be customized via parameters:
-  TODO
+
+  * `ONEAPP_JENKINS_USERNAME` - The username for the Jenkins admin user.
+  * `ONEAPP_JENKINS_PASSWORD` - The password for the Jenkins admin user.
+  * `ONEAPP_JENKINS_SITES_TOKEN` - Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault.
+  * `ONEAPP_JENKINS_OPENNEBULA_ENDPOINT` - The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2').
+  * `ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT` - The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474').
+  * `ONEAPP_JENKINS_OPENNEBULA_USERNAME` - The OpenNebula username used by Jenkins to deploy each component.
+  * `ONEAPP_JENKINS_OPENNEBULA_PASSWORD` - The password for the OpenNebula user used by Jenkins to deploy each component.
+  * `ONEAPP_JENKINS_OPENNEBULA_INSECURE` - Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification).
+  * `ONEAPP_JENKINS_AWS_ACCESS_KEY_ID` - S3 Storage access key. Same as used in the MinIO instance.
+  * `ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY` - S3 Storage secret key. Same as used in the MinIO instance. 
 
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
   
@@ -46,6 +56,11 @@ opennebula_template:
     oneapp_jenkins_opennebula_insecure:      "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
     oneapp_jenkins_aws_access_key_id:        "$ONEAPP_JENKINS_AWS_ACCESS_KEY_ID"
     oneapp_jenkins_aws_secret_access_key:    "$ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY"
+  inputs_order: >-
+    ONEAPP_JENKINS_USERNAME,ONEAPP_JENKINS_PASSWORD,ONEAPP_JENKINS_SITES_TOKEN,
+    ONEAPP_JENKINS_OPENNEBULA_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_INSECURE
+    ONEAPP_JENKINS_OPENNEBULA_USERNAME,ONEAPP_JENKINS_OPENNEBULA_PASSWORD,
+    ONEAPP_JENKINS_AWS_ACCESS_KEY_ID,ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -74,7 +89,7 @@ opennebula_template:
     oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance" 
 logo: jenkins.png
 images:
-  - name: "6G-Sandbox Jenkins v0.4.0-20241125-1624"
+  - name: "6G-Sandbox Jenkins v0.4.0-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_jenkins.qcow2
     type: OS

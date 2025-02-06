@@ -1,6 +1,6 @@
 ---
 name: "route-manager-api"
-version: "v0.1.0-20241125-1624"
+version: "v0.1.0-20250206-1009"
 software_version: "v0.1.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -55,7 +55,7 @@ opennebula_template:
     oneapp_routemanager_apitoken: "O|password|ONEAPP_ROUTEMANAGER_APITOKEN: Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
 logo: routemanager.png
 images:
-  - name: "route-manager-api v0.1.0-20241125-1624"
+  - name: "route-manager-api v0.1.0-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_routemanager.qcow2
     type: OS

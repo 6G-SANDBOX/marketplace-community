@@ -1,6 +1,6 @@
 ---
 name: "ELCM"
-version: "v3.6.3-20241125-1624"
+version: "v3.6.3-20250206-1009"
 software_version: "v3.6.3"
 publisher: "University of Malaga"
 description: |-
@@ -40,6 +40,8 @@ opennebula_template:
     oneapp_elcm_influxdb_password:  "$ONEAPP_ELCM_INFLUXDB_PASSWORD"
     oneapp_elcm_influxdb_database:  "$ONEAPP_ELCM_INFLUXDB_DATABASE"
     oneapp_elcm_grafana_password:   "$ONEAPP_ELCM_GRAFANA_PASSWORD"
+  inputs_order: >-
+    ONEAPP_ELCM_INFLUXDB_USER,ONEAPP_ELCM_INFLUXDB_PASSWORD,ONEAPP_ELCM_INFLUXDB_DATABASE,ONEAPP_ELCM_GRAFANA_PASSWORD
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -64,7 +66,7 @@ opennebula_template:
     oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. | |admin"
 logo: ubuntu.png
 images:
-  - name: "ELCM v3.6.3-20241125-1624"
+  - name: "ELCM v3.6.3-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
     type: OS

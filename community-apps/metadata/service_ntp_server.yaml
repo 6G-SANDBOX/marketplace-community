@@ -1,6 +1,6 @@
 ---
 name: "NTP Server"
-version: "v0.0.1-20241125-1624"
+version: "v0.0.1-20250206-1009"
 software_version: "v0.0.1"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -38,13 +38,13 @@ opennebula_template:
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
     oneapp_ntp_tz: "$ONEAPP_NTP_TZ"
+  inputs_order: >-
+    ONEAPP_NTP_TZ,ONEAPP_NTP_SERVERS
   cpu: '1'
   vcpu: '1'
   graphics:
     listen: 0.0.0.0
     type: vnc
-  inputs_order: >-
-    ONEAPP_NTP_SERVERS,ONEAPP_NTP,TZ
   memory: '512'
   memory_unit_cost: 'MB'
   memory_resize_mode: 'BALLOONING'
@@ -56,7 +56,7 @@ opennebula_template:
     oneapp_ntp_tz: "O|text|Timezone defined by IANAA: https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-  - name: "NTP Server v0.0.1-20241125-1624"
+  - name: "NTP Server v0.0.1-20250206-1009"
     url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
     type: OS
     dev_prefix: vd

@@ -1,6 +1,6 @@
 ---
 name: "Technitium DNS"
-version: "v0.4.0-20241125-1624"
+version: "v0.4.0-20250206-1009"
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -17,7 +17,6 @@ description: |-
   * `ONEAPP_DNS_DOMAIN` - Domain name for creating the new zone.
 
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
-
 short_description: Technitium DNS appliance for KVM
 tags:
   - 6G-Sandbox
@@ -42,6 +41,8 @@ opennebula_template:
     oneapp_dns_password:       "$ONEAPP_DNS_PASSWORD"
     oneapp_dns_forwarders:     "$ONEAPP_DNS_FORWARDERS"
     oneapp_dns_domain:         "$ONEAPP_DNS_DOMAIN"
+  inputs_order: >-
+    ONEAPP_DNS_DOMAIN,ONEAPP_DNS_PASSWORD,ONEAPP_DNS_FORWARDERS
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -63,7 +64,7 @@ opennebula_template:
     oneapp_dns_domain:         "M|text|ONEAPP_DNS_DOMAIN: Domain name for creating the new zone."
 logo: technitium.png
 images:
-  - name: "Technitium DNS v0.4.0-20241125-1624"
+  - name: "Technitium DNS v0.4.0-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_dns.qcow2
     type: OS

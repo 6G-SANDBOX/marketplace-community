@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox TNLCM"
-version: "v0.4.5-20241125-1624"
+version: "v0.4.5-20250206-1009"
 software_version: "v0.4.5"
 publisher: "University of Malaga"
 description: |-
@@ -25,7 +25,7 @@ description: |-
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 
   **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
-   change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+  change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
 short_description: 6G-Sandbox TNLCM appliance for KVM
 tags:
   - 6G-Sandbox
@@ -51,6 +51,9 @@ opennebula_template:
     oneapp_tnlcm_sites_token:       "$ONEAPP_TNLCM_SITES_TOKEN"
     oneapp_tnlcm_admin_user:        "$ONEAPP_TNLCM_ADMIN_USER"
     oneapp_tnlcm_admin_password:    "$ONEAPP_TNLCM_ADMIN_PASSWORD"
+  inputs_order: >-
+    ONEAPP_TNLCM_JENKINS_HOST,ONEAPP_TNLCM_JENKINS_USERNAME,ONEAPP_TNLCM_JENKINS_PASSWORD,ONEAPP_TNLCM_JENKINS_TOKEN,
+    ONEAPP_TNLCM_SITES_TOKEN,ONEAPP_TNLCM_ADMIN_USER,ONEAPP_TNLCM_ADMIN_PASSWORD
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -74,11 +77,11 @@ opennebula_template:
     oneapp_tnlcm_jenkins_password:  "M|password|ONEAPP_TNLCM_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info"
     oneapp_tnlcm_jenkins_token:     "M|password|ONEAPP_TNLCM_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API"
     oneapp_tnlcm_sites_token:       "M|password|ONEAPP_TNLCM_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    oneapp_tnlcm_admin_user:        "O|text|ONEAPP_TNLCM_ADMIN_USER: Name of the TNLCM admin user. At least 3 characters||tnlcm"
-    oneapp_tnlcm_admin_password:    "M|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. At least 5 characters"
+    oneapp_tnlcm_admin_user:        "O|text|ONEAPP_TNLCM_ADMIN_USER: Name of the TNLCM admin user. At least 5 characters||tnlcm"
+    oneapp_tnlcm_admin_password:    "M|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. At least 8 characters"
 logo: tnlcm.png
 images:
-  - name: "6G-Sandbox TNLCM v0.4.0-20241125-1624"
+  - name: "6G-Sandbox TNLCM v0.4.0-20250206-1009"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/service_TNLCM.qcow2
     type: OS
