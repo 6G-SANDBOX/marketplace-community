@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox OpenSAND"
-version: "v0.4.0-20240619-1009"
+version: "v0.4.0-20240619-1200"
 software_version: "v0.4.0"
 publisher: 6G-SANDBOX
 description: |-
@@ -14,7 +14,7 @@ tags:
 - ubuntu
 - opensand
 format: qcow2
-creation_time: 1718791248
+creation_time: "1718791248"
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
@@ -43,13 +43,13 @@ opennebula_template:
   lxd_security_privileged: 'true'
 logo: opensand.png
 images:
-- name: "6G-Sandbox OpenSAND v0.4.0-20240619-1009"
+- name: "6G-Sandbox OpenSAND v0.4.0-20240619-1200"
   url: >-
     https://rawimages.mobilesandbox.cloud:9443/opensand_v0.4.0.qcow
   type: OS
   dev_prefix: vd
   driver: qcow2
-  size: 10737418240
+  size: "10737418240"
   checksum:
-    md5: bf295a31545abc8baf888a443a740010
-    sha256: 9dc1e6a461e148dab986b433e3d3bb45f13d52eca62286fb1c1c4759505ab2d9
+    md5: "bf295a31545abc8baf888a443a740010"
+    sha256: "9dc1e6a461e148dab986b433e3d3bb45f13d52eca62286fb1c1c4759505ab2d9"

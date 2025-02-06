@@ -1,6 +1,6 @@
 ---
 name: "LoadCore Agent Test Tool + hugepages"
-version: "v4.3.0.23-20250206-1009"
+version: "v4.3.0.23-20241202-2121"
 software_version: "v4.3.0.23"
 publisher: "Keysight Technologies"
 description: |-
@@ -61,7 +61,7 @@ opennebula_template:
   logo: images/logos/ubuntu.png
 logo: keysight.png
 images:
-  - name: "LoadCore Agent Test Tool + hugepages v4.3.0.23-20250206-1009"
+  - name: "LoadCore Agent Test Tool + hugepages v4.3.0.23-20241202-2121"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_hugepages_4.3.0.23.raw
     type: OS

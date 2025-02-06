@@ -1,6 +1,6 @@
 ---
 name: "LoadCore Agent Test Tool"
-version: "v4.3.0.23-20250206-1009"
+version: "v4.3.0.23-20241106-1840"
 software_version: "v4.3.0.23"
 publisher: "Keysight Technologies"
 description: |-
@@ -31,7 +31,7 @@ tags:
   - Keysight
   - Loadcore
 format: raw
-creation_time: "1733170911"
+creation_time: "1730914825"
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
@@ -61,13 +61,13 @@ opennebula_template:
   logo: images/logos/ubuntu.png
 logo: keysight.png
 images:
-  - name: "LoadCore Agent Test Tool v4.3.0.23-20250206-1009"
+  - name: "LoadCore Agent Test Tool v4.3.0.23-20241106-1840"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_v4.3.0.23.raw
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "4831838208"
+    size: "5368709120"
     checksum:
-      md5: "3c5cfb01e8ff185faecc25d3a54bba57"
-      sha256: "4adc1b32d8ad1186ee597e682cf7492dbd26027590d3db541ac085d709046be8"
+      md5: "b876857ccfddc32188b751bf1733badf"
+      sha256: "4cb172d3b548920471625f478c205fb79a09a360d26c755946b666872dd0ed64"

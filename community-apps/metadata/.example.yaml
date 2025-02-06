@@ -67,7 +67,7 @@ opennebula_template:
     oneapp_example_jenkins_job_deploy:   "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY: Name of the Jenkins pipeline used to deploy Trial Networks| |TN_DEPLOY"
     oneapp_example_jenkins_job_destroy:  "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY: Name of the Jenkins pipeline used to destroy Trial Networks| |TN_DESTROY"
     oneapp_example_sites_token:          "M|password|ONEAPP_EXAMPLE_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-logo: tnlcm.png    # image is loaded from marketplace/logos/
+logo: tnlcm.png    # image is loaded from marketplace/logos/ from this repository
 images:
   - name: "Example v0.4.0-20250206-1009"                                            # If your appliance is generated with packer, update_metadata.sh script will overwrite this value
     url: >-
