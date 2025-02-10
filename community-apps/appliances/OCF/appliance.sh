@@ -142,7 +142,7 @@ run_docker_compose()
 
 download_images()
 {
-    grep "image:" *.yml|awk '{ print $3 }' | xargs -n 1 -I {} docker pull {}
+    grep "image:" /etc/one-appliance/service.d/*.yml|awk '{ print $3 }' | xargs -n 1 -I {} docker pull {}
 }
 
 
