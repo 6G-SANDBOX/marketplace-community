@@ -256,7 +256,7 @@ http {
     }
 }
 EOF
-
+    cat /etc/nginx/sites-available/default
     sudo systemctl restart nginx
     sudo systemctl enable nginx
     sudo ufw allow 443/tcp
