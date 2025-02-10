@@ -1,7 +1,8 @@
 ---
-name: ELCM
-version: "20241010-1249"
-publisher: University of Malaga
+name: "ELCM"
+version: "autofill"
+software_version: "v3.6.3"
+publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of [ELCM](https://github.com/6G-SANDBOX/ELCM) and [ELCM_FRONTEND](https://github.com/6G-SANDBOX/portal) from the official repositories and configures them according to the input variables. Configuration of the ELCM can be made when instanciating the VM.
 
@@ -23,7 +24,7 @@ tags:
   - ELCM
   - ubuntu
 format: qcow2
-creation_time: "1721640274"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -39,6 +40,8 @@ opennebula_template:
     oneapp_elcm_influxdb_password:  "$ONEAPP_ELCM_INFLUXDB_PASSWORD"
     oneapp_elcm_influxdb_database:  "$ONEAPP_ELCM_INFLUXDB_DATABASE"
     oneapp_elcm_grafana_password:   "$ONEAPP_ELCM_GRAFANA_PASSWORD"
+  inputs_order: >-
+    ONEAPP_ELCM_INFLUXDB_USER,ONEAPP_ELCM_INFLUXDB_PASSWORD,ONEAPP_ELCM_INFLUXDB_DATABASE,ONEAPP_ELCM_GRAFANA_PASSWORD
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -63,13 +66,12 @@ opennebula_template:
     oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. | |admin"
 logo: ubuntu.png
 images:
-  - name: ELCM
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_ELCM.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10516192768"
+    size: "autofill"
     checksum:
-      md5: "490330ca6ee051cc7549cbdf80809e60"
-      sha256: "73a08181c7d6c3415c026d0854a4969ceabc1e33cc8cbd8e262cf12fa5208f2f"
+      md5: "autofill"
+      sha256: "autofill"

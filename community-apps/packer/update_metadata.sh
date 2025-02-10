@@ -1,16 +1,24 @@
 #!/bin/bash
+
+### Verify yq is installed
+if ! command -v yq &> /dev/null
+then
+    install_yq
+fi
+
+### Define execution variables
 LOGFILE=packer/update_metadata.log
-APP_NAME=${1}                                   # e.g. debian
+APP=${1}                                        # e.g. debian
 APP_VER=${2}                                    # e.g. 11
 if [ -n "${APP_VER}" ]; then
-    APP=${APP_NAME}${APP_VER}                   # e.g. debian11
-else
-    APP=${APP_NAME}
-fi               
+    APP=${APP}${APP_VER}                        # e.g. debian11 
+fi
+FULL_NAME=$(cat "metadata/${APP}.yaml" | yq '.name')            # 6G-Sandbox bastion
+SW_VERSION=$(cat "metadata/${APP}.yaml" | yq '.software_version')   # v0.4.0  
 ORIGIN=${3}                                     # e.g. export/debian11
 DESTINATION=${DIR_APPLIANCES}/${APP}.qcow2      # e.g. /var/lib/one/6gsandbox-marketplace/debian11.qcow2
 if [ -f "${DESTINATION}" ]; then
-    mkdir ${DIR_APPLIANCES}/backup/
+    mkdir "${DIR_APPLIANCES}/backup/"
     BACKUP=${DIR_APPLIANCES}/backup/${APP}-$(stat -c %y "${DESTINATION}" | awk '{print $1}' | sed 's/-//g').qcow2   # e.g. /var/lib/one/6gsandbox-marketplace/backup/debian11-20240723.qcow2
 else
     BACKUP=None
@@ -18,54 +26,74 @@ fi
 METADATA=${DIR_METADATA}/${APP}.yaml             # e.g. /opt/marketplace-community/marketplace/appliances/debian11.yaml
 
 
-# Verify if yq is installed, and install it
-if ! command -v yq &> /dev/null
-then
+### Log execution variables
+{
+  echo "------------------New build--------------------------"
+  echo "APP=\"${APP}\""
+  echo "APP_VER=\"${APP_VER}\""
+  echo "FULL_NAME=\"${FULL_NAME}\""
+  echo "SW_VERSION=\"${SW_VERSION}\""
+  echo "ORIGIN=\"${ORIGIN}\""
+  echo "DESTINATION=\"${DESTINATION}\""
+  echo "BACKUP=\"${BACKUP}\""
+  echo "METADATA=\"${METADATA}\""
+} >> ${LOGFILE}
+
+
+### Backup previous image
+if [ -f "${DESTINATION}" ]; then
+    mv "${DESTINATION}" "${BACKUP}"
+fi
+mv "${ORIGIN}" "${DESTINATION}"
+
+
+### Define build variables
+if [ -n "${SW_VERSION}" ]; then                             # Set build version with sw_version and build timestamp
+    BUILD_VERSION=${SW_VERSION}-$(date +"%Y%m%d-%H%M")      # e.g. v0.4.0-20240723-1016
+else
+    BUILD_VERSION=$(date +"%Y%m%d-%H%M")                    # e.g. 20240723-1016
+fi
+IMAGE_NAME="${FULL_NAME} ${BUILD_VERSION}"
+IMAGE_TIMESTAMP="$(stat -c %W "${DESTINATION}")"
+IMAGE_SIZE="$(qemu-img info "${DESTINATION}" | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g')"
+IMAGE_CHK_MD5="$(md5sum "${DESTINATION}" | cut -d' ' -f1)"
+IMAGE_CHK_SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
+
+
+### Log build variables
+{
+  echo "DESTINATION=\"${DESTINATION}\""
+  echo "BUILD_VERSION=\"${BUILD_VERSION}\""
+  echo "IMAGE_NAME=\"${IMAGE_NAME}\""
+  echo "IMAGE_TIMESTAMP=\"${IMAGE_TIMESTAMP}\""
+  echo "IMAGE_SIZE=\"${IMAGE_SIZE}\""
+  echo "IMAGE_CHK_MD5=\"${IMAGE_CHK_MD5}\""
+  echo "IMAGE_CHK_SHA256=\"${IMAGE_CHK_SHA256}\""
+} >> ${LOGFILE}
+
+
+### Write final metadata file
+cat "metadata/${APP}.yaml" | yq eval "
+  .version = \"${BUILD_VERSION}\" |
+  .creation_time = \"${IMAGE_TIMESTAMP}\" |
+  .images[0].name = \"${IMAGE_NAME}\" |
+  .images[0].url = \"${DESTINATION}\" |
+  .images[0].size = \"${IMAGE_SIZE}\" |
+  .images[0].checksum.md5 = \"${IMAGE_CHK_MD5}\" |
+  .images[0].checksum.sha256 = \"${IMAGE_CHK_SHA256}\"
+" > "${METADATA}"
+
+### Reload marketplace with the new file
+sleep 10
+systemctl restart appmarket-simple.service
+
+
+install_yq()
+{
     echo "------------------SETUP--------------------------" >> ${LOGFILE}
     echo "Command yq is not present in the system. Installing" >> ${LOGFILE}
     sudo apt-get update && sudo apt-get install -y wget
     sudo wget https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_amd64 -O /usr/bin/yq
     sudo chmod +x /usr/bin/yq
     echo "Command yq installed successfully" >> ${LOGFILE}
-fi
-
-echo "------------------New build--------------------------" >> ${LOGFILE}
-echo APP_NAME=${APP_NAME} >> ${LOGFILE}
-echo APP_VER=${APP_VER} >> ${LOGFILE}
-echo APP=${APP} >> ${LOGFILE}
-echo ORIGIN=${ORIGIN} >> ${LOGFILE}
-echo VERSION=${VERSION} >> ${LOGFILE}
-echo DESTINATION=${DESTINATION} >> ${LOGFILE}
-echo BACKUP=${BACKUP} >> ${LOGFILE}
-echo METADATA=${METADATA} >> ${LOGFILE}
-
-if [ -f "${DESTINATION}" ]; then
-    mv "${DESTINATION}" "${BACKUP}"
-fi
-mv ${ORIGIN} ${DESTINATION}
-
-# Calculate the values to update the appliance metadata
-if [ -n "${APP_VER}" ]; then
-    VERSION=${APP_VER}-$(date +"%Y%m%d-%H%M")         # e.g. 11-20240723-1016
-else
-    VERSION=$(date +"%Y%m%d-%H%M")                    # e.g. 20240723-1016
-fi   
-TIMESTAMP="$(stat -c %W "${DESTINATION}")"
-SIZE="$(qemu-img info "${DESTINATION}" | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g')"
-MD5="$(md5sum "${DESTINATION}" | cut -d' ' -f1)"
-SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
-
-echo TIMESTAMP=${TIMESTAMP} >> ${LOGFILE}
-echo SIZE=${SIZE} >> ${LOGFILE}
-echo MD5=${MD5} >> ${LOGFILE}
-echo SHA256=${SHA256} >> ${LOGFILE}
-
-cp metadata/${APP}.yaml  "${METADATA}"
-cat "${METADATA}" | yq ".version = \"${VERSION}\"" | sponge "${METADATA}"
-cat "${METADATA}" | yq ".creation_time = \"${TIMESTAMP}\"" | sponge "${METADATA}"
-cat "${METADATA}" | yq ".images[0].size = \"${SIZE}\"" | sponge "${METADATA}"
-cat "${METADATA}" | yq ".images[0].checksum.md5 = \"${MD5}\"" | sponge "${METADATA}"
-cat "${METADATA}" | yq ".images[0].checksum.sha256 = \"${SHA256}\"" | sponge "${METADATA}"
-
-sleep 10
-systemctl restart appmarket-simple.service
+}

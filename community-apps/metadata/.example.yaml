@@ -1,8 +1,7 @@
 ---
 name: Example
-# version + date "%Y%M%d-%h%m"
-version: "020-20240624-1835"
-publisher: 6G-SANDBOX
+version: "v0.4.0-20250206-1009"    # version + $(date +"%Y%m%d-%H%M"). If your appliance is generated with packer, update_metadata.sh script will overwrite this value
+software_version: "v0.4.0"         # Custom parameter for the 6GL marketplace
 description: |-
   Sample Appliance for KVM hosts.
 
@@ -18,13 +17,16 @@ tags:
   - tnlcm
 format: qcow2
 # stat -c %W <file>
-creation_time: "1719246477"
+creation_time: "1719246477"   # If your appliance is generated with packer, update_metadata.sh script will overwrite this value
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
   6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+# This is how you interact with the appliance using OpenNebula.
+# These variables are defined in the CONTEXT section of the VM Template as custom variables
+# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section
 opennebula_template:
   context:
     network: 'YES'
@@ -37,6 +39,9 @@ opennebula_template:
     oneapp_example_jenkins_job_deploy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY"
     oneapp_example_jenkins_job_destroy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY"
     oneapp_example_sites_token: "$ONEAPP_EXAMPLE_SITES_TOKEN"
+  # Order in which they will be asked in OpenNebula
+  inputs_order: >-
+    ONEAPP_EXAMPLE_JENKINS_HOST,ONEAPP_EXAMPLE_JENKINS_USERNAME,ONEAPP_EXAMPLE_JENKINS_PASSWORD,ONEAPP_EXAMPLE_JENKINS_TOKEN,ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY,ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY,ONEAPP_EXAMPLE_SITES_TOKEN
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -53,8 +58,8 @@ opennebula_template:
   memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
-  logo: images/logos/ubuntu.png
-  user_inputs:
+  logo: images/logos/ubuntu.png       # path to a file already existing in the frontend, at /usr/lib/one/sunstone/public/
+  user_inputs:    # Documentation at https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
     oneapp_example_jenkins_host:         "M|text|ONEAPP_EXAMPLE_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
     oneapp_example_jenkins_username:     "M|text|ONEAPP_EXAMPLE_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
     oneapp_example_jenkins_password:     "M|text|ONEAPP_EXAMPLE_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
@@ -62,18 +67,18 @@ opennebula_template:
     oneapp_example_jenkins_job_deploy:   "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY: Name of the Jenkins pipeline used to deploy Trial Networks| |TN_DEPLOY"
     oneapp_example_jenkins_job_destroy:  "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY: Name of the Jenkins pipeline used to destroy Trial Networks| |TN_DESTROY"
     oneapp_example_sites_token:          "M|password|ONEAPP_EXAMPLE_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-logo: tnlcm.png
+logo: tnlcm.png    # image is loaded from marketplace/logos/ from this repository
 images:
-  - name: Example
+  - name: "Example v0.4.0-20250206-1009"                                            # If your appliance is generated with packer, update_metadata.sh script will overwrite this value
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/tnlcm020.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
     # qemu-img info <file> | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g'
-    size: "7516192768"
+    size: "7516192768"                                                              # If your appliance is generated with packer, update_metadata.sh script will overwrite this value
     checksum:
       # md5sum <file> | cut -d' ' -f1
-      md5: "85971d547fe036800fd1832fc1f13d2d"
+      md5: "85971d547fe036800fd1832fc1f13d2d"                                       # If your appliance is generated with packer, update_metadata.sh script will overwrite this value
       # sha256sum <file> | cut -d' ' -f1
-      sha256: "c5457a1cd3f8e8a2efc2e9429960dc0e8874d1f538ed0aca4f79a102fd2a28ba"
+      sha256: "c5457a1cd3f8e8a2efc2e9429960dc0e8874d1f538ed0aca4f79a102fd2a28ba"    # If your appliance is generated with packer, update_metadata.sh script will overwrite this value

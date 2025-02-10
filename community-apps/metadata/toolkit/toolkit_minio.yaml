@@ -1,7 +1,8 @@
 ---
 name: "[6G-Sandbox toolkit] MinIO"
-version: 1725448126   # date +%s
-publisher: Telefonica Innovacion Digital
+version: "v6.10.0-20250206-1511"
+software_version: "v6.10.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   Custom template of the [MinIO appliance](https://github.com/OpenNebula/one-apps/wiki/minio_quick) for the 6G-Sandbox toolkit.
 
@@ -11,11 +12,12 @@ short_description: 6G-Sandbox toolkit VM template for the MinIO appliance
 tags:
 - 6G-Sandbox
 - toolkit
+- service
 - minio
 - ubuntu
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1725448126   # date +%s
+creation_time: "1738851073"   # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -37,6 +39,8 @@ opennebula_template:
     oneapp_minio_root_user:     "$ONEAPP_MINIO_ROOT_USER"
     oneapp_minio_tls_cert:      "$ONEAPP_MINIO_TLS_CERT"
     oneapp_minio_tls_key:       "$ONEAPP_MINIO_TLS_KEY"
+  inputs_order: >-
+    ONEAPP_MINIO_ROOT_USER,ONEAPP_MINIO_ROOT_PASSWORD,ONEAPP_MINIO_OPTS,ONEAPP_MINIO_HOSTNAME,ONEAPP_MINIO_TLS_CERT,ONEAPP_MINIO_TLS_KEY
   cpu: '1'
   vcpu: '1'
   graphics:

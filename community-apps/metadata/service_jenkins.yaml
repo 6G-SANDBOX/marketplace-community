@@ -1,7 +1,8 @@
 ---
-name: 6G-Sandbox Jenkins 
-version: "20240705-1102"
-publisher: Telefonica Innovacion Digital
+name: "6G-Sandbox Jenkins"
+version: "autofill"
+software_version: "v0.4.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of Jenkins LTS from the official download and configures it to be ready to serve a 6G-SANDBOX site.
   The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
@@ -13,10 +14,16 @@ description: |-
 
   The appliance configuration can be customized via parameters:
 
-  * `ONEAPP_ELCM_INFLUXDB_USER` - Username used to login into the InfluxDB.
-  * `ONEAPP_ELCM_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
-  * `ONEAPP_ELCM_INFLUXDB_DATABASE` - Database name.
-  * `ONEAPP_ELCM_GRAFANA_PASSWORD` - Password used to login into the Grafana.
+  * `ONEAPP_JENKINS_USERNAME` - The username for the Jenkins admin user.
+  * `ONEAPP_JENKINS_PASSWORD` - The password for the Jenkins admin user.
+  * `ONEAPP_JENKINS_SITES_TOKEN` - Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault.
+  * `ONEAPP_JENKINS_OPENNEBULA_ENDPOINT` - The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2').
+  * `ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT` - The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474').
+  * `ONEAPP_JENKINS_OPENNEBULA_USERNAME` - The OpenNebula username used by Jenkins to deploy each component.
+  * `ONEAPP_JENKINS_OPENNEBULA_PASSWORD` - The password for the OpenNebula user used by Jenkins to deploy each component.
+  * `ONEAPP_JENKINS_OPENNEBULA_INSECURE` - Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification).
+  * `ONEAPP_JENKINS_AWS_ACCESS_KEY_ID` - S3 Storage access key. Same as used in the MinIO instance.
+  * `ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY` - S3 Storage secret key. Same as used in the MinIO instance. 
 
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
   
@@ -27,7 +34,7 @@ tags:
   - jenkins
   - ubuntu
 format: qcow2
-creation_time: "1720169901"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -49,6 +56,8 @@ opennebula_template:
     oneapp_jenkins_opennebula_insecure:      "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
     oneapp_jenkins_aws_access_key_id:        "$ONEAPP_JENKINS_AWS_ACCESS_KEY_ID"
     oneapp_jenkins_aws_secret_access_key:    "$ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY"
+  inputs_order: >-
+    ONEAPP_JENKINS_USERNAME,ONEAPP_JENKINS_PASSWORD,ONEAPP_JENKINS_SITES_TOKEN,ONEAPP_JENKINS_OPENNEBULA_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_INSECURE,ONEAPP_JENKINS_OPENNEBULA_USERNAME,ONEAPP_JENKINS_OPENNEBULA_PASSWORD,ONEAPP_JENKINS_AWS_ACCESS_KEY_ID,ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -66,24 +75,23 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_jenkins_username:                 "O|text|ONEAPP_JENKINS_USERNAME: The username for the Jenkins admin user||admin"
-    oneapp_jenkins_password:                 "O|password|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user"
+    oneapp_jenkins_password:                 "M|password|ONEAPP_JENKINS_PASSWORD: The password for the Jenkins admin user"
     oneapp_jenkins_sites_token:              "M|password|ONEAPP_JENKINS_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-    oneapp_jenkins_opennebula_endpoint:      "M|text|ONEAPP_JENKINS_OPENNEBULA_ENDPOINT: The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')||"
-    oneapp_jenkins_opennebula_flow_endpoint: "M|text|ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT: The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')||"
-    oneapp_jenkins_opennebula_username:      "M|text|ONEAPP_JENKINS_OPENNEBULA_USERNAME: The OpenNebula username used by Jenkins to deploy each component||"
+    oneapp_jenkins_opennebula_endpoint:      "M|text|ONEAPP_JENKINS_OPENNEBULA_ENDPOINT: The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')"
+    oneapp_jenkins_opennebula_flow_endpoint: "M|text|ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT: The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')"
+    oneapp_jenkins_opennebula_username:      "M|text|ONEAPP_JENKINS_OPENNEBULA_USERNAME: The OpenNebula username used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_password:      "M|password|ONEAPP_JENKINS_OPENNEBULA_PASSWORD: The password for the OpenNebula user used by Jenkins to deploy each component"
     oneapp_jenkins_opennebula_insecure:      "O|boolean|ONEAPP_JENKINS_OPENNEBULA_INSECURE: Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
-    oneapp_jenkins_aws_access_key_id:        "M|text|ONEAPP_JENKINS_AWS_ACCESS_KEY_ID: S3 Storage access key. Same as used in the MinIO instance||"
-    oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance||" 
+    oneapp_jenkins_aws_access_key_id:        "M|text|ONEAPP_JENKINS_AWS_ACCESS_KEY_ID: S3 Storage access key. Same as used in the MinIO instance"
+    oneapp_jenkins_aws_secret_access_key:    "M|text|ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY: S3 Storage secret key. Same as used in the MinIO instance" 
 logo: jenkins.png
 images:
-  - name: 6G-Sandbox Jenkins
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_jenkins.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10737418240"
+    size: "autofill"
     checksum:
-      md5: "63ee6cdb02526748c93a91d000c47052"
-      sha256: "b70b679ccabb840f34f43e3563cdf1a9e7ca009350c5505c0502e5c307e394ce"
+      md5: "autofill"
+      sha256: "autofill"

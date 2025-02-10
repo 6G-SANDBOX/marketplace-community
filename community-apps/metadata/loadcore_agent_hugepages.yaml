@@ -1,0 +1,73 @@
+---
+name: "LoadCore Agent Test Tool + hugepages"
+version: "v4.3.0.23-20241202-2121"
+software_version: "v4.3.0.23"
+publisher: "Keysight Technologies"
+description: |-
+    Keysight's 5G LoadCore test solution addresses critical validation requirements for improved reliability and performance of 5G emerging architectures. With comprehensive performance testing of all nodes and interfaces, this powerful yet easy-to-use solution helps network operators deliver higher-performing services, greater scale, and lower-latency communications.
+    Using real-world subscriber modeling, testers do not need to be protocol experts to develop realistic test scenarios. From a single application, perform capacity tests, detail a device’s throughput, measure voice and video quality, and model a wide variety of mobility scenarios.
+
+    With 5G development and adoption progressing rapidly, cloud native is central to the 5GC architecture. With its microservice architecture and options to be deployed either as a virtual machine (VM) or Container, LoadCore is fully aligned to this new paradigm.
+
+    **Highlights**
+
+    * Test the 4G/5G Core Network by simulating multiple nodes and interfaces, from end-toend to node isolation.
+    * Simulate UE behavior in multiple 4G/5G use cases like network slicing, multi-access edge computing (MEC) low latency and offloading, video optimization.
+    * Scale up to millions of subscribers with high data throughput, using stateful application traffic mixes that can interact with real servers and peers.
+    * Perform service quality validation with subscriber modeling, multiplay traffic, and quality of experience (QoE) measurements.
+    * Validate complex scenarios for service-based architecture (SBA)
+    * Control test traffic mix and intensity using network objectives to independently manage control and user planes.
+    * Deploy either as VM or containers on private, hybrid or public clouds. High flexibility in terms of supported platform, hypervisor and orchestration.
+    * Available through AWS Marketplace either as BYOL (Bring Your Own License) or PAYG (Pay As You Go) – an industry first.
+    * Full automation via REST API and Python allows users to create regressions for continuous validation of product quality.
+    * Predefined test suites for 3GPP 5G Security Assurance Specification (SCAS) conformance validation.
+    * Fuzzing testing capability on SBI interfaces.
+
+    **Note**: This appliance TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
+    change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+short_description: LoadCore Agent Test Tool appliance for KVM
+tags:
+  - 6G-Sandbox
+  - Keysight
+  - Loadcore
+format: raw
+creation_time: "1733170911"
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+  cpu: '1'
+  vcpu: '8'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hot_resize:
+    cpu_hot_add_enabled: 'YES'
+    memory_hot_add_enabled: 'YES'
+  hypervisor: kvm
+  memory: '18432'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+logo: keysight.png
+images:
+  - name: "LoadCore Agent Test Tool + hugepages v4.3.0.23-20241202-2121"
+    url: >-
+      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_hugepages_4.3.0.23.raw
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "4831838208"
+    checksum:
+      md5: "3c5cfb01e8ff185faecc25d3a54bba57"
+      sha256: "4adc1b32d8ad1186ee597e682cf7492dbd26027590d3db541ac085d709046be8"

@@ -3,55 +3,11 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='6G-Sandbox Jenkins'
-ONE_SERVICE_VERSION='0.3.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Appliance with Jenkins preinstalled and configured to serve 6G-Sandbox sites.'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of Jenkins LTS from the official download and configures it to be ready to serve a 6G-SANDBOX site.
-
-The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-Run with default values and manually configure the credentials from Jenkins WebUI, or use contextualization variables to automate the bootstrap.
-Default Jenkins credentials (if ONEAPP_JENKINS_USERNAME and ONEAPP_JENKINS_PASSWORD are unspecified) are admin:admin
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-
-**WARNING: The appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.**
-EOF
-)
-
-ONE_SERVICE_RECONFIGURABLE=false
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_JENKINS_USERNAME'                  'configure'  'The username for the Jenkins admin user'                                        'O|text'
-    'ONEAPP_JENKINS_PASSWORD'                  'configure'  'The password for the Jenkins admin user'                                        'O|text'
-    'ONEAPP_JENKINS_SITES_TOKEN'               'configure'  'Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault'  'M|password'
-    'ONEAPP_JENKINS_OPENNEBULA_ENDPOINT'       'configure'  'The URL of your OpenNebula XML-RPC Endpoint API'                                'M|text'
-    'ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT'  'configure'  'The URL of your OneFlow HTTP Endpoint API'                                      'M|text'
-    'ONEAPP_JENKINS_OPENNEBULA_USERNAME'       'configure'  'The OpenNebula username used by Jenkins to deploy each component'               'M|text'
-    'ONEAPP_JENKINS_OPENNEBULA_PASSWORD'       'configure'  'The password matching OPENNEBULA_USERNAME'                                      'M|password'
-    'ONEAPP_JENKINS_OPENNEBULA_INSECURE'       'configure'  'Allow insecure connexion into the OpenNebula XML-RPC Endpoint API (skip TLS verification)'                  'O|boolean'
-    'ONEAPP_JENKINS_AWS_ACCESS_KEY_ID'         'configure'  'S3 Storage access key. Same as used in the MinIO instance'                      'M|text'
-    'ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY'     'configure'  'S3 Storage secret key. Same as used in the MinIO instance'                      'M|text'
-)
-
-ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
-ONEAPP_JENKINS_PASSWORD="${ONEAPP_JENKINS_PASSWORD:-admin}"
-ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
-
-
-# ------------------------------------------------------------------------------
 # Global variables
 # ------------------------------------------------------------------------------
+
+ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
+ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 
 DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip"
 DEP_PIP="boto3 botocore pyone==6.8.3 netaddr"
@@ -72,16 +28,16 @@ service_install()
     systemctl stop unattended-upgrades
 
     # packages
-    install_pkg_deps DEP_PKGS
+    install_pkg_deps
 
     # jenkins
     install_jenkins
 
     # pip modules
-    install_pip_deps DEP_PIP
+    install_pip_deps
 
     # ansible and terraform
-    install_ansible_terraform ANSIBLE_COLLECTIONS
+    install_ansible_terraform
 
     # jenkins admin user
     create_admin_user
@@ -91,9 +47,6 @@ service_install()
 
     # pipelines
     import_pipelines
-
-    # service metadata
-    create_one_service_metadata
 
     # cleanup
     postinstall_cleanup
@@ -141,8 +94,9 @@ install_pkg_deps()
     msg info "Run apt-get update"
     apt-get update
 
-    msg info "Install required packages for Jenkins"
-    if ! apt-get install -y ${!1} ; then
+    msg info "Install required .deb packages"
+    wait_for_dpkg_lock_release
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
@@ -150,9 +104,9 @@ install_pkg_deps()
 
 install_pip_deps()
 {
-    if [ -n ${1} ]; then
+    if [ -n "${DEP_PIP}" ]; then
         msg info "Install required pip packages for Jenkins"
-        if ! sudo -H -u jenkins bash -c "pip3 install ${!1}" ; then
+        if ! sudo -H -u jenkins bash -c "pip3 install ${DEP_PIP}" ; then
             msg error "pip package(s) installation failed"
             exit 1
         fi
@@ -216,7 +170,7 @@ install_ansible_terraform()
         exit 1
     fi
     msg info "Install required ansible collections"
-    if ! sudo -H -u jenkins bash -c "ansible-galaxy collection install ${!1}"; then
+    if ! sudo -H -u jenkins bash -c "ansible-galaxy collection install ${ANSIBLE_COLLECTIONS}"; then
         msg error "instalation of ansible collections failed"
         exit 1
     fi
@@ -455,6 +409,24 @@ credentials:
 EOF
     chown jenkins:jenkins /var/lib/jenkins/casc_configs/credentials.yaml
     chmod u=r,go= /var/lib/jenkins/casc_configs/credentials.yaml
+}
+
+wait_for_dpkg_lock_release()
+{
+  local lock_file="/var/lib/dpkg/lock-frontend"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if ! lsof "${lock_file}" &>/dev/null; then
+      return 0
+    fi
+    msg info "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  exit 1
 }
 
 postinstall_cleanup()

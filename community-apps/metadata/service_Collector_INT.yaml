@@ -1,10 +1,10 @@
 ---
-name: Service Collector_INT P4 - KVM
-# version + date "%Y%M%d-%h%m"
-version: "001-20241205-1000"
-publisher: UMA
+name: "INT-P4 Collector"
+version: "autofill"
+software_version: "v1.0.0"
+publisher: "University of Malaga"
 description: |-
-  This appliance includes pre-installed INT-Collector P4, InfluxDB, and Grafana.
+  This appliance includes pre-installed INT-P4 Collector, InfluxDB, and Grafana.
 
   The appliance collects P4 telemetry reports, processes them, and stores them in InfluxDB for visualization in Grafana.
 
@@ -14,8 +14,6 @@ description: |-
   - Optimized storage in InfluxDB
   - Real-time visualization with Grafana dashboards
   - Based on the INT-Collector project: https://github.com/GEANT-DataPlaneProgramming/int-collector
-
-
 short_description: Appliance that includes pre-installed INT-Collector P4, InfluxDB and Grafana
 tags:
   - ubuntu
@@ -24,7 +22,7 @@ tags:
   - influxdb
   - grafana
 format: qcow2
-creation_time: "1733393580"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '18.04'
 os-arch: x86_64
@@ -56,13 +54,12 @@ opennebula_template:
   user_inputs:
 logo: INT-P4_Collector.png
 images:
-  - name: Collector INT P4
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_Collector_INT.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10737418240"
+    size: "autofill"
     checksum:
-      md5: "e68ce09564f4e31f15843d0f7247165f"
-      sha256: "e017428bf899e84eb75dcafea50ab5bc0b3883c1a094f306dff4802fd64b8c99"
+      md5: "autofill"
+      sha256: "autofill"

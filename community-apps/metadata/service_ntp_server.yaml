@@ -1,7 +1,8 @@
 ---
-name: NTP Server
-version: 20240828-1800
-publisher: Telefonica Innovacion Digital
+name: "NTP Server"
+version: "autofill"
+software_version: "v0.0.1"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   Appliance with preinstalled NTP server based on Chrony and Docker.
 
@@ -23,7 +24,7 @@ tags:
   - ntp
   - ubuntu
 format: qcow2
-creation_time: "1724860738"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '22.04 LTS'
 os-arch: x86_64
@@ -37,13 +38,13 @@ opennebula_template:
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
     oneapp_ntp_tz: "$ONEAPP_NTP_TZ"
+  inputs_order: >-
+    ONEAPP_NTP_TZ,ONEAPP_NTP_SERVERS
   cpu: '1'
   vcpu: '1'
   graphics:
     listen: 0.0.0.0
     type: vnc
-  inputs_order: >-
-    ONEAPP_NTP_SERVERS,ONEAPP_NTP,TZ
   memory: '512'
   memory_unit_cost: 'MB'
   memory_resize_mode: 'BALLOONING'
@@ -52,15 +53,15 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_ntp_servers: "O|text|List of NTP Servers to use as Upstream| |0.es.pool.ntp.org,1.es.pool.ntp.org,2.es.pool.ntp.org,3.es.pool.ntp.org"
-    oneapp_ntp_tz: "O|text|Timezone defined by IANAA| |Europe/Madrid"
+    oneapp_ntp_tz: "O|text|Timezone defined by IANAA: https://ftp.iana.org/tz/tzdb-2020f/zone1970.tab| |Europe/Madrid"
 logo: images/logos/NTP.png
 images:
-  - name: NTP Server
-    url: https://rawimages.mobilesandbox.cloud:9443/service_ntp_server.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "5242880000"
+    size: "autofill"
     checksum:
-      md5: a042b767a8e9ebf0acd55ee66bb43c2e
-      sha256: a3e8ba389a553a5cc5a1064e6daff5259f5cb9b39acc5325e41df7b4cec1a15d
+      md5: "autofill"
+      sha256: "autofill"

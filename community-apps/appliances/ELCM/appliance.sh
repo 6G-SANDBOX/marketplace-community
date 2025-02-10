@@ -3,36 +3,10 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Global variables
 # ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='ELCM'
-ONE_SERVICE_VERSION='3.6.3'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='ELCM appliance for KVM'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs the latest version of [ELCM](https://github.com/6G-SANDBOX/ELCM) and [ELCM_FRONTEND](https://github.com/6G-SANDBOX/portal) from the official repositories and configures them according to the input variables. Configuration of the ELCM can be made when instanciating the VM.
-
-The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-
-EOF
-)
 
 ONE_SERVICE_RECONFIGURABLE=true
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_ELCM_INFLUXDB_USER'            'configure'  'Username used to login into the InfluxDB'       'M|text'
-    'ONEAPP_ELCM_INFLUXDB_PASSWORD'        'configure'  'Password used to login into the InfluxDB'       'M|password'
-    'ONEAPP_ELCM_INFLUXDB_DATABASE'        'configure'  'Database name'                                  'M|text'
-    'ONEAPP_ELCM_GRAFANA_PASSWORD'         'configure'  'Password used to login into the Grafana'        'M|password'
-)
 
 ONEAPP_ELCM_INFLUXDB_USER="${ONEAPP_ELCM_INFLUXDB_USER:-admin}"
 ONEAPP_ELCM_INFLUXDB_PASSWORD="${ONEAPP_ELCM_INFLUXDB_PASSWORD:-admin}"
@@ -44,20 +18,13 @@ ONEAPP_ELCM_GRAFANA_PASSWORD="${ONEAPP_ELCM_GRAFANA_PASSWORD:-admin}"
 ONEAPP_ELCM_GRAFANA_HOST="127.0.0.1"
 ONEAPP_ELCM_GRAFANA_PORT="3000"
 
-
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
-
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
-
 PYTHON_BACKEND_ELCM_VERSION="3.10.12"
 PYTHON_FRONTEND_ELCM_VERSION="3.7.9"
 INFLUXDB_VERSION="1.7.6"
 GRAFANA_VERSION="5.4.5"
 PYTHON_BACKEND_ELCM_BIN="/usr/local/bin/python${PYTHON_BACKEND_ELCM_VERSION%.*}"
 PYTHON_FRONTEND_ELCM_BIN="/usr/local/bin/python${PYTHON_FRONTEND_ELCM_VERSION%.*}"
-
 
 
 # ------------------------------------------------------------------------------
@@ -69,10 +36,9 @@ PYTHON_FRONTEND_ELCM_BIN="/usr/local/bin/python${PYTHON_FRONTEND_ELCM_VERSION%.*
 service_install()
 {
     export DEBIAN_FRONTEND=noninteractive
-    systemctl stop unattended-upgrades
 
     # packages
-    install_pkg_deps DEP_PKGS
+    install_pkg_deps
 
     # python elcm backend
     install_python_backend_elcm
@@ -97,9 +63,6 @@ service_install()
 
     systemctl daemon-reload
 
-    # service metadata
-    create_one_service_metadata
-
     # cleanup
     postinstall_cleanup
 
@@ -108,7 +71,6 @@ service_install()
     return 0
 }
 
-# Runs when VM is first started, and every time 
 service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -153,21 +115,6 @@ service_bootstrap()
     return 0
 }
 
-# This one is not really mandatory, however it is a handled function
-service_help()
-{
-    msg info "Example appliance how to use message. If missing it will default to the generic help"
-
-    return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_cleanup()
-{
-    msg info "CLEANUP logic goes here in case of install failure"
-    :
-}
-
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -181,7 +128,8 @@ install_pkg_deps()
     apt-get update
 
     msg info "Install required packages for ELCM"
-    if ! apt-get install -y ${!1} ; then
+    wait_for_dpkg_lock_release
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
@@ -444,6 +392,24 @@ Logging:
   AppLevel: INFO
   LogLevel: DEBUG
 EOF
+}
+
+wait_for_dpkg_lock_release()
+{
+  local lock_file="/var/lib/dpkg/lock-frontend"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if ! lsof "${lock_file}" &>/dev/null; then
+      return 0
+    fi
+    msg info "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  exit 1
 }
 
 postinstall_cleanup()

@@ -1,7 +1,7 @@
 ---
 name: "XRext"
-# version + date "%Y%M%d-%h%m"
-version: "1.0.2"
+version: "v1.0.2-20241028-2002"
+software_version: "v1.0.2"
 publisher: NOKIA
 description: |-
   Appliance with preinstalled XRext. Run with default values and manually
@@ -25,8 +25,7 @@ tags:
   - XRext
   - ubuntu
 format: qcow2
-# stat -c %W <file>
-creation_time: "1724834325"
+creation_time: "1730142165"
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
@@ -50,6 +49,10 @@ opennebula_template:
     oneapp_xr_capif_password:      "$ONEAPP_XR_CAPIF_PASSWORD"
     oneapp_xr_capif_invoker_id:    "$ONEAPP_XR_CAPIF_INVOKER_ID"
     oneapp_xr_capif_api_name:      "$ONEAPP_XR_CAPIF_API_NAME"
+  inputs_order: >-
+    ONEAPP_XR_NAC_SERVER_IP,ONEAPP_XR_NAC_SERVER_PORT,ONEAPP_XR_NAC_SERVER_UNAME,ONEAPP_XR_NAC_SERVER_PASSWORD,
+    ONEAPP_XR_CAPIF_HTTP_HOST,ONEAPP_XR_CAPIF_HTTP_PORT,ONEAPP_XR_CAPIF_HTTPS_HOST,ONEAPP_XR_CAPIF_HTTPS_PORT,
+    ONEAPP_XR_CAPIF_UNAME,ONEAPP_XR_CAPIF_PASSWORD,ONEAPP_XR_CAPIF_INVOKER_ID,ONEAPP_XR_CAPIF_API_NAME
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -80,16 +83,12 @@ opennebula_template:
     oneapp_xr_capif_api_name:      "O|text|CAPIF API name||nac_api"
 logo: nokia.png
 images:
-  - name: "XRext"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_XRext.qcow2
+  - name: "XRext v1.0.2-20241028-2002"
+    url: "https://rawimages.mobilesandbox.cloud:9443/XRext_v1.0.2.qcow"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    # qemu-img info <file> | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g'
     size: "21474836480"
     checksum:
-      # md5sum <file> | cut -d' ' -f1
-      md5: "747817d4450a8554792680c38075fe7c"
-      # sha256sum <file> | cut -d' ' -f1
-      sha256: "c3d7ef1b23d6dfbf6b6b30da0c19b759670aaea0daf5b4bba83e137ade9f3046"
+      md5: "1f65224c0e2bd3f32a6a38de3c2f4a2b"
+      sha256: "dfa00cb8078bb0444d07885abdb8fc7bc3978b48724da45a6c9d59f834ca0a61"

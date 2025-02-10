@@ -17,11 +17,10 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Contextualization and global variables
+# Global variables
 # ------------------------------------------------------------------------------
 
-DEPLOY_TOKEN=''
-DOWNLOAD_URL=''
+OPEN5GS_VERSION="2.7.2" 
 
 
 # ------------------------------------------------------------------------------
@@ -37,7 +36,7 @@ service_install()
 
     # install
     install_dependencies
-    install_o5gc
+    install_open5gs
 
     # cleanup
     postinstall_cleanup
@@ -51,7 +50,7 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
-    msg info "CONFIGURE FINISHED - now use ansible to configure the open5gcore"
+    msg info "CONFIGURE FINISHED - now use ansible to configure the open5gs"
     return 0
 }
 
@@ -69,40 +68,49 @@ service_bootstrap()
 
 install_dependencies()
 {
-
     msg info "update apt"
     apt-get update
-
-    msg info "Install mariadb"
-    if ! apt-get install -y mariadb-server ; then
-        msg error "installation failed"
-        exit 1
-    fi
 
     msg info "Install dependencies"
     if ! apt-get install -y bmon tmux jq ; then
         msg error "installation failed"
         exit 1
     fi
+
+    msg info "Adding MongoDB 6 PPA | no apt key"
+    mkdir -p /etc/apt/keyrings
+    if ! (curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | sudo tee /etc/apt/keyrings/mongodb-server-6.0.asc); then
+        msg error "adding MongoDB 6 PPA no apt key failed"
+        exit 1
+    fi
+
+    msg info "Adding MongoDB 6 | apt source"
+    if ! (echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/mongodb-server-6.0.asc] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list) ; then
+        msg error "adding MongoDB 6 PPA apt sourcefailed"
+        exit 1
+    fi
+
+    msg info "Installing mongodb-org"
+    apt-get update
+    if ! apt install -y mongodb-org ; then
+        msg error "mongodb-org installation failed"
+        exit 1
+    fi
 }
 
-install_o5gc()
+
+install_open5gs()
 {
-    msg info "downloading deb file"
-
-    if [ -z "$DOWNLOAD_URL"  ] || [ -z "${DEPLOY_TOKEN}" ] ; then
-        msg error "Download failed: DOWNLOAD_URL and DEPLOY_TOKEN needed!"
+    msg info "Install open5gs"
+    msg info "Adding Open5GS PPA..."
+    if ! add-apt-repository -y ppa:open5gs/latest ; then
+        msg error "adding Open5GS PPA failed"
         exit 1
     fi
 
-    if ! wget --no-verbose --password="${DEPLOY_TOKEN}" --user=token "$DOWNLOAD_URL" -O /root/phoenix.deb ; then
-        msg error "Download failed"
-        exit 1
-    fi
-
-    msg info "Install open5gcore deb"
-    if ! apt-get install -y /root/phoenix.deb ; then
-        msg error "installation failed"
+    msg info "Installing open5gs ${OPEN5GS_VERSION}~*..."
+    if ! apt install -y open5gs=${OPEN5GS_VERSION}~* ; then
+        msg error "open5gs installation failed"
         exit 1
     fi
 }
@@ -114,6 +122,5 @@ postinstall_cleanup()
     apt-get autoclean
     apt-get autoremove
     rm -rf /var/lib/apt/lists/*
-    rm -rf /root/phoenix.deb
 }
 

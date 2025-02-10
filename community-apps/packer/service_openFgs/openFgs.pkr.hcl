@@ -12,13 +12,13 @@ build {
   }
 }
 
-
-source "qemu" "routemanager" {
-  cpus        = 2 
-  memory      = 2048
+# Build VM image
+source "qemu" "openFgs" {
+  cpus        = 2
+  memory      = 4096
   accelerator = "kvm"
 
-  iso_url      = "../one-apps/export/debian12.qcow2"
+  iso_url      = "../one-apps/export/ubuntu2204.qcow2"
   iso_checksum = "none"
 
   headless = var.headless
@@ -29,12 +29,12 @@ source "qemu" "routemanager" {
   net_device       = "virtio-net"
   format           = "qcow2"
   disk_compression = false
-  skip_resize_disk = true
+  #skip_resize_disk = true
+  disk_size        = "6144"   #default size increased to 6G
 
   output_directory = var.output_dir
 
   qemuargs = [
-    ["-cpu", "host"],
     ["-cdrom", "${var.input_dir}/${var.appliance_name}-context.iso"],
     ["-serial", "stdio"],
     # MAC addr needs to mach ETH0_MAC from context iso
@@ -42,20 +42,18 @@ source "qemu" "routemanager" {
     ["-device", "virtio-net-pci,netdev=net0,mac=00:11:22:33:44:55"]
   ]
   ssh_username     = "root"
-  ssh_password     = "opennebula"
+  ssh_password     = "cdcoEvLKJf3sxg2J"
   ssh_timeout      = "900s"
   shutdown_command = "poweroff"
   vm_name          = "${var.appliance_name}"
 }
 
-
 build {
-  sources = ["source.qemu.routemanager"]
+  sources = ["source.qemu.openFgs"]
 
+  # revert insecure ssh options done by context start_script
   provisioner "shell" {
-    scripts = [
-      "${var.input_dir}/81-configure-ssh.sh",
-    ]
+    scripts = ["${var.input_dir}/81-configure-ssh.sh"]
   }
 
   provisioner "shell" {
@@ -73,7 +71,6 @@ build {
     ]
     destination = "/etc/one-appliance/"
   }
-
   provisioner "file" {
     sources = [
       "../one-apps/appliances/lib/common.sh",
@@ -81,17 +78,12 @@ build {
     ]
     destination = "/etc/one-appliance/lib/"
   }
-
   provisioner "file" {
     source      = "../one-apps/appliances/service.sh"
     destination = "/etc/one-appliance/service"
   }
-
   provisioner "file" {
-    # sources     = ["appliances/routemanager"]
-    sources     = [
-      "appliances/routemanager/appliance.sh",
-      ]
+    sources     = ["appliances/openFgs/appliance.sh"]
     destination = "/etc/one-appliance/service.d/"
   }
 

@@ -6,57 +6,17 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
 
-# If your "service_install" function includes the "create_one_service_metadata" function
-# The same metadata as in the marketplace yaml file will be placed in /etc/one-appliance/metadata inside the appliance
-ONE_SERVICE_NAME='Service example - KVM'
-ONE_SERVICE_VERSION=''   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Sample Appliance for KVM hosts'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-Sample Appliance for KVM hosts.
+# Whether steps in service_configure() should run at every reboot instead of only on the first one
+# Virtually, service_configure() will run at the same cases that service_bootstrap() so just put the repeatable code there instead
+# Default value is empty=false 
+#ONE_SERVICE_RECONFIGURABLE=true
 
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-EOF
-)
-
-# Whether service_configure() and service_bootstrap() can run again
-ONE_SERVICE_RECONFIGURABLE=true
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-# This is how you interact with the appliance using OpenNebula.
-# These variables are defined in the CONTEXT section of the VM Template as custom variables
-# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section
-
-# 'name' 'type' 'description' 'input'.
-# 'type' is always 'configure', and 'input' are shown at https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_LITHOPS_BACKEND'            'configure'  'Lithops compute backend'                                          'O|text'
-    'ONEAPP_LITHOPS_STORAGE'            'configure'  'Lithops storage backend'                                          'O|text'
-    'ONEAPP_MINIO_ENDPOINT'             'configure'  'Lithops storage backend MinIO endpoint URL'                       'O|text'
-    'ONEAPP_MINIO_ACCESS_KEY_ID'        'configure'  'Lithops storage backend MinIO account user access key'            'O|text'
-    'ONEAPP_MINIO_SECRET_ACCESS_KEY'    'configure'  'Lithops storage backend MinIO account user secret access key'     'O|text'
-    'ONEAPP_MINIO_BUCKET'               'configure'  'Lithops storage backend MinIO existing bucket'                    'O|text'
-    'ONEAPP_MINIO_ENDPOINT_CERT'        'configure'  'Lithops storage backend MinIO endpoint certificate'               'O|text64'
-)
-
-# Default values for when the variable isn't defined on the VM Template
+# Default values for when a variable isn't defined on the VM Template
 ONEAPP_LITHOPS_BACKEND="${ONEAPP_LITHOPS_BACKEND:-localhost}"
 ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
-
-# You can make these parameters a required step of the VM instantiation wizard by using the USER_INPUTS feature
-# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
-
-
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
 
 # For organization purposes is good to define here variables that will be used by your bash logic
 DEP_PKGS="python3-pip"
@@ -65,15 +25,14 @@ LITHOPS_VERSION="3.4.0"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 
 
-
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Function Definitions
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-# The following functions will be called by the appliance service manager at
-# the  different stages of the appliance life cycles. They must exist
+# The following functions must exist, and will be called by the appliance service manager at
+# the  different stages of the appliance life cycles.
 # https://github.com/OpenNebula/one-apps/wiki/apps_intro#appliance-life-cycle
 
 service_install()
@@ -82,7 +41,7 @@ service_install()
     systemctl stop unattended-upgrades
 
     # packages
-    install_deps DEP_PKGS DEP_PIP
+    install_deps
 
     # docker
     install_docker
@@ -93,9 +52,6 @@ service_install()
     # create Lithops config file in /etc/lithops
     create_lithops_config
 
-    # service metadata. Function defined at one-apps/appliances/lib/common.sh
-    create_one_service_metadata
-
     # cleanup
     postinstall_cleanup
 
@@ -104,7 +60,7 @@ service_install()
     return 0
 }
 
-# Runs when VM is first started, and every time 
+# Runs when the appliance is first started
 service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -129,6 +85,7 @@ service_configure()
     return 0
 }
 
+# Runs every time the appliance boots
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -155,7 +112,6 @@ service_cleanup()
 }
 
 
-
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Function Definitions
@@ -164,22 +120,21 @@ service_cleanup()
 
 # Then for modularity purposes you can define your own functions as long as their name
 # doesn't clash with the previous functions
-
-
 install_deps()
 {
     msg info "Run apt-get update"
     apt-get update
 
     msg info "Install required packages for Jenkins"
-    if ! apt-get install -y ${!1} ; then
+    wait_for_dpkg_lock_release
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
 
-    if [ -n ${2} ]; then
+    if [ -n "${DEP_PIP}" ]; then
         msg info "Install required pip packages for Jenkins"
-        if ! pip install ${2} ; then
+        if ! pip install ${DEP_PIP} ; then
             msg error "pip package(s) installation failed"
             exit 1
         fi
@@ -269,6 +224,24 @@ check_minio_attrs()
     [[ -z "$ONEAPP_MINIO_SECRET_ACCESS_KEY" ]] && return 1
 
     return 0
+}
+
+wait_for_dpkg_lock_release()
+{
+  local lock_file="/var/lib/dpkg/lock-frontend"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if ! lsof "${lock_file}" &>/dev/null; then
+      return 0
+    fi
+    msg info "Could not get lock ${lock_file} due to unattended-upgrades. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without ${lock_file} being released by unattended-upgrades"
+  exit 1
 }
 
 postinstall_cleanup()

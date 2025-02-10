@@ -1,7 +1,8 @@
 ---
 name: "6G-Sandbox bastion"
-version: "20241125-1624"
-publisher: Telefonica Innovacion Digital
+version: "autofill"
+software_version: "v0.4.0"
+publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of the bastion, the entrypoint of every Virtual Network, with additional services such as:
   - Technitium DNS
@@ -19,8 +20,7 @@ description: |-
   * `ONEAPP_BASTION_DNS_PASSWORD` - For the Technitium DNS, admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.
   * `ONEAPP_BASTION_DNS_FORWARDERS` - For the Technitium DNS, comma separated list of forwarders to be used by the DNS server.
   * `ONEAPP_BASTION_DNS_DOMAIN` - For the Technitium DNS, domain name for creating the new zone.
-  * `ONEAPP_BASTION_ROUTEMANAGER_TOKEN` - For the route-manager-api, token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.
-  * `ONEAPP_BASTION_ROUTEMANAGER_PORT` - For the route-manager-api, TCP port where the API service is be exposed.
+  * `ONEAPP_BASTION_ROUTEMANAGER_APITOKEN` - For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`.
 
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
 
@@ -32,7 +32,7 @@ tags:
   - bastion
   - ubuntu
 format: qcow2
-creation_time: "1721838167"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -49,8 +49,9 @@ opennebula_template:
     oneapp_bastion_dns_password:       "$ONEAPP_BASTION_DNS_PASSWORD"
     oneapp_bastion_dns_forwarders:     "$ONEAPP_BASTION_DNS_FORWARDERS"
     oneapp_bastion_dns_domain:         "$ONEAPP_BASTION_DNS_DOMAIN"
-    oneapp_bastion_routemanager_token: "$ONEAPP_BASTION_ROUTEMANAGER_TOKEN"
-    oneapp_bastion_routemanager_port:  "$ONEAPP_BASTION_ROUTEMANAGER_PORT"
+    oneapp_bastion_routemanager_apitoken: "$ONEAPP_BASTION_ROUTEMANAGER_APITOKEN"
+  inputs_order: >-
+    ONEAPP_BASTION_DNS_DOMAIN,ONEAPP_BASTION_DNS_PASSWORD,ONEAPP_BASTION_DNS_FORWARDERS,ONEAPP_BASTION_ROUTEMANAGER_APITOKEN
   cpu: '2'
   vcpu: '2'
   graphics:
@@ -70,17 +71,15 @@ opennebula_template:
     oneapp_bastion_dns_password:       "O|password|ONEAPP_BASTION_DNS_PASSWORD: For the Technitium DNS, admin user password. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
     oneapp_bastion_dns_forwarders:     "O|text|ONEAPP_BASTION_DNS_FORWARDERS: For the Technitium DNS, comma separated list of forwarders to be used by the DNS server.| |8.8.8.8,1.1.1.1"
     oneapp_bastion_dns_domain:         "M|text|ONEAPP_BASTION_DNS_DOMAIN: For the Technitium DNS, domain name for creating the new zone."
-    oneapp_bastion_routemanager_token: "O|password|ONEAPP_BASTION_ROUTEMANAGER_TOKEN: For the route-manager-api, token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
-    oneapp_bastion_routemanager_port:  "O|number|ONEAPP_ROUTEMANAGER_PORT: For the route-manager-api, TCP port where the API service is be exposed.| |8172"
-logo: sandbox.png
+    oneapp_bastion_routemanager_apitoken: "O|password|ONEAPP_BASTION_ROUTEMANAGER_APITOKEN: For the route-manager-api, Bearer token to authenticate to the API. If not provided, a new one will be generated at instanciate time with `openssl rand -base64 32`."
+logo: ubuntu.png
 images:
-  - name: "6G-Sandbox bastion"
-    url: >-
-      https://rawimages.mobilesandbox.cloud:9443/service_bastion.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "10737418240"
+    size: "autofill"
     checksum:
-      md5: "16da388980a2e575c09cf3f4a2a40180"
-      sha256: "79477b99b9d7e7ef4158cf17614d1e626c166fe0da8a1d5d5a766a40facfda18"
+      md5: "autofill"
+      sha256: "autofill"

@@ -1,21 +1,21 @@
 ---
-name: "Fraunhofer Open5GCore"
+name: "Open5GS VM"
 version: "autofill"
-software_version: "v9.0.x"
+software_version: "v2.7.2"
 publisher: "Fraunhofer FOKUS"
 description: |-
-  Appliance with preinstalled Open5gCore and mariadb.
-  ***Note*** This appliance is subject to a license which is bound to a Facility.
-  In order to build this Appliance you need to add your download url and deploy token 
-  for the Open5gcore.deb file into `appliances/phoenix/appliance.sh` as
-  DEPLOY_TOKEN='' and DOWNLOAD_URL='' and then manually upload this image in the OpenNebula.
+  Appliance with preinstalled Open5GS and MongoDB.
 
-short_description: Open5gcore appliance for KVM
+  See the Official [documentation](https://open5gs.org/open5gs/docs).
+
+  **Note:** There are no configuration parameters for this Appliance as it is meant
+  to be used by the [Open5GS_vm](https://github.com/6G-SANDBOX/6G-Library/tree/develop/open5gs_vm) 6g-Library component.
+short_description: Open5GS and MongoDB appliance for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library
-  - 5G-core
-  - open5gcore
+  - 5G-Core
+  - Open5GS
   - ubuntu
 format: qcow2
 creation_time: "autofill"
@@ -30,19 +30,20 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-  cpu: '1'
+  cpu: '2'
   vcpu: '2'
   graphics:
     listen: 0.0.0.0
     type: vnc
+  inputs_order:
   memory: '2048'
   memory_unit_cost: 'MB'
   memory_resize_mode: 'BALLOONING'
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-  user_inputs: {}
-logo: https://cdn0.scrvt.com/fokus/d9859d6f8b785685/4d3f99755ad3/v/96292ff212e8/NGNI_logo_open5gcore_02.jpg
+  user_inputs:
+logo: https://open5gs.org/assets/img/open5gs-logo.png
 images:
   - name: "autofill"
     url: "autofill"

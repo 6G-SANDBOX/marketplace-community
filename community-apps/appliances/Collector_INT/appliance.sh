@@ -3,45 +3,7 @@
 set -o errexit -o pipefail
 
 # ------------------------------------------------------------------------------
-# Appliance metadata
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_NAME='Service Collector_INT P4 - KVM'
-ONE_SERVICE_VERSION='1.0.0'   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Appliance that includes pre-installed INT-Collector P4, InfluxDB and Grafana'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance includes pre-installed INT-Collector P4, InfluxDB, and Grafana.
-
-The appliance collects P4 telemetry reports, processes them, and stores them in InfluxDB for visualization in Grafana.
-
-Key Features:
-
-- Automatic collection of P4 telemetry data
-
-- Optimized storage in InfluxDB
-
-- Real-time visualization with Grafana dashboards
-
-- Based on the INT-Collector project: https://github.com/GEANT-DataPlaneProgramming/int-collector
-
-EOF
-)
-
-ONE_SERVICE_RECONFIGURABLE=true
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-ONE_SERVICE_PARAMS=(
-# TODO: Add contextualization parameters in the future
-)
-
-
-# ------------------------------------------------------------------------------
-# Global variables
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
 
 DESIRED_KERNEL="4.15.0-154-generic"
@@ -64,7 +26,7 @@ service_install()
     install_kernel
     
     # Install dependencies
-    install_deps DEP_PKGS
+    install_deps
 
     # Install BCC
     install_bcc
@@ -171,7 +133,7 @@ install_deps()
     apt-get update
 
     msg info "Install required packages for bcc, influxDB and Grafana"
-    if ! apt-get install -y ${!1} ; then
+    if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
     fi
