@@ -47,13 +47,13 @@ service_install()
     install_docker
 
     # nginx
-    install_nginx
+    # install_nginx
 
     # whatever your appliance is about
-    install_whatever
+    # install_whatever
 
     # create Lithops config file in /etc/lithops
-    create_lithops_config
+    # create_lithops_config
 
     # service metadata. Function defined at one-apps/appliances/lib/common.sh
     create_one_service_metadata
@@ -256,6 +256,7 @@ http {
     }
 }
 EOF
+    sudo nginx -t
     cat /etc/nginx/sites-available/default
     sudo systemctl restart nginx
     sudo systemctl enable nginx
