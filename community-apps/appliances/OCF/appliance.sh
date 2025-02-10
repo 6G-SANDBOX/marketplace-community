@@ -230,38 +230,37 @@ install_nginx()
         -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt \
         -subj "/CN=localhost"
     cat > /etc/nginx/sites-available/default <<EOF
-    events {}
+events {}
 
-    http {
-        map $host $backend {
-            default "127.0.0.1:8080";  # Por defecto, redirige a 8080
-            register-opencapif "127.0.0.1:8084";
-            opencapif "127.0.0.1:8080";
-        }
+http {
+    map \$host \$backend {
+        default "127.0.0.1:8080";  # Por defecto, redirige a 8080
+        register-opencapif "127.0.0.1:8084";
+        opencapif "127.0.0.1:8080";
+    }
 
-        server {
-            listen 443 ssl;
-            server_name register-opencapif opencapif;
+    server {
+        listen 443 ssl;
+        server_name register-opencapif opencapif;
 
-            ssl_certificate /etc/nginx/certs/server.crt;
-            ssl_certificate_key /etc/nginx/certs/server.key;
+        ssl_certificate /etc/nginx/certs/server.crt;
+        ssl_certificate_key /etc/nginx/certs/server.key;
 
-            location / {
-                proxy_pass http://$backend;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto https;
-            }
+        location / {
+            proxy_pass http://\$backend;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
         }
     }
+}
 EOF
 
     sudo systemctl restart nginx
     sudo systemctl enable nginx
     sudo ufw allow 443/tcp
     sudo ufw reload
-
 }
 
 install_whatever()
