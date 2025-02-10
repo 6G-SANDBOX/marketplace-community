@@ -5,49 +5,6 @@
 
 set -o errexit -o pipefail
 
-# ------------------------------------------------------------------------------
-# Appliance metadata
-# ------------------------------------------------------------------------------
-
-# If your "service_install" function includes the "create_one_service_metadata" function
-# The same metadata as in the marketplace yaml file will be placed in /etc/one-appliance/metadata inside the appliance
-ONE_SERVICE_NAME='[Testing] OCF - KVM'
-ONE_SERVICE_VERSION=''   #latest
-ONE_SERVICE_BUILD=$(date +%s)
-ONE_SERVICE_SHORT_DESCRIPTION='Sample Appliance for KVM hosts'
-ONE_SERVICE_DESCRIPTION=$(cat <<EOF
-This appliance installs OpenCAPIF, check OCF Documentation at [OpenCAPIF](https://ocf.etsi.org/documentation/v1.0.0-release/).
-
-The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
-
-After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
-EOF
-)
-
-# Whether service_configure() and service_bootstrap() can run again
-ONE_SERVICE_RECONFIGURABLE=false
-
-
-# ------------------------------------------------------------------------------
-# List of contextualization parameters
-# ------------------------------------------------------------------------------
-
-# This is how you interact with the appliance using OpenNebula.
-# These variables are defined in the CONTEXT section of the VM Template as custom variables
-# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section
-
-# 'name' 'type' 'description' 'input'.
-# 'type' is always 'configure', and 'input' are shown at https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
-ONE_SERVICE_PARAMS=(
-    'ONEAPP_LITHOPS_BACKEND'            'configure'  'Lithops compute backend'                                          'O|text'
-    'ONEAPP_LITHOPS_STORAGE'            'configure'  'Lithops storage backend'                                          'O|text'
-    'ONEAPP_MINIO_ENDPOINT'             'configure'  'Lithops storage backend MinIO endpoint URL'                       'O|text'
-    'ONEAPP_MINIO_ACCESS_KEY_ID'        'configure'  'Lithops storage backend MinIO account user access key'            'O|text'
-    'ONEAPP_MINIO_SECRET_ACCESS_KEY'    'configure'  'Lithops storage backend MinIO account user secret access key'     'O|text'
-    'ONEAPP_MINIO_BUCKET'               'configure'  'Lithops storage backend MinIO existing bucket'                    'O|text'
-    'ONEAPP_MINIO_ENDPOINT_CERT'        'configure'  'Lithops storage backend MinIO endpoint certificate'               'O|text64'
-)
-
 # Default values for when the variable isn't defined on the VM Template
 ONEAPP_LITHOPS_BACKEND="${ONEAPP_LITHOPS_BACKEND:-localhost}"
 ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
