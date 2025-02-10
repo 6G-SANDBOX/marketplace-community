@@ -56,7 +56,7 @@ source "qemu" "ocf" {
 # Essentially, a bunch of scripts are pulled from ./appliances and placed inside the Guest OS
 # There are shared libraries for ruby and bash. Bash is used in this example
 build {
-  sources = ["source.qemu.example"]
+  sources = ["source.qemu.ocf"]
 
   # revert insecure ssh options done by context start_script
   provisioner "shell" {
