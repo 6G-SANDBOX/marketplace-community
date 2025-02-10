@@ -40,11 +40,14 @@ service_install()
     export DEBIAN_FRONTEND=noninteractive
     systemctl stop unattended-upgrades
 
-    # packages
-    install_deps DEP_PKGS DEP_PIP
+    # # packages
+    # install_deps DEP_PKGS DEP_PIP
 
     # docker
     install_docker
+
+    # nginx
+    install_nginx
 
     # whatever your appliance is about
     install_whatever
@@ -212,6 +215,53 @@ install_docker()
         msg error "Docker installation failed"
         exit 1
     fi
+}
+
+install_nginx()
+{
+    apt update
+    msg info "Install Nginx"
+    if ! apt-get install -y nginx ; then
+        msg error "Nginx installation failed"
+        exit 1
+    fi
+    mkdir -p /etc/nginx/certs
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt \
+        -subj "/CN=localhost"
+    cat > /etc/nginx/sites-available/default <<EOF
+    events {}
+
+    http {
+        map $host $backend {
+            default "127.0.0.1:8080";  # Por defecto, redirige a 8080
+            register-opencapif "127.0.0.1:8084";
+            opencapif "127.0.0.1:8080";
+        }
+
+        server {
+            listen 443 ssl;
+            server_name register-opencapif opencapif;
+
+            ssl_certificate /etc/nginx/certs/server.crt;
+            ssl_certificate_key /etc/nginx/certs/server.key;
+
+            location / {
+                proxy_pass http://$backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto https;
+            }
+        }
+    }
+EOF
+
+    sudo systemctl restart nginx
+    sudo systemctl enable nginx
+    sudo ufw allow 443/tcp
+    sudo ufw reload
+
 }
 
 install_whatever()
