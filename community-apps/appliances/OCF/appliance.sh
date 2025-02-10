@@ -145,7 +145,7 @@ download_images()
 
 create_local_folders()
 {
-    services= (
+    services=(
         "TS29222_CAPIF_API_Invoker_Management_API"
         "TS29222_CAPIF_API_Provider_Management_API"
         "TS29222_CAPIF_Access_Control_Policy_API"
@@ -167,7 +167,7 @@ create_local_folders()
     )
     for service in "${services[@]}"; do
         echo "Current service: $service"
-        mkdif /etc/one-appliance/service.d/$service
+        mkdir -p /etc/one-appliance/service.d/$service
     done
 }
 
