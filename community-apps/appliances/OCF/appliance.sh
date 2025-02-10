@@ -146,7 +146,7 @@ download_images()
 create_local_folders()
 {
     services= (
-        "TS29222_CAPIF_API_Invoker_Management_API",
+        "TS29222_CAPIF_API_Invoker_Management_API"
         "TS29222_CAPIF_API_Provider_Management_API"
         "TS29222_CAPIF_Access_Control_Policy_API"
         "TS29222_CAPIF_Auditing_API"
