@@ -18,12 +18,13 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 # ------------------------------------------------------------------------------
 
 # For organization purposes is good to define here variables that will be used by your bash logic
-DEP_PKGS="python3-pip"
-DEP_PIP="boto3"
-LITHOPS_VERSION="3.4.0"
+# Static data that will be used by the appliance on installation part of the lifecycle
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
-
+OCF_ROBOT_FRAMEWORK_VERSION="1.0"
+# Configurable variables only for config and bootstrap, set by default on the VM Template
+# ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
+# ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
 
 
 # ------------------------------------------------------------------------------
@@ -47,9 +48,6 @@ service_install()
     # nginx
     # install_nginx
 
-    # service metadata. Function defined at one-apps/appliances/lib/common.sh
-    # create_one_service_metadata
-
     # create local folders to run capif services.
     create_local_folders
 
@@ -69,23 +67,7 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
-    # update Lithops config file if non-default options are set
-    configure_something
-
-    local_ca_folder="/usr/local/share/ca-certificates/minio"
-    if [[ ! -z "${ONEAPP_MINIO_ENDPOINT_CERT}" ]] && [[ ! -f "${local_ca_folder}/ca.crt" ]]; then
-        msg info "Adding trust CA for MinIO endpoint"
-
-        if [[ ! -d "${local_ca_folder}" ]]; then
-            msg info "Create folder ${local_ca_folder}"
-            mkdir "${local_ca_folder}"
-        fi
-
-        msg info "Create CA file and update certificates"
-        echo ${ONEAPP_MINIO_ENDPOINT_CERT} | base64 --decode >> ${local_ca_folder}/ca.crt
-        update-ca-certificates
-    fi
-
+    # in fact not needed now, because the service is started in the bootstrap
     run_docker_compose
 
     return 0
@@ -100,6 +82,8 @@ service_bootstrap()
     msg info "Starting OpenCAPIF Services"
     run_docker_compose
 
+    msg info "Creating OpenCAPIF user"
+    create_user
 
     msg info "BOOTSTRAP FINISHED"
     return 0
@@ -205,6 +189,7 @@ download_images()
         mongo:6.0.2
         mongo-express:1.0.0-alpha.4
         redis:alpine
+        labs.etsi.org:5050/ocf/capif/robot-tests-image:${OCF_ROBOT_FRAMEWORK_VERSION}
     )
 
     for image in "${images[@]}"; do
@@ -214,7 +199,7 @@ download_images()
 }
 
 
-
+#under development
 install_nginx()
 {
     apt update
@@ -262,42 +247,6 @@ EOF
     sudo ufw reload
 }
 
-
-configure_something(){
-    :
-}
-
-update_at_bootstrap(){
-    msg info "Update compute and storage backend modes"
-    sed -i "s/backend: .*/backend: ${ONEAPP_LITHOPS_BACKEND}/g" /etc/lithops/config
-    sed -i "s/storage: .*/storage: ${ONEAPP_LITHOPS_STORAGE}/g" /etc/lithops/config
-
-    if [[ ${ONEAPP_LITHOPS_STORAGE} = "localhost" ]]; then
-        msg info "Edit config file for localhost Storage Backend"
-        sed -i -ne "/# Start Storage/ {p;" -e ":a; n; /# End Storage/ {p; b}; ba}; p" /etc/lithops/config
-    elif [[ ${ONEAPP_LITHOPS_STORAGE} = "minio" ]]; then
-        msg info "Edit config file for MinIO Storage Backend"
-        if ! check_minio_attrs; then
-            echo
-            msg error "MinIO configuration failed"
-            msg info "You have to provide endpoint, access key id and secrec access key to configure MinIO storage backend"
-            exit 1
-        else
-            msg info "Adding MinIO configuration to /etc/lithops/config"
-            sed -i -ne "/# Start Storage/ {p; iminio:\n  endpoint: ${ONEAPP_MINIO_ENDPOINT}\n  access_key_id: ${ONEAPP_MINIO_ACCESS_KEY_ID}\n  secret_access_key: ${ONEAPP_MINIO_SECRET_ACCESS_KEY}\n  storage_bucket: ${ONEAPP_MINIO_BUCKET}" -e ":a; n; /# End Storage/ {p; b}; ba}; p" /etc/lithops/config
-        fi
-    fi
-}
-
-check_minio_attrs()
-{
-    [[ -z "$ONEAPP_MINIO_ENDPOINT" ]] && return 1
-    [[ -z "$ONEAPP_MINIO_ACCESS_KEY_ID" ]] && return 1
-    [[ -z "$ONEAPP_MINIO_SECRET_ACCESS_KEY" ]] && return 1
-
-    return 0
-}
-
 postinstall_cleanup()
 {
     msg info "Delete cache and stored packages"
@@ -306,9 +255,20 @@ postinstall_cleanup()
     rm -rf /var/lib/apt/lists/*
 }
 
-
+download_capif_repository()
+{
+    msg info "Download OpenCAPIF repository"
+    git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
+}
 
 run_docker_compose()
 {
+    msg info "Run OpenCAPIF"
     /etc/one-appliance/service.d/run.sh -s
+}
+
+create_user()
+{
+    msg info "Create OpenCAPIF user"
+    /etc/one-appliance/service.d/capif/services/create_users.sh -u ${ONEAPP_OCF_USER} -p ${ONEAPP_OCF_PASSWORD} -t 1
 }

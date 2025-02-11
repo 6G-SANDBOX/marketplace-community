@@ -5,9 +5,13 @@ version: "20241221-0914"
 software_version: "v2.0.0"
 publisher: Telefonica Innovación Digital
 description: |-
-  This appliance installs OpenCAPIF from ETSI. The OpenCAPIF version installed will be Release 1
+  This appliance installs OpenCAPIF from ETSI. The OpenCAPIF version installed will be Release v2.0.0-release
 
   After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+
+  Default client to onboard API invokers and API providers is client/password.
+
+  Remember to include in your local DNS the entry to resolve the hostname (capifcore) of the appliance. Register Service will be accesible through capifcore:8084 and CCF will be at capifcore:8080
   
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
   
@@ -31,13 +35,8 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    oneapp_example_jenkins_host: "$ONEAPP_EXAMPLE_JENKINS_HOST"
-    oneapp_example_jenkins_username: "$ONEAPP_EXAMPLE_JENKINS_USERNAME"
-    oneapp_example_jenkins_password: "$ONEAPP_EXAMPLE_JENKINS_PASSWORD"
-    oneapp_example_jenkins_token: "$ONEAPP_EXAMPLE_JENKINS_TOKEN"
-    oneapp_example_jenkins_job_deploy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY"
-    oneapp_example_jenkins_job_destroy: "$ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY"
-    oneapp_example_sites_token: "$ONEAPP_EXAMPLE_SITES_TOKEN"
+    oneapp_ocf_user: "$ONEAPP_OCF_USER"
+    oneapp_ocf_password: "$ONEAPP_OCF_PASSWORD"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -56,18 +55,13 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs:
-    oneapp_example_jenkins_host:         "M|text|ONEAPP_EXAMPLE_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
-    oneapp_example_jenkins_username:     "M|text|ONEAPP_EXAMPLE_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
-    oneapp_example_jenkins_password:     "M|text|ONEAPP_EXAMPLE_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
-    oneapp_example_jenkins_token:        "M|text|ONEAPP_EXAMPLE_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API| |114803bbd81a27f5eb9052ce4d3b9212d4"
-    oneapp_example_jenkins_job_deploy:   "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DEPLOY: Name of the Jenkins pipeline used to deploy Trial Networks| |TN_DEPLOY"
-    oneapp_example_jenkins_job_destroy:  "M|text|ONEAPP_EXAMPLE_JENKINS_JOB_DESTROY: Name of the Jenkins pipeline used to destroy Trial Networks| |TN_DESTROY"
-    oneapp_example_sites_token:          "M|password|ONEAPP_EXAMPLE_SITES_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    oneapp_ocf_user:                     "O|text|ONEAPP_OCF_USER: User to access the OpenCAPIF| |client"
+    oneapp_ocf_password:                 "O|password|ONEAPP_OCF_PASSWORD: Password to access the OpenCAPIF| |password"
 logo: OCF.png
 images:
   - name: "[Testing] OCF"
     url: >-
-      https://rawtest.mobilesandbox.cloud:9443/ocf_r1.qcow2
+      https://rawtest.mobilesandbox.cloud:9443/ocf_r2.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
