@@ -193,7 +193,7 @@ download_images()
     )
 
     for image in "${images[@]}"; do
-        msg info "Pull image $service from etsi repository"
+        msg info "Pull image $image from etsi repository"
         docker pull $image
     done
 }
