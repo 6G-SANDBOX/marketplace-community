@@ -22,6 +22,7 @@ DEP_PKGS="python3-pip"
 DEP_PIP="boto3"
 LITHOPS_VERSION="3.4.0"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
+OCF_VERSION="v2.0.0-release"
 
 
 
@@ -40,23 +41,14 @@ service_install()
     export DEBIAN_FRONTEND=noninteractive
     systemctl stop unattended-upgrades
 
-    # # packages
-    # install_deps DEP_PKGS DEP_PIP
-
     # docker
     install_docker
 
     # nginx
     # install_nginx
 
-    # whatever your appliance is about
-    # install_whatever
-
-    # create Lithops config file in /etc/lithops
-    # create_lithops_config
-
     # service metadata. Function defined at one-apps/appliances/lib/common.sh
-    create_one_service_metadata
+    # create_one_service_metadata
 
     # create local folders to run capif services.
     create_local_folders
@@ -105,6 +97,10 @@ service_bootstrap()
 
     update_at_bootstrap
 
+    msg info "Starting OpenCAPIF Services"
+    run_docker_compose
+
+
     msg info "BOOTSTRAP FINISHED"
     return 0
 }
@@ -135,65 +131,6 @@ service_cleanup()
 # Then for modularity purposes you can define your own functions as long as their name
 # doesn't clash with the previous functions
 
-run_docker_compose()
-{
-    /etc/one-appliance/service.d/run.sh -s
-}
-
-download_images()
-{
-    grep "image:" /etc/one-appliance/service.d/*.yml|awk '{ print $3 }' | xargs -n 1 -I {} docker pull {}
-}
-
-
-create_local_folders()
-{
-    services=(
-        "TS29222_CAPIF_API_Invoker_Management_API"
-        "TS29222_CAPIF_API_Provider_Management_API"
-        "TS29222_CAPIF_Access_Control_Policy_API"
-        "TS29222_CAPIF_Auditing_API"
-        "TS29222_CAPIF_Discover_Service_API"
-        "TS29222_CAPIF_Events_API"
-        "TS29222_CAPIF_Logging_API_Invocation_API"
-        "TS29222_CAPIF_Publish_Service_API"
-        "TS29222_CAPIF_Routing_Info_API"
-        "TS29222_CAPIF_Security_API"
-        "helper"
-        "mock_server"
-        "monitoring"
-        "nginx"
-        "redis-data"
-        "redis.conf"
-        "register"
-        "vault"
-    )
-    for service in "${services[@]}"; do
-        echo "Current service: $service"
-        mkdir -p /etc/one-appliance/service.d/$service
-    done
-}
-
-
-install_deps()
-{
-    msg info "Run apt-get update"
-    apt-get update
-
-    msg info "Install required packages for Jenkins"
-    if ! apt-get install -y ${!1} ; then
-        msg error "Package(s) installation failed"
-        exit 1
-    fi
-
-    if [ -n ${2} ]; then
-        msg info "Install required pip packages for Jenkins"
-        if ! pip install ${2} ; then
-            msg error "pip package(s) installation failed"
-            exit 1
-        fi
-    fi
-}
 
 install_docker()
 {
@@ -216,6 +153,67 @@ install_docker()
         exit 1
     fi
 }
+
+create_local_folders()
+{
+    msg info "Create Local Folders for each service"
+    services=(
+        "TS29222_CAPIF_API_Invoker_Management_API"
+        "TS29222_CAPIF_API_Provider_Management_API"
+        "TS29222_CAPIF_Access_Control_Policy_API"
+        "TS29222_CAPIF_Auditing_API"
+        "TS29222_CAPIF_Discover_Service_API"
+        "TS29222_CAPIF_Events_API"
+        "TS29222_CAPIF_Logging_API_Invocation_API"
+        "TS29222_CAPIF_Publish_Service_API"
+        "TS29222_CAPIF_Routing_Info_API"
+        "TS29222_CAPIF_Security_API"
+        "helper"
+        "mock_server"
+        "monitoring"
+        "nginx"
+        "redis-data"
+        "redis.conf"
+        "register"
+        "vault"
+    )
+    for service in "${services[@]}"; do
+        msg info "Create Local Folders for $service"
+        mkdir -p /etc/one-appliance/service.d/$service
+    done
+}
+
+download_images()
+{
+    msg info "Pull all openCAPIF images from etsi repository of version ${OCF_VERSION}"
+    images=(
+        labs.etsi.org:5050/ocf/capif/prod/helper:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-access-control-policy-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-api-invoker-management-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-api-provider-management-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-auditing-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-discover-service-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-events-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-logging-api-invocation-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-publish-service-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-routing-info-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/ocf-security-api:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/nginx:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/mock-server:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/register:${OCF_VERSION}
+        labs.etsi.org:5050/ocf/capif/prod/vault:${OCF_VERSION}
+        mongo:6.0.2
+        mongo-express:1.0.0-alpha.4
+        redis:alpine
+    )
+
+    for image in "${images[@]}"; do
+        msg info "Pull image $service from etsi repository"
+        docker pull $image
+    done
+}
+
+
 
 install_nginx()
 {
@@ -264,33 +262,6 @@ EOF
     sudo ufw reload
 }
 
-install_whatever()
-{
-    msg info "Install Lithops from pip"
-    if ! pip install lithops==${LITHOPS_VERSION} ; then
-        msg error "Error installing Lithops"
-        exit 1
-    fi
-
-    msg info "Create /etc/lithops folder"
-    mkdir /etc/lithops
-}
-
-create_lithops_config()
-{
-    msg info "Create default config file"
-    cat > /etc/lithops/config <<EOF
-lithops:
-  backend: localhost
-  storage: localhost
-
-# Start Compute Backend configuration
-# End Compute Backend configuration
-
-# Start Storage Backend configuration
-# End Storage Backend configuration
-EOF
-}
 
 configure_something(){
     :
@@ -335,3 +306,9 @@ postinstall_cleanup()
     rm -rf /var/lib/apt/lists/*
 }
 
+
+
+run_docker_compose()
+{
+    /etc/one-appliance/service.d/run.sh -s
+}
