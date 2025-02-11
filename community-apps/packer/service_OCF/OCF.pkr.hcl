@@ -33,7 +33,7 @@ source "qemu" "ocf" {
   format           = "qcow2"
   disk_compression = false
   #skip_resize_disk = true           # You can either 'skip_resize_disk = true' to use the "virtual disk" of the original image, or set a fixed disk_size
-  disk_size        = "10240"       # I recommend the second approach as usually the original image is not large enough to fit all the added libraries and binaries.
+  disk_size        = "15360"       # I recommend the second approach as usually the original image is not large enough to fit all the added libraries and binaries.
 
   output_directory = var.output_dir
 
