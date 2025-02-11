@@ -54,6 +54,7 @@ else
     BUILD_VERSION=$(date +"%Y%m%d-%H%M")                    # e.g. 20240723-1016
 fi
 IMAGE_NAME="${FULL_NAME} ${BUILD_VERSION}"
+IMAGE_URL="${URL_APPLIANCES}/${APP}.qcow2"
 IMAGE_TIMESTAMP="$(stat -c %W "${DESTINATION}")"
 IMAGE_SIZE="$(qemu-img info "${DESTINATION}" | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g')"
 IMAGE_CHK_MD5="$(md5sum "${DESTINATION}" | cut -d' ' -f1)"
@@ -65,6 +66,7 @@ IMAGE_CHK_SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
   echo "DESTINATION=\"${DESTINATION}\""
   echo "BUILD_VERSION=\"${BUILD_VERSION}\""
   echo "IMAGE_NAME=\"${IMAGE_NAME}\""
+  echo "IMAGE_URL=\"${IMAGE_URL}\""
   echo "IMAGE_TIMESTAMP=\"${IMAGE_TIMESTAMP}\""
   echo "IMAGE_SIZE=\"${IMAGE_SIZE}\""
   echo "IMAGE_CHK_MD5=\"${IMAGE_CHK_MD5}\""
@@ -77,7 +79,7 @@ cat "metadata/${APP}.yaml" | yq eval "
   .version = \"${BUILD_VERSION}\" |
   .creation_time = \"${IMAGE_TIMESTAMP}\" |
   .images[0].name = \"${IMAGE_NAME}\" |
-  .images[0].url = \"${DESTINATION}\" |
+  .images[0].url = \"${IMAGE_URL}\" |
   .images[0].size = \"${IMAGE_SIZE}\" |
   .images[0].checksum.md5 = \"${IMAGE_CHK_MD5}\" |
   .images[0].checksum.sha256 = \"${IMAGE_CHK_SHA256}\"
