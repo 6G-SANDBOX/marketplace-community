@@ -1,10 +1,10 @@
 services:
   register:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/register:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/register:${OCF_VERSION}
     ports:
       - 8084:8080
-    volumes:
-      - /etc/one-appliance/service.d/register:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/register:/usr/src/app
     environment:
       - CAPIF_PRIV_KEY=${CAPIF_PRIV_KEY}
       - VAULT_HOSTNAME=vault

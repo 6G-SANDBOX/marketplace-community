@@ -4,21 +4,21 @@ services:
     command: redis-server
     ports:
       - "6379:6379"
-    volumes:
-      - /etc/one-appliance/service.d/redis-data:/var/lib/redis
-      - /etc/one-appliance/service.d/redis.conf:/usr/local/etc/redis/redis.conf
+    # volumes:
+    #   - ${SERVICES_FOLDER}/redis-data:/var/lib/redis
+    #   - ${SERVICES_FOLDER}/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_REPLICATION_MODE=master
     
 
   helper:
-    image: "labs.etsi.org:5050/ocf/capif/v1-0-0-release/helper:v1-0-0-release"
+    image: "labs.etsi.org:5050/ocf/capif/prod/helper:${OCF_VERSION}"
     expose:
       - "8080"
     container_name: helper
     restart: unless-stopped
-    volumes:
-      - /etc/one-appliance/service.d/helper:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/helper:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
       - fluent-bit:host-gateway
@@ -35,11 +35,11 @@ services:
       - nginx
 
   access-control-policy:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-access-control-policy-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-access-control-policy-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Access_Control_Policy_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Access_Control_Policy_API:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
       - fluent-bit:host-gateway
@@ -55,11 +55,11 @@ services:
       - nginx
 
   api-invoker-management:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-api-invoker-management-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-api-invoker-management-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_API_Invoker_Management_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_API_Invoker_Management_API:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
       - fluent-bit:host-gateway
@@ -79,11 +79,11 @@ services:
     - nginx
 
   api-provider-management:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-api-provider-management-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-api-provider-management-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_API_Provider_Management_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_API_Provider_Management_API:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
       - fluent-bit:host-gateway
@@ -102,11 +102,11 @@ services:
       - nginx
 
   logs:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-auditing-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-auditing-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Auditing_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Auditing_API:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
       - fluent-bit:host-gateway
@@ -121,11 +121,11 @@ services:
       - mongo
 
   service-apis:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-discover-service-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-discover-service-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Discover_Service_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Discover_Service_API:/usr/src/app
     restart: unless-stopped
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -140,11 +140,11 @@ services:
     - mongo
 
   capif-events:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-events-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-events-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Events_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Events_API:/usr/src/app
     environment:
       - CAPIF_HOSTNAME=${CAPIF_HOSTNAME}
       - CONTAINER_NAME=api-events
@@ -159,11 +159,11 @@ services:
       - mongo
 
   api-invocation-logs:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-logging-api-invocation-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-logging-api-invocation-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Logging_API_Invocation_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Logging_API_Invocation_API:/usr/src/app
     restart: unless-stopped
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -178,11 +178,11 @@ services:
       - mongo
 
   published-apis:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-publish-service-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-publish-service-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Publish_Service_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Publish_Service_API:/usr/src/app
     restart: unless-stopped
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -198,16 +198,16 @@ services:
       - mongo
 
   capif-routing-info:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-routing-info-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-routing-info-api:${OCF_VERSION}
     expose:
       - "8080"
 
   capif-security:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/ocf-security-api:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/ocf-security-api:${OCF_VERSION}
     expose:
       - "8080"
-    volumes:
-      - /etc/one-appliance/service.d/TS29222_CAPIF_Security_API:/usr/src/app
+    # volumes:
+    #   - ${SERVICES_FOLDER}/TS29222_CAPIF_Security_API:/usr/src/app
     restart: unless-stopped
     environment:
       - CAPIF_HOSTNAME=${CAPIF_HOSTNAME}
@@ -253,7 +253,7 @@ services:
       - mongo
 
   nginx:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/nginx:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/nginx:${OCF_VERSION}
     ports:
       - "8080:8080"
       - "443:443"
@@ -264,8 +264,8 @@ services:
       - VAULT_PORT=8200
       - LOG_LEVEL=${LOG_LEVEL}
     hostname: ${CAPIF_HOSTNAME}
-    volumes:
-      - /etc/one-appliance/service.d/nginx/certs:/etc/nginx/certs
+    # volumes:
+    #   - ${SERVICES_FOLDER}/nginx/certs:/etc/nginx/certs
     extra_hosts:
       - host.docker.internal:host-gateway
       - vault:host-gateway

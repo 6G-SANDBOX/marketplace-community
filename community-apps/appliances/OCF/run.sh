@@ -2,6 +2,7 @@
 
 # Directories variables setup (no modification needed)
 export SERVICES_DIR=/etc/one-appliance/service.d
+export SERVICES_DIR=/Users/jms/projects/marketplace-community/community-apps/appliances/OCF
 
 
 help() {
@@ -20,6 +21,8 @@ MONITORING_STATE=false
 DEPLOY=all
 LOG_LEVEL=DEBUG
 CACHED_INFO=""
+
+VERSION="v2.0.0-release"
 
 # Needed to avoid write permissions on bind volumes with prometheus and grafana
 DUID=$(id -u)
@@ -90,7 +93,7 @@ fi
 
 docker network create capif-network
 
-docker compose -f "$SERVICES_DIR/docker-compose-vault.yml" up --detach --build $CACHED_INFO
+OCF_VERSION=$VERSION docker compose -f "$SERVICES_DIR/docker-compose-vault.yml" up --detach --build $CACHED_INFO
 
 status=$?
 if [ $status -eq 0 ]; then
@@ -100,7 +103,7 @@ else
     exit $status
 fi
 
-CAPIF_HOSTNAME=$HOSTNAME MONITORING=$MONITORING_STATE LOG_LEVEL=$LOG_LEVEL docker compose -f "$SERVICES_DIR/docker-compose-capif.yml" up --detach --build $CACHED_INFO
+SERVICE_FOLDER=$SERVICES_DIR OCF_VERSION=$VERSION CAPIF_HOSTNAME=$HOSTNAME MONITORING=$MONITORING_STATE LOG_LEVEL=$LOG_LEVEL docker compose -f "$SERVICES_DIR/docker-compose-capif.yml" up --detach --build $CACHED_INFO
 
 status=$?
 if [ $status -eq 0 ]; then
@@ -111,7 +114,7 @@ else
 fi
 
 CAPIF_PRIV_KEY_BASE_64=$(echo "$(cat nginx/certs/server.key)")
-CAPIF_PRIV_KEY=$CAPIF_PRIV_KEY_BASE_64 LOG_LEVEL=$LOG_LEVEL docker compose -f "$SERVICES_DIR/docker-compose-register.yml" up --detach --build $CACHED_INFO
+SERVICE_FOLDER=$SERVICES_DIR OCF_VERSION=$VERSION CAPIF_PRIV_KEY=$CAPIF_PRIV_KEY_BASE_64 LOG_LEVEL=$LOG_LEVEL docker compose -f "$SERVICES_DIR/docker-compose-register.yml" up --detach --build $CACHED_INFO
 
 status=$?
 if [ $status -eq 0 ]; then
@@ -125,7 +128,7 @@ if [ "$ROBOT_MOCK_SERVER" == "true" ] ; then
     echo '***Robot Mock Server set as true***'
     echo '***Creating Robot Mock Server stack***'
 
-    IP=$IP PORT=$PORT docker compose -f "$SERVICES_DIR/docker-compose-mock-server.yml" up --detach --build $CACHED_INFO
+    SERVICE_FOLDER=$SERVICES_DIR OCF_VERSION=$VERSION IP=$IP PORT=$PORT docker compose -f "$SERVICES_DIR/docker-compose-mock-server.yml" up --detach --build $CACHED_INFO
     status=$?
     if [ $status -eq 0 ]; then
         echo "*** Monitoring Stack Runing ***"

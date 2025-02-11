@@ -1,6 +1,6 @@
 services:
   vault:
-    image: labs.etsi.org:5050/ocf/capif/v1-0-0-release/vault:v1-0-0-release
+    image: labs.etsi.org:5050/ocf/capif/prod/vault:${OCF_VERSION}
     restart: unless-stopped
     ports:
       - 8200:8200
@@ -9,6 +9,12 @@ services:
     environment:
       - VAULT_DEV_ROOT_TOKEN_ID=dev-only-token
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
-    volumes:
-      - /etc/one-appliance/service.d/vault/data:/vault/data
-      - /etc/one-appliance/service.d/vault/config:/vault/config
+    # volumes:
+    #   - ${SERVICES_FOLDER}/vault/data:/vault/data
+    #   - ${SERVICES_FOLDER}/vault/config:/vault/config
+
+
+networks:
+  default:
+    name: capif-network
+    external: true

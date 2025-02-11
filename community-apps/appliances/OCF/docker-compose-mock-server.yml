@@ -1,11 +1,11 @@
 services:
   mock-server:
-    image: "labs.etsi.org:5050/ocf/capif/v1-0-0-release/mock-server:v1-0-0-release"
+    image: "labs.etsi.org:5050/ocf/capif/prod/mock-server:${OCF_VERSION}"
     ports:
-      - 9100:9090
-#      - 9100:9100
-    volumes:
-      - /etc/one-appliance/service.d/mock_server:/usr/src/app
+      # - 9100:9090
+      - 9100:9100
+    # volumes:
+    #   - ${SERVICES_FOLDER}/mock_server:/usr/src/app
     extra_hosts:
       - host.docker.internal:host-gateway
     restart: unless-stopped
