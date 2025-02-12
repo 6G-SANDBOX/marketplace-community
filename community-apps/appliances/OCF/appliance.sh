@@ -21,7 +21,7 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 # Static data that will be used by the appliance on installation part of the lifecycle
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
-OCF_ROBOT_FRAMEWORK_VERSION="1.0"
+OCF_ROBOT_FRAMEWORK_VERSION="1.0-amd64"
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
 # ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
@@ -53,6 +53,9 @@ service_install()
 
     # Download locally the docker images
     download_images
+
+    # download capif repository
+    download_capif_repository
 
     # cleanup
     postinstall_cleanup

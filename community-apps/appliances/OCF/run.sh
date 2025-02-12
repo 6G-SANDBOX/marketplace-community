@@ -2,7 +2,7 @@
 
 # Directories variables setup (no modification needed)
 export SERVICES_DIR=/etc/one-appliance/service.d
-export SERVICES_DIR=/Users/jms/projects/marketplace-community/community-apps/appliances/OCF
+# export SERVICES_DIR=/Users/jms/projects/marketplace-community/community-apps/appliances/OCF
 
 
 help() {
