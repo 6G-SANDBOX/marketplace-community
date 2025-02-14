@@ -131,9 +131,9 @@ if [ "$ROBOT_MOCK_SERVER" == "true" ] ; then
     SERVICE_FOLDER=$SERVICES_DIR OCF_VERSION=$VERSION IP=$IP PORT=$PORT docker compose -f "$SERVICES_DIR/docker-compose-mock-server.yml" up --detach --build $CACHED_INFO
     status=$?
     if [ $status -eq 0 ]; then
-        echo "*** Monitoring Stack Runing ***"
+        echo "*** Mock Server Running ***"
     else
-        echo "*** Monitoring Stack failed to start ***"
+        echo "*** Mock Server failed to start ***"
         exit $status
     fi
 fi

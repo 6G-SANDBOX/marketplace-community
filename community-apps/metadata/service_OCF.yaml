@@ -37,6 +37,7 @@ opennebula_template:
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     oneapp_ocf_user: "$ONEAPP_OCF_USER"
     oneapp_ocf_password: "$ONEAPP_OCF_PASSWORD"
+    capif_hostname: "$CAPIF_HOSTNAME"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -57,6 +58,7 @@ opennebula_template:
   user_inputs:
     oneapp_ocf_user:                     "O|text|ONEAPP_OCF_USER: User to access the OpenCAPIF| |client"
     oneapp_ocf_password:                 "O|password|ONEAPP_OCF_PASSWORD: Password to access the OpenCAPIF| |password"
+    capif_hostname:                      "O|password|CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
 logo: OCF.png
 images:
   - name: "[Testing] OCF"

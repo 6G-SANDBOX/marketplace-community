@@ -3,8 +3,8 @@ services:
     image: labs.etsi.org:5050/ocf/capif/prod/register:${OCF_VERSION}
     ports:
       - 8084:8080
-    # volumes:
-    #   - ${SERVICES_FOLDER}/register:/usr/src/app
+    volumes:
+      - ${SERVICES_FOLDER}/register:/usr/src/app
     environment:
       - CAPIF_PRIV_KEY=${CAPIF_PRIV_KEY}
       - VAULT_HOSTNAME=vault

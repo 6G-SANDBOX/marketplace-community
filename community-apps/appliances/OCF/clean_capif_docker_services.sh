@@ -72,7 +72,7 @@ echo "${FILES[@]}"
 
 for FILE in "${FILES[@]}"; do
   echo "Executing 'docker compose down' for file $FILE"
-  CAPIF_PRIV_KEY=$CAPIF_PRIV_KEY_BASE_64 DUID=$DUID DGID=$DGID MONITORING=$MONITORING_STATE LOG_LEVEL=$LOG_LEVEL docker compose -f "$FILE" down --rmi all
+  SERVICE_FOLDER=$SERVICES_DIR OCF_VERSION=$VERSION CAPIF_PRIV_KEY=$CAPIF_PRIV_KEY_BASE_64 DUID=$DUID DGID=$DGID MONITORING=$MONITORING_STATE LOG_LEVEL=$LOG_LEVEL docker compose -f "$FILE" down --rmi all
   status=$?
     if [ $status -eq 0 ]; then
         echo "*** Removed Service from $FILE ***"

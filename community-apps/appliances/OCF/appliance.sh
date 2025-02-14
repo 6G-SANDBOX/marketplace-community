@@ -25,6 +25,7 @@ OCF_ROBOT_FRAMEWORK_VERSION="1.0-amd64"
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
 # ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
+# CAPIF_HOSTNAME="${CAPIF_HOSTNAME:-'capifcore'}"
 
 
 # ------------------------------------------------------------------------------
@@ -45,11 +46,14 @@ service_install()
     # docker
     install_docker
 
+    # install yq
+    install_yq
+
     # nginx
     # install_nginx
 
     # create local folders to run capif services.
-    create_local_folders
+    # create_local_folders
 
     # Download locally the docker images
     download_images
@@ -70,8 +74,11 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
-    # in fact not needed now, because the service is started in the bootstrap
-    run_docker_compose
+    # # in fact not needed now, because the service is started in the bootstrap
+    # run_docker_compose
+
+    # Setup environment variables for deployment
+    setup_environment
 
     return 0
 }
@@ -79,8 +86,6 @@ service_configure()
 service_bootstrap()
 {
     export DEBIAN_FRONTEND=noninteractive
-
-    update_at_bootstrap
 
     msg info "Starting OpenCAPIF Services"
     run_docker_compose
@@ -261,17 +266,37 @@ postinstall_cleanup()
 download_capif_repository()
 {
     msg info "Download OpenCAPIF repository"
-    git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
+    # git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
+    git clone --branch OCFXX-Improve_local_scripts --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
 }
 
 run_docker_compose()
 {
     msg info "Run OpenCAPIF"
-    /etc/one-appliance/service.d/run.sh -s
+    /etc/one-appliance/service.d/capif/services/run.sh -s
 }
 
 create_user()
 {
     msg info "Create OpenCAPIF user"
     /etc/one-appliance/service.d/capif/services/create_users.sh -u ${ONEAPP_OCF_USER} -p ${ONEAPP_OCF_PASSWORD} -t 1
+}
+
+setup_environment()
+{
+    msg info "Setup OpenCAPIF environment"
+    VARIABLES_FILE="/etc/one-appliance/service.d/capif/services/variables.sh"
+    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"$labs.etsi.org:5050/ocf/capif/prod\"/" "$VARIABLES_FILE"
+    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"v2.0.0-release\"/" "$VARIABLES_FILE"
+    sed -i '' "s/^CAPIF_HOSTNAME=.*/CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"/" "$VARIABLES_FILE"
+    sed -i '' "s/^BUILD_DOCKER_IMAGES=.*/BUILD_DOCKER_IMAGES=false/" "$VARIABLES_FILE"
+    sed -i '' "s/^DOCKER_ROBOT_IMAGE=.*/DOCKER_ROBOT_IMAGE=1.0/" "$VARIABLES_FILE"
+}
+
+install_yq()
+{
+    msg info "Install yq"
+    add-apt-repository ppa:rmescandon/yq
+    apt update
+    apt install yq -y
 }
