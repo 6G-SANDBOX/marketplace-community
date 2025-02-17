@@ -22,7 +22,9 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
 OCF_ROBOT_FRAMEWORK_VERSION="1.0-amd64"
-GITLAB_BASE_URL="labs.etsi.org:5050/ocf/capif/prod"
+REGISTRY_BASE_URL="labs.etsi.org:5050/ocf/capif/prod"
+BASE_DIR=/etc/one-appliance/service.d/capif
+VARIABLES_FILE="${BASE_DIR}/services/variables.sh"
 
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
@@ -180,21 +182,21 @@ download_images()
 {
     msg info "Pull all openCAPIF images from etsi repository of version ${OCF_VERSION}"
     images=(
-        labs.etsi.org:5050/ocf/capif/prod/helper:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-access-control-policy-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-api-invoker-management-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-api-provider-management-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-auditing-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-discover-service-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-events-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-logging-api-invocation-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-publish-service-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-routing-info-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/ocf-security-api:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/nginx:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/mock-server:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/register:${OCF_VERSION}
-        labs.etsi.org:5050/ocf/capif/prod/vault:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/helper:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-access-control-policy-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-api-invoker-management-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-api-provider-management-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-auditing-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-discover-service-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-events-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-logging-api-invocation-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-publish-service-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-routing-info-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/ocf-security-api:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/nginx:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/mock-server:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/register:${OCF_VERSION}
+        ${REGISTRY_BASE_URL}/vault:${OCF_VERSION}
         mongo:6.0.2
         mongo-express:1.0.0-alpha.4
         redis:alpine
@@ -267,32 +269,31 @@ postinstall_cleanup()
 download_capif_repository()
 {
     msg info "Download OpenCAPIF repository"
-    # git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
-    git clone --branch OCFXX-Improve_local_scripts --single-branch https://labs.etsi.org/rep/ocf/capif.git /etc/one-appliance/service.d/capif
+    # git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
+    git clone --branch OCFXX-Improve_local_scripts --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
 }
 
 run_docker_compose()
 {
     msg info "Run OpenCAPIF"
-    /etc/one-appliance/service.d/capif/services/clean_capif_docker_services.sh -a -z false
-    /etc/one-appliance/service.d/capif/services/run.sh -s
+    ${BASE_DIR}/services/clean_capif_docker_services.sh -a -z false
+    ${BASE_DIR}/services/run.sh -s
 }
 
 create_user()
 {
     msg info "Create OpenCAPIF user"
-    /etc/one-appliance/service.d/capif/services/create_users.sh -u ${ONEAPP_OCF_USER} -p ${ONEAPP_OCF_PASSWORD} -t 1
+    ${BASE_DIR}/services/create_users.sh -u ${ONEAPP_OCF_USER} -p ${ONEAPP_OCF_PASSWORD} -t 1
 }
 
 setup_environment()
 {
     msg info "Setup OpenCAPIF environment"
-    VARIABLES_FILE="/etc/one-appliance/service.d/capif/services/variables.sh"
-    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"$GITLAB_BASE_URL\"/" "$VARIABLES_FILE"
-    sed -i '' "s/^OCF_VERSION=.*/OCF_VERSION=\"$OCF_VERSION\"/" "$VARIABLES_FILE"
-    sed -i '' "s/^CAPIF_HOSTNAME=.*/CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"/" "$VARIABLES_FILE"
-    sed -i '' "s/^BUILD_DOCKER_IMAGES=.*/BUILD_DOCKER_IMAGES=false/" "$VARIABLES_FILE"
-    sed -i '' "s/^DOCKER_ROBOT_IMAGE=.*/DOCKER_ROBOT_IMAGE=1.0/" "$VARIABLES_FILE"
+    sed -i "s|^export REGISTRY_BASE_URL=.*|export REGISTRY_BASE_URL=\"$REGISTRY_BASE_URL\"|" "$VARIABLES_FILE"
+    sed -i "s|^export OCF_VERSION=.*|export OCF_VERSION=\"$OCF_VERSION\"|" "$VARIABLES_FILE"
+    sed -i "s|^export CAPIF_HOSTNAME=.*|export CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"|" "$VARIABLES_FILE"
+    sed -i "s|^export BUILD_DOCKER_IMAGES=.*|export BUILD_DOCKER_IMAGES=false|" "$VARIABLES_FILE"
+    sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=1.0|" "$VARIABLES_FILE"
 }
 
 install_yq()
