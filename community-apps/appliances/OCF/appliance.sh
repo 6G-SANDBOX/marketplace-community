@@ -21,10 +21,12 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 # Static data that will be used by the appliance on installation part of the lifecycle
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
-OCF_ROBOT_FRAMEWORK_VERSION="1.0-amd64"
 REGISTRY_BASE_URL="labs.etsi.org:5050/ocf/capif/prod"
 BASE_DIR=/etc/one-appliance/service.d/capif
 VARIABLES_FILE="${BASE_DIR}/services/variables.sh"
+DOCKER_ROBOT_IMAGE="labs.etsi.org:5050/ocf/capif/robot-tests-image"
+DOCKER_ROBOT_IMAGE_VERSION=1.0
+OCF_ROBOT_FRAMEWORK_VERSION="${DOCKER_ROBOT_IMAGE_VERSION}-amd64"
 
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
@@ -200,7 +202,7 @@ download_images()
         mongo:6.0.2
         mongo-express:1.0.0-alpha.4
         redis:alpine
-        labs.etsi.org:5050/ocf/capif/robot-tests-image:${OCF_ROBOT_FRAMEWORK_VERSION}
+        ${DOCKER_ROBOT_IMAGE}:${OCF_ROBOT_FRAMEWORK_VERSION}
     )
 
     for image in "${images[@]}"; do
@@ -293,7 +295,8 @@ setup_environment()
     sed -i "s|^export OCF_VERSION=.*|export OCF_VERSION=\"$OCF_VERSION\"|" "$VARIABLES_FILE"
     sed -i "s|^export CAPIF_HOSTNAME=.*|export CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"|" "$VARIABLES_FILE"
     sed -i "s|^export BUILD_DOCKER_IMAGES=.*|export BUILD_DOCKER_IMAGES=false|" "$VARIABLES_FILE"
-    sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=1.0|" "$VARIABLES_FILE"
+    sed -i "s|^export DOCKER_ROBOT_IMAGE_VERSION=.*|export DOCKER_ROBOT_IMAGE_VERSION=$DOCKER_ROBOT_IMAGE_VERSION|" "$VARIABLES_FILE"
+    sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=$DOCKER_ROBOT_IMAGE|" "$VARIABLES_FILE"
 }
 
 install_yq()
