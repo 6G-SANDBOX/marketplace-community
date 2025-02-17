@@ -58,7 +58,7 @@ opennebula_template:
   user_inputs:
     oneapp_ocf_user:                     "O|text|ONEAPP_OCF_USER: User to access the OpenCAPIF| |client"
     oneapp_ocf_password:                 "O|password|ONEAPP_OCF_PASSWORD: Password to access the OpenCAPIF| |password"
-    capif_hostname:                      "O|password|CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
+    capif_hostname:                      "O|text|CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
 logo: OCF.png
 images:
   - name: "[Testing] OCF"

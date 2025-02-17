@@ -22,6 +22,8 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
 OCF_ROBOT_FRAMEWORK_VERSION="1.0-amd64"
+GITLAB_BASE_URL="labs.etsi.org:5050/ocf/capif/prod"
+
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
 # ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
@@ -74,9 +76,6 @@ service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
 
-    # # in fact not needed now, because the service is started in the bootstrap
-    # run_docker_compose
-
     # Setup environment variables for deployment
     setup_environment
 
@@ -89,6 +88,8 @@ service_bootstrap()
 
     msg info "Starting OpenCAPIF Services"
     run_docker_compose
+
+    sleep 2m
 
     msg info "Creating OpenCAPIF user"
     create_user
@@ -146,34 +147,34 @@ install_docker()
     fi
 }
 
-create_local_folders()
-{
-    msg info "Create Local Folders for each service"
-    services=(
-        "TS29222_CAPIF_API_Invoker_Management_API"
-        "TS29222_CAPIF_API_Provider_Management_API"
-        "TS29222_CAPIF_Access_Control_Policy_API"
-        "TS29222_CAPIF_Auditing_API"
-        "TS29222_CAPIF_Discover_Service_API"
-        "TS29222_CAPIF_Events_API"
-        "TS29222_CAPIF_Logging_API_Invocation_API"
-        "TS29222_CAPIF_Publish_Service_API"
-        "TS29222_CAPIF_Routing_Info_API"
-        "TS29222_CAPIF_Security_API"
-        "helper"
-        "mock_server"
-        "monitoring"
-        "nginx"
-        "redis-data"
-        "redis.conf"
-        "register"
-        "vault"
-    )
-    for service in "${services[@]}"; do
-        msg info "Create Local Folders for $service"
-        mkdir -p /etc/one-appliance/service.d/$service
-    done
-}
+# create_local_folders()
+# {
+#     msg info "Create Local Folders for each service"
+#     services=(
+#         "TS29222_CAPIF_API_Invoker_Management_API"
+#         "TS29222_CAPIF_API_Provider_Management_API"
+#         "TS29222_CAPIF_Access_Control_Policy_API"
+#         "TS29222_CAPIF_Auditing_API"
+#         "TS29222_CAPIF_Discover_Service_API"
+#         "TS29222_CAPIF_Events_API"
+#         "TS29222_CAPIF_Logging_API_Invocation_API"
+#         "TS29222_CAPIF_Publish_Service_API"
+#         "TS29222_CAPIF_Routing_Info_API"
+#         "TS29222_CAPIF_Security_API"
+#         "helper"
+#         "mock_server"
+#         "monitoring"
+#         "nginx"
+#         "redis-data"
+#         "redis.conf"
+#         "register"
+#         "vault"
+#     )
+#     for service in "${services[@]}"; do
+#         msg info "Create Local Folders for $service"
+#         mkdir -p /etc/one-appliance/service.d/$service
+#     done
+# }
 
 download_images()
 {
@@ -208,52 +209,52 @@ download_images()
 
 
 #under development
-install_nginx()
-{
-    apt update
-    msg info "Install Nginx"
-    if ! apt-get install -y nginx ; then
-        msg error "Nginx installation failed"
-        exit 1
-    fi
-    mkdir -p /etc/nginx/certs
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt \
-        -subj "/CN=localhost"
-    cat > /etc/nginx/sites-available/default <<EOF
-events {}
+# install_nginx()
+# {
+#     apt update
+#     msg info "Install Nginx"
+#     if ! apt-get install -y nginx ; then
+#         msg error "Nginx installation failed"
+#         exit 1
+#     fi
+#     mkdir -p /etc/nginx/certs
+#     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#         -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt \
+#         -subj "/CN=localhost"
+#     cat > /etc/nginx/sites-available/default <<EOF
+# events {}
 
-http {
-    map \$host \$backend {
-        default "127.0.0.1:8080";  # Por defecto, redirige a 8080
-        register-opencapif "127.0.0.1:8084";
-        opencapif "127.0.0.1:8080";
-    }
+# http {
+#     map \$host \$backend {
+#         default "127.0.0.1:8080";  # Por defecto, redirige a 8080
+#         register-opencapif "127.0.0.1:8084";
+#         opencapif "127.0.0.1:8080";
+#     }
 
-    server {
-        listen 443 ssl;
-        server_name register-opencapif opencapif;
+#     server {
+#         listen 443 ssl;
+#         server_name register-opencapif opencapif;
 
-        ssl_certificate /etc/nginx/certs/server.crt;
-        ssl_certificate_key /etc/nginx/certs/server.key;
+#         ssl_certificate /etc/nginx/certs/server.crt;
+#         ssl_certificate_key /etc/nginx/certs/server.key;
 
-        location / {
-            proxy_pass http://\$backend;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto https;
-        }
-    }
-}
-EOF
-    sudo nginx -t
-    cat /etc/nginx/sites-available/default
-    sudo systemctl restart nginx
-    sudo systemctl enable nginx
-    sudo ufw allow 443/tcp
-    sudo ufw reload
-}
+#         location / {
+#             proxy_pass http://\$backend;
+#             proxy_set_header Host \$host;
+#             proxy_set_header X-Real-IP \$remote_addr;
+#             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+#             proxy_set_header X-Forwarded-Proto https;
+#         }
+#     }
+# }
+# EOF
+#     sudo nginx -t
+#     cat /etc/nginx/sites-available/default
+#     sudo systemctl restart nginx
+#     sudo systemctl enable nginx
+#     sudo ufw allow 443/tcp
+#     sudo ufw reload
+# }
 
 postinstall_cleanup()
 {
@@ -273,6 +274,7 @@ download_capif_repository()
 run_docker_compose()
 {
     msg info "Run OpenCAPIF"
+    /etc/one-appliance/service.d/capif/services/clean_capif_docker_services.sh -a -z false
     /etc/one-appliance/service.d/capif/services/run.sh -s
 }
 
@@ -286,8 +288,8 @@ setup_environment()
 {
     msg info "Setup OpenCAPIF environment"
     VARIABLES_FILE="/etc/one-appliance/service.d/capif/services/variables.sh"
-    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"$labs.etsi.org:5050/ocf/capif/prod\"/" "$VARIABLES_FILE"
-    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"v2.0.0-release\"/" "$VARIABLES_FILE"
+    sed -i '' "s/^GITLAB_BASE_URL=.*/GITLAB_BASE_URL=\"$GITLAB_BASE_URL\"/" "$VARIABLES_FILE"
+    sed -i '' "s/^OCF_VERSION=.*/OCF_VERSION=\"$OCF_VERSION\"/" "$VARIABLES_FILE"
     sed -i '' "s/^CAPIF_HOSTNAME=.*/CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"/" "$VARIABLES_FILE"
     sed -i '' "s/^BUILD_DOCKER_IMAGES=.*/BUILD_DOCKER_IMAGES=false/" "$VARIABLES_FILE"
     sed -i '' "s/^DOCKER_ROBOT_IMAGE=.*/DOCKER_ROBOT_IMAGE=1.0/" "$VARIABLES_FILE"

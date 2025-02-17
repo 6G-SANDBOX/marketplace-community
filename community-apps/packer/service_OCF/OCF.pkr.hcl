@@ -105,13 +105,7 @@ build {
   #################################################################################################
   provisioner "file" {
     sources     = [                                   # locations of the file in the git repo. Flexible
-      "appliances/OCF/appliance.sh",                   # main configuration script.
-      "appliances/OCF/clean_capif_docker_services.sh",
-      "appliances/OCF/docker-compose-capif.yml",
-      "appliances/OCF/docker-compose-mock-server.yml",
-      "appliances/OCF/docker-compose-register.yml",
-      "appliances/OCF/docker-compose-vault.yml",
-      "appliances/OCF/run.sh",
+      "appliances/OCF/appliance.sh"                   # main configuration script.
       ]
     destination = "/etc/one-appliance/service.d/"          # path in the Guest OS. Strict, always the same
   }
