@@ -297,6 +297,7 @@ setup_environment()
     sed -i "s|^export BUILD_DOCKER_IMAGES=.*|export BUILD_DOCKER_IMAGES=false|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE_VERSION=.*|export DOCKER_ROBOT_IMAGE_VERSION=$DOCKER_ROBOT_IMAGE_VERSION|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=$DOCKER_ROBOT_IMAGE|" "$VARIABLES_FILE"
+    sed -i "s|^export DOCKER_ROBOT_TTY_OPTIONS=.*|export DOCKER_ROBOT_TTY_OPTIONS="-i"|" "$VARIABLES_FILE"
 }
 
 install_yq()
