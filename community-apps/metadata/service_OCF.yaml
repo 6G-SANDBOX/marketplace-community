@@ -38,6 +38,7 @@ opennebula_template:
     oneapp_ocf_user: "$ONEAPP_OCF_USER"
     oneapp_ocf_password: "$ONEAPP_OCF_PASSWORD"
     capif_hostname: "$CAPIF_HOSTNAME"
+    register_hostname: "$REGISTER_HOSTNAME"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -59,6 +60,7 @@ opennebula_template:
     oneapp_ocf_user:                     "O|text|ONEAPP_OCF_USER: User to access the OpenCAPIF| |client"
     oneapp_ocf_password:                 "O|password|ONEAPP_OCF_PASSWORD: Password to access the OpenCAPIF| |password"
     capif_hostname:                      "O|text|CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
+    register_hostname:                   "O|text|REGISTER_HOSTNAME: Hostname for Register Service| |register"
 logo: OCF.png
 images:
   - name: "[Testing] OCF"
