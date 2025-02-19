@@ -9,7 +9,8 @@ set -o errexit -o pipefail
 ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
 ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 
-DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip"
+DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip ruby-dev"
+DEP_RUBY="opennebula-cli"
 DEP_PIP="boto3 botocore pyone==6.8.3 netaddr"
 ANSIBLE_COLLECTIONS="amazon.aws kubernetes.core community.general"
 CONSULT_ME_DIR="/var/lib/jenkins/consult_me/"
@@ -28,12 +29,12 @@ service_install()
     systemctl stop unattended-upgrades
 
     # packages
-    install_pkg_deps
+    install_deps
 
     # jenkins
     install_jenkins
 
-    # pip modules
+    # pip modules for jenkins user
     install_pip_deps
 
     # ansible and terraform
@@ -89,7 +90,7 @@ service_bootstrap()
 # ------------------------------------------------------------------------------
 
 
-install_pkg_deps()
+install_deps()
 {
     msg info "Run apt-get update"
     apt-get update
@@ -99,6 +100,14 @@ install_pkg_deps()
     if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
         exit 1
+    fi
+
+    if [ -n "${DEP_RUBY}" ]; then
+        msg info "Install required ruby gems"
+        if ! gem install ${DEP_RUBY} ; then
+            msg error "ruby gem(s) installation failed"
+            exit 1
+        fi
     fi
 }
 

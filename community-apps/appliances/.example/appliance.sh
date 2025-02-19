@@ -125,7 +125,7 @@ install_deps()
     msg info "Run apt-get update"
     apt-get update
 
-    msg info "Install required packages for Jenkins"
+    msg info "Install required .deb packages"
     wait_for_dpkg_lock_release
     if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Package(s) installation failed"
