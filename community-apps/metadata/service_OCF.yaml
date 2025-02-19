@@ -1,6 +1,5 @@
 ---
 name: "OpenCAPIF"
-# version + date "%Y%M%d-%h%m"
 version: "autofill"
 software_version: "v2.0.0"
 publisher: Telefonica Innovación Digital
@@ -23,15 +22,15 @@ description: |-
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
   
   **Note**: Remember to update the template in order to add a network after importing it.
-
 short_description: OpenCAPIF appliance for KVM
 tags:
-  - ubuntu
+  - OpenCAPIF
   - ocf
+  - ubuntu
 format: qcow2
 creation_time: "autofill"
 os-id: Ubuntu
-os-release: '22.04'
+os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
@@ -41,10 +40,14 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    token: 'YES'
     oneapp_ocf_user: "$ONEAPP_OCF_USER"
     oneapp_ocf_password: "$ONEAPP_OCF_PASSWORD"
     oneapp_ocf_capif_hostname: "$ONEAPP_OCF_CAPIF_HOSTNAME"
     oneapp_ocf_register_hostname: "$ONEAPP_OCF_REGISTER_HOSTNAME"
+  inputs_order: >-
+    ONEAPP_OCF_USER,ONEAPP_OCF_PASSWORD,ONEAPP_OCF_CAPIF_HOSTNAME,ONEAPP_OCF_REGISTER_HOSTNAME
   cpu: '2'
   vcpu: '2'
   cpu_model:
