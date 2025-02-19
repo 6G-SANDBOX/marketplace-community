@@ -3,6 +3,7 @@ source "null" "null" { communicator = "none" }
 build {
   sources = ["source.null.null"]
 
+  # TODO: Read this https://developer.hashicorp.com/packer/docs/provisioners/file#uploading-files-that-don-t-exist-before-packer-starts
   # New local script to first compile UERANSIM binaries if they are not present in the system
   provisioner "shell-local" {
     inline = [
@@ -130,6 +131,10 @@ build {
     destination = "/etc/one-appliance/service.d/"
   }
 
+  #######################################################################
+  # Setup appliance: Execute install step                               #
+  # https://github.com/OpenNebula/one-apps/wiki/apps_intro#installation #
+  #######################################################################
   provisioner "shell" {
     scripts = ["${var.input_dir}/82-configure-context.sh"]
   }

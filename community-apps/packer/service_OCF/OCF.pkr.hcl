@@ -1,7 +1,5 @@
 source "null" "null" { communicator = "none" }
 
-# Prior to setting up the appliance or distro, the context packages need to be generated first
-# These will then be installed as part of the setup process
 build {
   sources = ["source.null.null"]
 
@@ -14,8 +12,6 @@ build {
   }
 }
 
-# A Virtual Machine is created with qemu in order to run the setup from the ISO on the CD-ROM
-# Here are the details about the VM virtual hardware
 source "qemu" "ocf" {
   cpus        = 2 
   memory      = 2048
@@ -32,8 +28,8 @@ source "qemu" "ocf" {
   net_device       = "virtio-net"
   format           = "qcow2"
   disk_compression = false
-  #skip_resize_disk = true           # You can either 'skip_resize_disk = true' to use the "virtual disk" of the original image, or set a fixed disk_size
-  disk_size        = "15360"       # I recommend the second approach as usually the original image is not large enough to fit all the added libraries and binaries.
+  #skip_resize_disk = true
+  disk_size        = "15360"
 
   output_directory = var.output_dir
 
@@ -52,15 +48,12 @@ source "qemu" "ocf" {
   vm_name          = "${var.appliance_name}"
 }
 
-# Once the VM launches the following logic will be executed inside it to customize what happens inside
-# Essentially, a bunch of scripts are pulled from ./appliances and placed inside the Guest OS
-# There are shared libraries for ruby and bash. Bash is used in this example
+
 build {
   sources = ["source.qemu.ocf"]
 
-  # revert insecure ssh options done by context start_script
   provisioner "shell" {
-    scripts = ["${var.input_dir}/81-configure-ssh.sh"]       # Set /etc/ssh/sshd_config with: PasswordAuthentication no, PermitRootLogin without-password, UseDNS no
+    scripts = ["${var.input_dir}/81-configure-ssh.sh"]
   }
 
   ##############################################
@@ -75,16 +68,14 @@ build {
     ]
   }
 
-  # Script Required by a further step
   provisioner "file" {
     sources = [
-      "../one-apps/appliances/scripts/net-90-service-appliance",     # script to execute '/etc/one-appliance/service configure' and 'bootstrap'
-      "../one-apps/appliances/scripts/net-99-report-ready",          # when $REPORT_READY is YES, execute 'onegate vm update --data READY=YES' or a curl/wget equivalent
+      "../one-apps/appliances/scripts/net-90-service-appliance",
+      "../one-apps/appliances/scripts/net-99-report-ready",
     ]
     destination = "/etc/one-appliance/"
   }
 
-  # Bash libraries for easier custom implementation in bash logic. Contains multiple functions
   provisioner "file" {
     sources = [
       "../one-apps/appliances/lib/common.sh",
@@ -93,21 +84,16 @@ build {
     destination = "/etc/one-appliance/lib/"
   }
 
-  # Contains the appliance service management tool, used to invoke the previous functions
-  # https://github.com/OpenNebula/one-apps/wiki/apps_intro#appliance-life-cycle  
   provisioner "file" {
     source      = "../one-apps/appliances/service.sh"
     destination = "/etc/one-appliance/service"
   }
   
-  #################################################################################################
-  ###### Pull your own custom files here !!!!!!!!!!!!!!!!!!!!!!!!!!!! #############################
-  #################################################################################################
   provisioner "file" {
-    sources     = [                                   # locations of the file in the git repo. Flexible
-      "appliances/OCF/appliance.sh"                   # main configuration script.
+    sources     = [
+      "appliances/OCF/appliance.sh"
       ]
-    destination = "/etc/one-appliance/service.d/"          # path in the Guest OS. Strict, always the same
+    destination = "/etc/one-appliance/service.d/"
   }
 
   #######################################################################
@@ -115,16 +101,14 @@ build {
   # https://github.com/OpenNebula/one-apps/wiki/apps_intro#installation #
   #######################################################################
   provisioner "shell" {
-    scripts = ["${var.input_dir}/82-configure-context.sh"]   # move files net-*0 and net-99 to /etc/one-context and edit permissions
+    scripts = ["${var.input_dir}/82-configure-context.sh"]
   }
 
   provisioner "shell" {
     inline_shebang = "/bin/bash -e"
-    inline         = ["/etc/one-appliance/service install && sync"]   # execute '/etc/one-appliance/service install'
+    inline         = ["/etc/one-appliance/service install && sync"]
   }
 
-  # Remove machine ID from the VM and get it ready for continuous cloud use
-  # https://github.com/OpenNebula/one-apps/wiki/tool_dev#appliance-build-process
   post-processor "shell-local" {
     execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
     environment_vars = [

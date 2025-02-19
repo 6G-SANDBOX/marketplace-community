@@ -89,14 +89,9 @@ build {
     destination = "/etc/one-appliance/service"
   }
 
-  # Pull your own custom logic here
   provisioner "file" {
-    sources     = [
-      "appliances/jenkins/appliance.sh",
-      "appliances/jenkins/jenkins_plugins.txt",
-      "appliances/jenkins/jobs.yaml",
-      ]
-    destination = "/etc/one-appliance/service.d/"
+    source      = "appliances/jenkins/"
+    destination = "/etc/one-appliance/service.d"
   }
 
   #######################################################################

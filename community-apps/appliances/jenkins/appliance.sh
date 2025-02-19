@@ -16,7 +16,6 @@ ANSIBLE_COLLECTIONS="amazon.aws kubernetes.core community.general"
 CONSULT_ME_DIR="/var/lib/jenkins/consult_me/"
 
 
-
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Function Definitions
@@ -46,8 +45,9 @@ service_install()
     # plugins
     install_plugins_jenkins
 
-    # pipelines
-    import_pipelines
+    # import pipelines casc
+    source /etc/one-appliance/service.d/import_casc.sh
+    import_credentials_casc
 
     # cleanup
     postinstall_cleanup
@@ -67,8 +67,9 @@ service_configure()
     # sshd
     generate_ssh_keys
 
-    # credentials
-    import_credentials
+    # import credentials casc
+    source /etc/one-appliance/service.d/import_casc.sh
+    import_credentials_casc
 
     systemctl restart jenkins
 
@@ -294,13 +295,6 @@ check_plugins_installed() {
     return 0
 }
 
-import_pipelines(){
-    msg info "Import starting jenkins pipelines"
-    cp /etc/one-appliance/service.d/jobs.yaml /var/lib/jenkins/casc_configs/jobs.yaml
-    chown jenkins:jenkins /var/lib/jenkins/casc_configs/jobs.yaml
-    chmod u=r,go= /var/lib/jenkins/casc_configs/jobs.yaml
-}
-
 update_admin_user()
 {
     msg info "Update admin username and password in jenkins"
@@ -353,71 +347,6 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
 EOF"
-}
-
-import_credentials()
-{
-    cat > /var/lib/jenkins/casc_configs/credentials.yaml << EOF
-credentials:
-  system:
-    domainCredentials:
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "SSH_PRIVATE_KEY"
-              secret: "$(cat /var/lib/jenkins/.ssh/id_ed25519)"
-              description: "SSH private key to access VM components"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "ANSIBLE_VAULT_PASSWORD"
-              secret: "$(echo ${ONEAPP_JENKINS_SITES_TOKEN} | xargs)"
-              description: "Password to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "OPENNEBULA_ENDPOINT"
-              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_ENDPOINT} | xargs)"
-              description: "The URL of your OpenNebula XML-RPC Endpoint API (for example,'http://example.com:2633/RPC2')"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "OPENNEBULA_FLOW_ENDPOINT"
-              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT} | xargs)"
-              description: "The URL of your OneFlow HTTP Endpoint API (for example,'http://example.com:2474')"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "OPENNEBULA_USERNAME"
-              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_USERNAME} | xargs)"
-              description: "The OpenNebula username used to deploy each component (for example,'jenkins')"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "OPENNEBULA_PASSWORD"
-              secret: "$(echo ${ONEAPP_JENKINS_OPENNEBULA_PASSWORD} | xargs)"
-              description: "The OpenNebula password matching OPENNEBULA_USERNAME"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "OPENNEBULA_INSECURE"
-              secret: "$(if [ \"${ONEAPP_JENKINS_OPENNEBULA_INSECURE}\" = \"YES\" ]; then echo true; else echo false; fi)"
-              description: "Allow insecure connexion into the OpenNebula XML-RPC Endpoint API (skip TLS verification)"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "AWS_ACCESS_KEY_ID"
-              secret: "$(echo ${ONEAPP_JENKINS_AWS_ACCESS_KEY_ID} | xargs)"
-              description: "S3 Storage access key. Same as used in the MinIO instance"
-      - credentials:
-          - string:
-              scope: GLOBAL
-              id: "AWS_SECRET_ACCESS_KEY"
-              secret: "$(echo ${ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY} | xargs)"
-              description: "S3 Storage secret key. Same as used in the MinIO instance"
-EOF
-    chown jenkins:jenkins /var/lib/jenkins/casc_configs/credentials.yaml
-    chmod u=r,go= /var/lib/jenkins/casc_configs/credentials.yaml
 }
 
 wait_for_dpkg_lock_release()
