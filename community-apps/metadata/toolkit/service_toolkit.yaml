@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox Toolkit"
-version: "v0.4.0-20250219-1523"   # date +"%Y%m%d-%H%M" -d @EPOCH
+version: "v0.4.0-20250219-2235"   # date +"%Y%m%d-%H%M" -d @EPOCH
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -30,7 +30,7 @@ tags:
   - toolkit
 type: SERVICE_TEMPLATE        # Choices are <none> (default), SERVICE_TEMPLATE and VMTEMPLATE (shown in Sunstone as IMAGE, SERVICE and VM respectively)
 # format: qcow2
-creation_time: "1739974996"   # date +%s
+creation_time: "1740004546"   # date +%s
 # os-id: Ubuntu
 # os-release: 22.04 LTS
 os-arch: x86_64

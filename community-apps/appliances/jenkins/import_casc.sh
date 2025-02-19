@@ -151,10 +151,8 @@ export AWS_SECRET_ACCESS_KEY=\"${ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY}\"
 # ansible-playbook --vault-password-file /var/lib/jenkins/superisecurevaultpassword -i localhost, -e workspace=/var/lib/jenkins/workspace/TN_DEPLOY -e tn_id=b1w5 -e component_type=oneKE -e custom_name=cluster -e entity_name=oneKE-cluster -e deployment_site=uma -e tnlcm_callback=http://10.11.28.148:5000/tnlcm/callback -e debug=true /var/lib/jenkins/workspace/TN_DEPLOY/oneKE/code/component_playbook.yaml"
 
     # Avoid duplicate entries
-    if ! grep -q "OPENNEBULA_USERNAME" "$BASHRC"; then
+    if ! grep -q "OPENNEBULA_USERNAME" "/var/lib/jenkins/.bashrc"; then
         echo "${ENV_VARS}" >> "/var/lib/jenkins/.bashrc"
         echo "${ONEAPP_JENKINS_SITES_TOKEN}" > "/var/lib/jenkins/superisecurevaultpassword"
     fi
 }
-
-configure_jenkins_bashrc

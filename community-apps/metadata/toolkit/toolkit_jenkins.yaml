@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] Jenkins"
-version: "v0.4.0-20250219-1523"
+version: "v0.4.0-20250219-2235"
 software_version: "v0.4.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -21,7 +21,7 @@ tags:
   - jenkins
 type: VMTEMPLATE
 format: qcow2
-creation_time: "1739974996"   # date +%s
+creation_time: "1740004546"   # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -36,7 +36,7 @@ opennebula_template:
     netcfg_type: "interfaces"
     token: "YES"
     report_ready: "YES"
-    start_script_base64: "IyEvYmluL2Jhc2gKb25lZ2F0ZSB2bSB1cGRhdGUgJChvbmVnYXRlIHZtIHNob3cgLWogfCBqcSAtciAnLlZNLklEJykgLS1kYXRhIEpFTktJTlNfVE9LRU49IiQoY2F0IC92YXIvbGliL2plbmtpbnMvY29uc3VsdF9tZS9qZW5raW5zX3RubGNtX3Rva2VuKSIKb25lZ2F0ZSB2bSB1cGRhdGUgJChvbmVnYXRlIHZtIHNob3cgLWogfCBqcSAtciAnLlZNLklEJykgLS1kYXRhIFNTSF9LRVk9IiQoY2F0IC92YXIvbGliL2plbmtpbnMvY29uc3VsdF9tZS9pZF9lZDI1NTE5LnB1YikiCm1pbmlvX2lkPSIkKG9uZWdhdGUgc2VydmljZSBzaG93IC0tanNvbiB8IGpxIC1yICcuU0VSVklDRS5yb2xlc1tdIHwgc2VsZWN0KC5uYW1lPT0ibWluaW8iKSAubm9kZXNbMF0udm1faW5mby5WTS5JRCcpIgovdXNyL2xvY2FsL2Jpbi9vbmV2bSBkaXNrLXJlc2l6ZSAyNTU0IDAgMTBHIC0tdXNlciAiJHtPTkVBUFBfSkVOS0lOU19PUEVOTkVCVUxBX1VTRVJOQU1FfSIgLS1wYXNzd29yZCAiJHtPTkVBUFBfSkVOS0lOU19PUEVOTkVCVUxBX1BBU1NXT1JEfSIgLS1lbmRwb2ludCAiJHtPTkVBUFBfSkVOS0lOU19PUEVOTkVCVUxBX0VORFBPSU5UfSI="
+    start_script_base64: "IyEvYmluL2Jhc2gKCnNvdXJjZSAvZXRjL29uZS1hcHBsaWFuY2Uvc2VydmljZS5kL3Rvb2xraXRfc2NyaXB0LnNoID4gL3Zhci9sb2cvb25lLWFwcGxpYW5jZS9zdGFydF9zY3JpcHQubG9nIDI+JjE="
     oneapp_jenkins_username:                 "$ONEAPP_JENKINS_USERNAME"
     oneapp_jenkins_password:                 "$ONEAPP_JENKINS_PASSWORD"
     oneapp_jenkins_sites_token:              "$ONEAPP_JENKINS_SITES_TOKEN"

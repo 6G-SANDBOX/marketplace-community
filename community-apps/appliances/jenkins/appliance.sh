@@ -47,7 +47,7 @@ service_install()
 
     # import pipelines casc
     source /etc/one-appliance/service.d/import_casc.sh
-    import_credentials_casc
+    import_pipelines_casc
 
     # cleanup
     postinstall_cleanup
@@ -70,6 +70,8 @@ service_configure()
     # import credentials casc
     source /etc/one-appliance/service.d/import_casc.sh
     import_credentials_casc
+
+    configure_jenkins_bashrc
 
     systemctl restart jenkins
 
