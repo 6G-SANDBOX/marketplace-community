@@ -11,7 +11,7 @@ description: |-
 
   Default client to onboard API invokers and API providers is client/password.
 
-  Remember to include in your local DNS the entry to resolve the hostname (capifcore) of the appliance. Register Service will be accesible through capifcore:8084 and CCF will be at capifcore:8080
+  Remember to include in your local DNS the entry to resolve the hostname set for capif and register components of the appliance. Both services are available in the same IP address and same port (443).
   
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
   
