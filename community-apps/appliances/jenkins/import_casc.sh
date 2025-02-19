@@ -2,7 +2,6 @@
 
 import_pipelines_casc(){
     msg info "Import default 6G-Sandbox pipelines as ConfigurationAsCode"
-    cp /etc/one-appliance/service.d/jobs.yaml /var/lib/jenkins/casc_configs/jobs.yaml
     cat > /var/lib/jenkins/casc_configs/jobs.yaml << 'EOF'
 jobs:
   - script: >
