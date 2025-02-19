@@ -1,7 +1,7 @@
 ---
-name: "[Testing] OCF"
+name: "OpenCAPIF"
 # version + date "%Y%M%d-%h%m"
-version: "20241221-0914"
+version: "autofill"
 software_version: "v2.0.0"
 publisher: Telefonica Innovación Digital
 description: |-
@@ -13,17 +13,23 @@ description: |-
 
   Remember to include in your local DNS the entry to resolve the hostname set for capif and register components of the appliance. Both services are available in the same IP address and same port (443).
   
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_OCF_USER` - This will be the user created to register invoker and providers.
+  * `ONEAPP_OCF_PASSWORD` - Password associated to user created.
+  * `ONEAPP_OCF_CAPIF_HOSTNAME` - Hostname of OpenCAPIF core function.
+  * `ONEAPP_OCF_REGISTER_HOSTNAME` - Hostname of OpenCAPIF Register service.
+
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
   
   **Note**: Remember to update the template in order to add a network after importing it.
 
-short_description: OCF appliance for KVM
+short_description: OpenCAPIF appliance for KVM
 tags:
   - ubuntu
   - ocf
 format: qcow2
-# stat -c %W <file>
-creation_time: "1719246477"
+creation_time: "autofill"
 os-id: Ubuntu
 os-release: '22.04'
 os-arch: x86_64
@@ -37,8 +43,8 @@ opennebula_template:
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     oneapp_ocf_user: "$ONEAPP_OCF_USER"
     oneapp_ocf_password: "$ONEAPP_OCF_PASSWORD"
-    capif_hostname: "$CAPIF_HOSTNAME"
-    register_hostname: "$REGISTER_HOSTNAME"
+    oneapp_ocf_capif_hostname: "$ONEAPP_OCF_CAPIF_HOSTNAME"
+    oneapp_ocf_register_hostname: "$ONEAPP_OCF_REGISTER_HOSTNAME"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -59,20 +65,16 @@ opennebula_template:
   user_inputs:
     oneapp_ocf_user:                     "O|text|ONEAPP_OCF_USER: User to access the OpenCAPIF| |client"
     oneapp_ocf_password:                 "O|password|ONEAPP_OCF_PASSWORD: Password to access the OpenCAPIF| |password"
-    capif_hostname:                      "O|text|CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
-    register_hostname:                   "O|text|REGISTER_HOSTNAME: Hostname for Register Service| |register"
+    oneapp_ocf_capif_hostname:           "O|text|ONEAPP_OCF_CAPIF_HOSTNAME: Hostname for OpenCAPIF| |capifcore"
+    oneapp_ocf_register_hostname:        "O|text|ONEAPP_OCF_REGISTER_HOSTNAME: Hostname for Register Service| |register"
 logo: OCF.png
 images:
-  - name: "[Testing] OCF"
-    url: >-
-      https://rawtest.mobilesandbox.cloud:9443/ocf_r2.qcow2
+  - name: "autofill"
+    url: "autofill"
     type: OS
     dev_prefix: vd
     driver: qcow2
-    # qemu-img info <file> | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g'
-    size: "7516192768"
+    size: "autofill"
     checksum:
-      # md5sum <file> | cut -d' ' -f1
-      md5: "85971d547fe036800fd1832fc1f13d2d"
-      # sha256sum <file> | cut -d' ' -f1
-      sha256: "c5457a1cd3f8e8a2efc2e9429960dc0e8874d1f538ed0aca4f79a102fd2a28ba"
+      md5: "autofill"
+      sha256: "autofill"

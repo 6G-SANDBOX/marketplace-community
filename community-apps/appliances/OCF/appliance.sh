@@ -37,8 +37,8 @@ DOCKER_COMPOSE_INGRESS_NGINX_CONF_FILE="${INGRESS_NGINX_DIR}/nginx.conf"
 # Configurable variables only for config and bootstrap, set by default on the VM Template
 # ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
 # ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
-# CAPIF_HOSTNAME="${CAPIF_HOSTNAME:-'capifcore'}"
-# REGISTER_HOSTNAME="${REGISTER_HOSTNAME:-'register'}"
+# ONEAPP_OCF_CAPIF_HOSTNAME="${ONEAPP_OCF_CAPIF_HOSTNAME:-'capifcore'}"
+# ONEAPP_OCF_REGISTER_HOSTNAME="${ONEAPP_OCF_REGISTER_HOSTNAME:-'register'}"
 
 
 # ------------------------------------------------------------------------------
@@ -234,8 +234,8 @@ stream {
     access_log /var/log/nginx/access.log basic;
 
     map \$ssl_preread_server_name \$backend {
-        ${REGISTER_HOSTNAME} 127.0.0.1:8084;
-        ${CAPIF_HOSTNAME} 127.0.0.1:8443;
+        ${ONEAPP_OCF_REGISTER_HOSTNAME} 127.0.0.1:8084;
+        ${ONEAPP_OCF_CAPIF_HOSTNAME} 127.0.0.1:8443;
         default 127.0.0.1:8080;  # En caso de que el hostname no coincida
     }
 
@@ -268,9 +268,9 @@ setup_environment()
     msg info "Setup OpenCAPIF environment"
     sed -i "s|^export REGISTRY_BASE_URL=.*|export REGISTRY_BASE_URL=\"$REGISTRY_BASE_URL\"|" "$VARIABLES_FILE"
     sed -i "s|^export OCF_VERSION=.*|export OCF_VERSION=\"$OCF_VERSION\"|" "$VARIABLES_FILE"
-    sed -i "s|^export CAPIF_HOSTNAME=.*|export CAPIF_HOSTNAME=\"$CAPIF_HOSTNAME\"|" "$VARIABLES_FILE"
+    sed -i "s|^export CAPIF_HOSTNAME=.*|export CAPIF_HOSTNAME=\"$ONEAPP_OCF_CAPIF_HOSTNAME\"|" "$VARIABLES_FILE"
     sed -i "s|^export CAPIF_HTTPS_PORT=.*|export CAPIF_HTTPS_PORT=\"443\"|" "$VARIABLES_FILE"
-    sed -i "s|^export CAPIF_REGISTER=.*|export CAPIF_REGISTER=\"$REGISTER_HOSTNAME\"|" "$VARIABLES_FILE"
+    sed -i "s|^export CAPIF_REGISTER=.*|export CAPIF_REGISTER=\"$ONEAPP_OCF_REGISTER_HOSTNAME\"|" "$VARIABLES_FILE"
     sed -i "s|^export CAPIF_REGISTER_PORT=.*|export CAPIF_REGISTER_PORT=\"443\"|" "$VARIABLES_FILE"
     sed -i "s|^export BUILD_DOCKER_IMAGES=.*|export BUILD_DOCKER_IMAGES=false|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE_VERSION=.*|export DOCKER_ROBOT_IMAGE_VERSION=$DOCKER_ROBOT_IMAGE_VERSION|" "$VARIABLES_FILE"
