@@ -1,24 +1,16 @@
 #!/usr/bin/env bash
 
-# This script contains an example implementation logic for your appliances.
-# For this example the goal will be to have a "database as a service" appliance
-
 set -o errexit -o pipefail
 
-# Default values for when the variable isn't defined on the VM Template
-ONEAPP_LITHOPS_BACKEND="${ONEAPP_LITHOPS_BACKEND:-localhost}"
-ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
-
-# You can make these parameters a required step of the VM instantiation wizard by using the USER_INPUTS feature
-# https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
-
-
 # ------------------------------------------------------------------------------
-# Global variables
+# Contextualization and global variables
 # ------------------------------------------------------------------------------
 
-# For organization purposes is good to define here variables that will be used by your bash logic
-# Static data that will be used by the appliance on installation part of the lifecycle
+# ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
+# ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
+# ONEAPP_OCF_CAPIF_HOSTNAME="${ONEAPP_OCF_CAPIF_HOSTNAME:-'capifcore'}"
+# ONEAPP_OCF_REGISTER_HOSTNAME="${ONEAPP_OCF_REGISTER_HOSTNAME:-'register'}"
+
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
 OCF_REPOSITORY_BRANCH="staging"
@@ -34,22 +26,12 @@ INGRESS_NGINX_DIR="${BASE_DIR}/ingress-nginx"
 DOCKER_COMPOSE_INGRESS_NGINX_FILE="${INGRESS_NGINX_DIR}/docker-compose-ingress-nginx.yml"
 DOCKER_COMPOSE_INGRESS_NGINX_CONF_FILE="${INGRESS_NGINX_DIR}/nginx.conf"
 
-# Configurable variables only for config and bootstrap, set by default on the VM Template
-# ONEAPP_OCF_USER="${ONEAPP_OCF_USER:-'client'}"
-# ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
-# ONEAPP_OCF_CAPIF_HOSTNAME="${ONEAPP_OCF_CAPIF_HOSTNAME:-'capifcore'}"
-# ONEAPP_OCF_REGISTER_HOSTNAME="${ONEAPP_OCF_REGISTER_HOSTNAME:-'register'}"
-
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-# Function Definitions
+# Mandatory Functions
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
-# The following functions will be called by the appliance service manager at
-# the  different stages of the appliance life cycles. They must exist
-# https://github.com/OpenNebula/one-apps/wiki/apps_intro#appliance-life-cycle
 
 service_install()
 {
@@ -76,7 +58,6 @@ service_install()
     return 0
 }
 
-# Runs when VM is first started, and every time 
 service_configure()
 {
     export DEBIAN_FRONTEND=noninteractive
@@ -110,32 +91,12 @@ service_bootstrap()
     return 0
 }
 
-# This one is not really mandatory, however it is a handled function
-service_help()
-{
-    msg info "Example appliance how to use message. If missing it will default to the generic help"
-
-    return 0
-}
-
-# This one is not really mandatory, however it is a handled function
-service_cleanup()
-{
-    msg info "CLEANUP logic goes here in case of install failure"
-    :
-}
-
-
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Function Definitions
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
-# Then for modularity purposes you can define your own functions as long as their name
-# doesn't clash with the previous functions
-
 
 install_docker()
 {
@@ -203,14 +164,6 @@ download_capif_repository()
 {
     msg info "Download OpenCAPIF repository"
     git clone --branch ${OCF_REPOSITORY_BRANCH} --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
-}
-
-postinstall_cleanup()
-{
-    msg info "Delete cache and stored packages"
-    apt-get autoclean
-    apt-get autoremove
-    rm -rf /var/lib/apt/lists/*
 }
 
 configure_ingress_nginx()
@@ -302,6 +255,10 @@ create_user()
     ${BASE_DIR}/services/create_users.sh -u ${ONEAPP_OCF_USER} -p ${ONEAPP_OCF_PASSWORD} -t 1
 }
 
-
-
-
+postinstall_cleanup()
+{
+    msg info "Delete cache and stored packages"
+    apt-get autoclean
+    apt-get autoremove
+    rm -rf /var/lib/apt/lists/*
+}
