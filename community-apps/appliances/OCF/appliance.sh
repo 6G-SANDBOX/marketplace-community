@@ -21,6 +21,7 @@ ONEAPP_LITHOPS_STORAGE="${ONEAPP_LITHOPS_STORAGE:-localhost}"
 # Static data that will be used by the appliance on installation part of the lifecycle
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 OCF_VERSION="v2.0.0-release"
+OCF_REPOSITORY_BRANCH="staging"
 REGISTRY_BASE_URL="labs.etsi.org:5050/ocf/capif/prod"
 BASE_DIR=/etc/one-appliance/service.d/capif
 VARIABLES_FILE="${BASE_DIR}/services/variables.sh"
@@ -201,8 +202,7 @@ download_images()
 download_capif_repository()
 {
     msg info "Download OpenCAPIF repository"
-    # git clone --branch ${OCF_VERSION} --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
-    git clone --branch OCFXX-Improve_local_scripts --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
+    git clone --branch ${OCF_REPOSITORY_BRANCH} --single-branch https://labs.etsi.org/rep/ocf/capif.git ${BASE_DIR}
 }
 
 postinstall_cleanup()
