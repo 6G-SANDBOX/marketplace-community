@@ -249,8 +249,6 @@ EOF
     # Create nginx docker compose file
     msg info "Create docker-compose file for Ingress Nginx"
     cat > $DOCKER_COMPOSE_INGRESS_NGINX_FILE <<EOF
-version: '3.8'
-
 services:
   nginx:
     image: nginx:${INGRESS_NGINX_VERSION}
