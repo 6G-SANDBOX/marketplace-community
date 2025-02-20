@@ -14,8 +14,9 @@ short_description: Open5GS and MongoDB appliance for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library
-  - 5G-Core
+  - Fokus
   - Open5GS
+  - 5G-Core
   - ubuntu
 format: qcow2
 creation_time: "autofill"

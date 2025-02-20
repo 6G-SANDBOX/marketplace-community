@@ -16,8 +16,11 @@ description: |-
   - Based on the INT-Collector project: https://github.com/GEANT-DataPlaneProgramming/int-collector
 short_description: Appliance that includes pre-installed INT-Collector P4, InfluxDB and Grafana
 tags:
-  - ubuntu
+  - 6G-Sandbox
+  - 6G-Library
+  - UMA
   - p4
+  - ubuntu
   - telemetry
   - influxdb
   - grafana

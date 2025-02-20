@@ -28,8 +28,10 @@ description: |-
 short_description: LoadCore Agent Test Tool appliance for KVM
 tags:
   - 6G-Sandbox
+  - 6G-Library
   - Keysight
   - Loadcore
+  - ubuntu
 format: raw
 creation_time: "1733170911"
 os-id: Ubuntu

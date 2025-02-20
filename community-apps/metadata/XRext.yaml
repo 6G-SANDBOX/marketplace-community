@@ -21,6 +21,7 @@ description: |-
 short_description: XRext appliance for KVM
 tags:
   - 6G-Sandbox
+  - 6G-Library
   - nokia
   - XRext
   - ubuntu

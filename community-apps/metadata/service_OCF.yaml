@@ -24,6 +24,7 @@ description: |-
   **Note**: Remember to update the template in order to add a network after importing it.
 short_description: OpenCAPIF appliance for KVM
 tags:
+  - TID
   - OpenCAPIF
   - ocf
   - ubuntu

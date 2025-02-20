@@ -29,6 +29,7 @@ short_description: 6G-Sandbox bastion for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library
+  - TID
   - bastion
   - ubuntu
 format: qcow2

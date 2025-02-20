@@ -11,8 +11,11 @@ description: |-
   **Note**: VM credentials are root:root
 short_description: OpenSAND 6G-SANDBOX for KVM
 tags:
-- ubuntu
-- opensand
+  - 6G-Sandbox
+  - 6G-Library
+  - INFOLYSiS
+  - opensand
+  - ubuntu
 format: qcow2
 creation_time: "1718791248"
 os-id: Ubuntu

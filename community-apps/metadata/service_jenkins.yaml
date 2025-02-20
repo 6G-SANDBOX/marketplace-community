@@ -31,6 +31,7 @@ description: |-
 short_description: 6G-Sandbox Jenkins appliance for KVM
 tags:
   - 6G-Sandbox
+  - TID
   - jenkins
   - ubuntu
 format: qcow2

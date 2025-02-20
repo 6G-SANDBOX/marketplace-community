@@ -14,8 +14,10 @@ description: |-
 short_description: Endpoint for IxChariot
 tags:
   - 6G-Sandbox
+  - 6G-Library
   - Keysight
-  - "IxChariot endpoint"
+  - IxChariot
+  - ubuntu
 format: qcow2
 creation_time: "1737149773"
 os-arch: x86_64

@@ -17,7 +17,7 @@ description: |-
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 short_description: 6G-Sandbox route-manager-api appliance for KVM
 tags:
-  - 6G-Sandbox
+  - TID
   - route-manager-api
   - debian
 format: qcow2

@@ -14,8 +14,9 @@ short_description: Open5gcore appliance for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library
-  - 5G-core
+  - Fokus
   - open5gcore
+  - 5G-core
   - ubuntu
 format: qcow2
 creation_time: "autofill"

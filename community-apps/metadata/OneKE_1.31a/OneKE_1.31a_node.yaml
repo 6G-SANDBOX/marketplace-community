@@ -1,12 +1,12 @@
 ---
-name: "[6G-Sandbox OneKE 1.31] node"
-version: 1.31.3-6.10.0-2-20250220-0051      # date +"%Y%m%d-%H%M" -d @EPOCH
+name: "[6G-Sandbox OneKE 1.31a] node"
+version: 1.31.3-6.10.0-2-20250220-0051          # date +"%Y%m%d-%H%M" -d @EPOCH
 publisher: OpenNebula Systems
 description: |-
-  OneKE 1.31 VM template for Master and Worker VMs.
+  OneKE 1.31 Airgapped VM template for Master and Worker VMs.
 
   See the dedicated [documentation](https://github.com/OpenNebula/one-apps/wiki).
-short_description: OneKE 1.31 VM template for Master and Worker VMs
+short_description: OneKE 1.31 Airgapped VM template for Master and Worker VMs
 tags:
   - service
   - oneflow
@@ -19,7 +19,7 @@ tags:
   - control_plane
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1740012707             # date +%s
+creation_time: 1740012707               # date +%s
 os-id: Ubuntu
 os-release: "22.04 LTS"
 os-arch: x86_64
@@ -37,7 +37,7 @@ opennebula_template:
     TOKEN: "YES"
     REPORT_READY: "YES"
     SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"
-    ONE_SERVICE_AIRGAPPED: "NO"
+    ONE_SERVICE_AIRGAPPED: "YES"
     ONEAPP_VROUTER_ETH0_VIP0: "$ONEAPP_VROUTER_ETH0_VIP0"
     ONEAPP_VROUTER_ETH1_VIP0: "$ONEAPP_VROUTER_ETH1_VIP0"
     ONEAPP_RKE2_SUPERVISOR_EP: "$ONEAPP_RKE2_SUPERVISOR_EP"
@@ -82,4 +82,4 @@ opennebula_template:
   user_inputs: {}
 logo: kubernetes.png
 disks:
-- "OneKE 1.31 OS disk"
+- "OneKE 1.31 Airgapped OS disk"

@@ -19,8 +19,8 @@ description: |-
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
 short_description: Technitium DNS appliance for KVM
 tags:
-  - 6G-Sandbox
-  - 6G-Library
+  - TID
+  - Technitium
   - DNS
   - ubuntu
 format: qcow2

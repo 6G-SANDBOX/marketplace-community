@@ -29,6 +29,7 @@ description: |-
 short_description: 6G-Sandbox TNLCM appliance for KVM
 tags:
   - 6G-Sandbox
+  - UMA
   - TNLCM
   - ubuntu
 format: qcow2

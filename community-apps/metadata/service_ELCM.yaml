@@ -21,6 +21,8 @@ description: |-
 short_description: ELCM appliance for KVM
 tags:
   - 6G-Sandbox
+  - 6G-Library
+  - UMA
   - ELCM
   - ubuntu
 format: qcow2
