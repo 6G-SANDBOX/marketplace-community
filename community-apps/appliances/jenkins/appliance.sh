@@ -206,26 +206,30 @@ create_admin_user()
     url=http://localhost:8080
     password=$(cat /var/lib/jenkins/secrets/initialAdminPassword)
 
-    # ADMIN CREDENTIALS URL ENCODED USING PYTHON
+    msg info "URL encode admin credentials using python"
     username=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "admin")
     new_password=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "admin")
     fullname=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "admin")
     email=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "hello@world.com")
 
-    # GET THE CRUMB AND COOKIE
+    msg info "Get crumb and cookie for Jenkins API"
     cookie_jar="$(mktemp)"
+    msg info "Variable cookie_jar set to ${cookie_jar}"
     full_crumb=$(curl -u "admin:${password}" --cookie-jar "${cookie_jar}" ${url}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\))
+    msg info "Variable full_crumb set to ${full_crumb}"
     arr_crumb=(${full_crumb//:/ })
-    only_crumb=$(echo ${arr_crumb[1]})
+    msg info "Variable arr_crumb set to ${arr_crumb[0]}"
+    only_crumb="$(echo ${arr_crumb[1]})"
+    msg info "Variable only_crumb set to ${only_crumb}"
 
-    # MAKE THE REQUEST TO CREATE AN ADMIN USER
+    msg info "Send API request to create the 'admin' user"
     curl -X POST -u "admin:${password}" ${url}/setupWizard/createAdminUser \
             -H "Connection: keep-alive" \
             -H "Accept: application/json, text/javascript" \
             -H "X-Requested-With: XMLHttpRequest" \
             -H "${full_crumb}" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            --cookie ${cookie_jar} \
+            --cookie "${cookie_jar}" \
             --data-raw "username=${username}&password1=${new_password}&password2=${new_password}&fullname=${fullname}&email=${email}&Jenkins-Crumb=${only_crumb}&json=%7B%22username%22%3A%20%22${username}%22%2C%20%22password1%22%3A%20%22${new_password}%22%2C%20%22%24redact%22%3A%20%5B%22password1%22%2C%20%22password2%22%5D%2C%20%22password2%22%3A%20%22${new_password}%22%2C%20%22fullname%22%3A%20%22${fullname}%22%2C%20%22email%22%3A%20%22${email}%22%2C%20%22Jenkins-Crumb%22%3A%20%22${only_crumb}%22%7D&core%3Aapply=&Submit=Save&json=%7B%22username%22%3A%20%22${username}%22%2C%20%22password1%22%3A%20%22${new_password}%22%2C%20%22%24redact%22%3A%20%5B%22password1%22%2C%20%22password2%22%5D%2C%20%22password2%22%3A%20%22${new_password}%22%2C%20%22fullname%22%3A%20%22${fullname}%22%2C%20%22email%22%3A%20%22${email}%22%2C%20%22Jenkins-Crumb%22%3A%20%22${only_crumb}%22%7D"
 }
 
@@ -235,18 +239,21 @@ install_plugins_jenkins()
     msg info "Install required jenkins plugins"
     url=http://localhost:8080
     url_urlEncoded=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${url}")
-    user=admin
-    password=admin
+    user="admin"
+    password="admin"
     plugin_list=$(cat /etc/one-appliance/service.d/jenkins_plugins.txt | awk '{print "'"'"'" $0 "'"'"'"}' | paste -sd,)
     mapfile -t plugins_map < "/etc/one-appliance/service.d/jenkins_plugins.txt"
 
-    # GET THE CRUMB AND COOKIE
+    msg info "Get crumb and cookie for Jenkins API"
     cookie_jar="$(mktemp)"
+    msg info "Variable cookie_jar set to ${cookie_jar}"
     full_crumb=$(curl -u "${user}:${password}" --cookie-jar "${cookie_jar}" ${url}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\))
+    msg info "Variable full_crumb set to ${full_crumb}"
     arr_crumb=(${full_crumb//:/ })
+    msg info "Variable arr_crumb set to ${arr_crumb[0]}"
     only_crumb=$(echo ${arr_crumb[1]})
 
-    msg info "Make the request to download and install required modules"
+    msg info "Send API request to download and install the required plugins"
     curl -X POST -u "${user}:${password}" ${url}/pluginManager/installPlugins \
         -H 'Connection: keep-alive' \
         -H 'Accept: application/json, text/javascript, */*; q=0.01' \
@@ -257,7 +264,8 @@ install_plugins_jenkins()
         --cookie ${cookie_jar} \
         --data-raw "{'dynamicLoad':true,'plugins':[${plugin_list}],'Jenkins-Crumb':'${only_crumb}'}"
 
-    msg info "Send the request to confirm the url for the WebUI"
+    # TODO: probably incorrect, as warning appears afterwards
+    msg info "Send API request to confirm the WebUI URL"
     curl -X POST -u "${user}:${password}" ${url}/setupWizard/configureInstance \
         -H 'Connection: keep-alive' \
         -H 'Accept: application/json, text/javascript, */*; q=0.01' \
@@ -302,18 +310,23 @@ update_admin_user()
     msg info "Update admin username and password in jenkins"
     url=http://localhost:8080
 
+    msg info "URL encode admin credentials using python"
     username=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_USERNAME}")
     password=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_PASSWORD}")
     fullname=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "${ONEAPP_JENKINS_USERNAME}")
     email=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(), safe=''))" <<< "hello@world.com")
 
-    # GET THE CRUMB AND COOKIE
+    msg info "Get crumb and cookie for Jenkins API"
     cookie_jar="$(mktemp)"
+    msg info "Variable cookie_jar set to ${cookie_jar}"
     full_crumb=$(curl -u "admin:admin" --cookie-jar "$cookie_jar" ${url}/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\))
+    msg info "Variable full_crumb set to ${full_crumb}"
     arr_crumb=(${full_crumb//:/ })
-    only_crumb=$(echo ${arr_crumb[1]})
+    msg info "Variable arr_crumb set to ${arr_crumb[0]}"
+    only_crumb="$(echo ${arr_crumb[1]})"
 
     # MAKE THE REQUEST TO CREATE AN ADMIN USER
+    msg info "Send API request to create another Admin user"
     curl -X POST -u "admin:admin" $url/setupWizard/createAdminUser \
         -H "Connection: keep-alive" \
         -H "Accept: application/json, text/javascript" \
@@ -335,6 +348,14 @@ update_admin_user()
     echo "${jenkins_tnlcm_token}" > "${CONSULT_ME_DIR}jenkins_tnlcm_token"
     chown jenkins:jenkins "${CONSULT_ME_DIR}jenkins_tnlcm_token"
     chmod u=r,go= "${CONSULT_ME_DIR}jenkins_tnlcm_token"
+    
+    msg info "Allow SSH access to the jenkins Linux user with the Jenkins Admin Password"
+    echo "jenkins:${ONEAPP_JENKINS_PASSWORD}" | chpasswd
+    cat > /etc/ssh/sshd_config.d/jenkins.conf << 'EOF'
+Match User jenkins
+    PasswordAuthentication yes
+EOF
+    systemctl restart sshd
 }
 
 generate_ssh_keys()
