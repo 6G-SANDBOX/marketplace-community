@@ -63,7 +63,7 @@ opennebula_template:
   memory: "3072"
   os:
     arch: x86_64
-  user_inputs: {}
+  logo: images/logos/ubuntu.png
 logo: kubernetes.png
 disks:
 - "OneKE 1.31 OS disk"

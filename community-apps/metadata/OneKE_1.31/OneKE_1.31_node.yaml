@@ -68,18 +68,18 @@ opennebula_template:
     ONEAPP_VNF_HAPROXY_LB3_IP: "$ONEAPP_VNF_HAPROXY_LB3_IP"
     ONEAPP_VNF_HAPROXY_LB3_PORT: "$ONEAPP_VNF_HAPROXY_LB3_PORT"
     ONEAPP_VNF_DNS_ENABLED: "$ONEAPP_VNF_DNS_ENABLED"
-  cpu: "2"
-  vcpu: "2"
+  cpu: "4"   # CHANGED FROM 2 to 4
+  vcpu: "4"  # CHANGED FROM 2 to 4
   cpu_model:
-    model: "host-passthrough" # CHANGED FOR 6G-SANDBOX
+    model: "host-passthrough"  # CHANGED FOR 6G-SANDBOX
   graphics:
     listen: "0.0.0.0"
     type: vnc
   inputs_order: ""
-  memory: "3072"
+  memory: "4096"  # CHANGED FROM 3072 to 4096
   os:
     arch: x86_64
-  user_inputs: {}
+  logo: images/logos/ubuntu.png
 logo: kubernetes.png
 disks:
 - "OneKE 1.31 OS disk"

@@ -68,7 +68,7 @@ opennebula_template:
     model: virtio
   os:
     arch: x86_64
-  user_inputs: {}
+  logo: images/logos/alpine.png
 logo: router.png
 images:
 - name: "[6G-Sandbox OneKE 1.31] VNF"
