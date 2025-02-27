@@ -216,6 +216,8 @@ install_elcm_frontend()
   ${PYTHON_BIN} -m venv ${FRONTEND_PATH}/venv
   source ${FRONTEND_PATH}/venv/bin/activate
   pip install -r ${FRONTEND_PATH}/requirements.txt
+  pip install waitress
+  flask db upgrade
   deactivate
 
   msg info "Define ELCM frontend systemd service"
@@ -227,7 +229,7 @@ Description=ELCM Frontend
 Type=simple
 WorkingDirectory=${FRONTEND_PATH}
 Environment="SECRET_KEY=super secret"
-ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5000'
+ExecStart=/bin/bash -c 'source venv/bin/activate && waitress-serve --listen=*:5000 portal:app'
 Restart=always
 
 [Install]
