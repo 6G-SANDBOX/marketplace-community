@@ -171,6 +171,7 @@ install_grafana()
   apt-get update
   apt-get install -y grafana
   systemctl enable --now grafana-server.service
+}
 
 install_elcm_backend()
 {
