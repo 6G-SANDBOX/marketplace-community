@@ -23,7 +23,6 @@ DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev lib
 PYTHON_VERSION="3.10"
 PYTHON_BIN="python${PYTHON_VERSION}"
 OPENTAP_PATH="/opt/opentap"
-GRAFANA_VERSION="11.5.2"
 BACKEND_VERSION="v3.7.1"
 BACKEND_PATH="/opt/ELCM_BACKEND"
 FRONTEND_VERSION="v3.0.1"
@@ -44,7 +43,7 @@ service_install()
   install_pkg_deps
 
   # python
-  install_python
+  # install_python
 
   # TODO: opentap
   # install_opentap
@@ -160,18 +159,18 @@ install_influxdb()
   echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
   apt-get update
   apt-get install -y influxdb2
-  systemctl enable --now influxdb
+  systemctl enable --now influxdb.service
 }
 
 install_grafana()
 {
-  msg info "Install Grafana version ${GRAFANA_VERSION}"
-  apt-get install -y adduser libfontconfig1 musl
-  wget https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb
-  dpkg -i grafana_${GRAFANA_VERSION}_amd64.deb
-  systemctl enable --now grafana-server
-  rm -rf grafana_${GRAFANA_VERSION}*
-}
+  msg info "Install Grafana"
+  mkdir -p /etc/apt/keyrings/
+  wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+  echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+  apt-get update
+  apt-get install -y grafana
+  systemctl enable --now grafana-server.service
 
 install_elcm_backend()
 {
