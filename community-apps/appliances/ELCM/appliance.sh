@@ -244,21 +244,19 @@ configure_influxdb()
 configure_grafana()
 {
   msg info "Configure Grafana"
-  if [ "${ONEAPP_ELCM_GRAFANA_PASSWORD}" != "admin" ]; then
-#     ONEAPP_ELCM_GRAFANA_UPDATE_PASSWORD_JSON=$(cat <<EOF
-#   {
-#   "oldPassword": "admin",
-#   "newPassword": "${ONEAPP_ELCM_GRAFANA_PASSWORD}",
-#   "confirmNew": "${ONEAPP_ELCM_GRAFANA_PASSWORD}"
-#   }
-# EOF
-# )
-  # curl -X PUT -H "Content-Type: application/json;charset=UTF-8" -d "${ONEAPP_ELCM_GRAFANA_UPDATE_PASSWORD_JSON}" http://${ONEAPP_ELCM_GRAFANA_USER}:admin@${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/user/password
+  msg info "Change admin password"
   grafana-cli admin reset-admin-password ${ONEAPP_ELCM_GRAFANA_PASSWORD}
-fi
+
+  msg info "Wait Grafana service up"
+  until curl -s "http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/health" | grep -q '"database": "ok"'; do
+    msg info "Waiting for Grafana to be ready..."
+    sleep 5
+  done
+  msg info "Grafana service is ready"
 
   msg info "Create InfluxDB datasource in Grafana"
   INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
+  msg info "InfluxDB user token: ${INFLUXDB_USER_TOKEN}"
   INFLUXDB_DATASOURCE_JSON=$(cat <<EOF
 {
   "name": "${ONEAPP_ELCM_INFLUXDB_BUCKET}",
@@ -278,7 +276,12 @@ fi
 }
 EOF
 )
-  curl -X POST -H "Content-Type: application/json" -d "${INFLUXDB_DATASOURCE_JSON}" http://${ONEAPP_ELCM_GRAFANA_USER}:${ONEAPP_ELCM_GRAFANA_PASSWORD}@${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/datasources
+  curl -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic $(echo -n "${ONEAPP_ELCM_GRAFANA_USER}:${ONEAPP_ELCM_GRAFANA_PASSWORD}" | base64)" \
+  -d "${INFLUXDB_DATASOURCE_JSON}" \
+  "http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/datasources"
 
   msg info "Create service account grafana"
   SERVICE_ACCOUNT_PAYLOAD=$(cat <<EOF
