@@ -136,10 +136,14 @@ install_pkg_deps()
 
 install_python()
 {
-  msg info "Install python version ${PYTHON_VERSION}"
-  add-apt-repository ppa:deadsnakes/ppa -y
-  wait_for_dpkg_lock_release
-  apt-get install python${PYTHON_VERSION}-full -y
+  if python${PYTHON_VERSION} --version &>/dev/null; then
+    msg info "Python ${PYTHON_VERSION} is already installed"
+  else
+    msg info "Install python ${PYTHON_VERSION}"
+    add-apt-repository ppa:deadsnakes/ppa -y
+    wait_for_dpkg_lock_release
+    apt-get install python${PYTHON_VERSION}-full -y
+  fi
 }
 
 install_opentap()
