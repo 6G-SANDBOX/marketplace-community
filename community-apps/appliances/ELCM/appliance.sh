@@ -16,7 +16,7 @@ ONEAPP_ELCM_INFLUXDB_PORT="8086"
 ONEAPP_ELCM_INFLUXDB_BUCKET="${ONEAPP_ELCM_INFLUXDB_BUCKET:-elcmbucket}"
 ONEAPP_ELCM_GRAFANA_USER="admin"
 # ONEAPP_ELCM_GRAFANA_PASSWORD="${ONEAPP_ELCM_GRAFANA_PASSWORD:-admin}"
-ONEAPP_ELCM_GRAFANA_HOST="127.0.0.1"
+ONEAPP_ELCM_GRAFANA_HOST="localhost"
 ONEAPP_ELCM_GRAFANA_PORT="3000"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
@@ -244,6 +244,7 @@ configure_influxdb()
 
 configure_grafana()
 {
+  msg info "Configure Grafana"
   if [ "${ONEAPP_ELCM_GRAFANA_PASSWORD}" != "admin" ]; then
 #     ONEAPP_ELCM_GRAFANA_UPDATE_PASSWORD_JSON=$(cat <<EOF
 #   {
@@ -257,7 +258,7 @@ configure_grafana()
   grafana-cli admin reset-admin-password ${ONEAPP_ELCM_GRAFANA_PASSWORD}
 fi
 
-  # connect grafana with influxdb
+  msg info "Create InfluxDB datasource in Grafana"
   INFLUXDB_DATASOURCE_JSON=$(cat <<EOF
 {
   "name": "${ONEAPP_ELCM_INFLUXDB_BUCKET}",
@@ -279,7 +280,7 @@ EOF
 )
   curl -X POST -H "Content-Type: application/json" -d "${INFLUXDB_DATASOURCE_JSON}" http://${ONEAPP_ELCM_GRAFANA_USER}:${ONEAPP_ELCM_GRAFANA_PASSWORD}@${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/datasources
 
-  # generate service account in grafana
+  msg info "Create service account grafana"
   SERVICE_ACCOUNT_PAYLOAD=$(cat <<EOF
 {
   "name": "elcmsa",
@@ -297,7 +298,7 @@ EOF
 
   SERVICE_ACCOUNT_ID=$(echo "${SERVICE_ACCOUNT_RESPONSE}" | grep -o '"id":[0-9]*' | cut -d ':' -f2)
 
-  # generate token to service account
+  msg info "Generate token to service account"
   SA_TOKEN_PAYLOAD=$(cat <<EOF
 {
   "name": "elcmsa-token",
