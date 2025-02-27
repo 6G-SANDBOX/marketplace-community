@@ -238,7 +238,6 @@ EOF
 configure_influxdb()
 {
   influx setup --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --org ${ONEAPP_ELCM_INFLUXDB_ORG} --bucket ${ONEAPP_ELCM_INFLUXDB_BUCKET} --username ${ONEAPP_ELCM_INFLUXDB_USER} --password ${ONEAPP_ELCM_INFLUXDB_PASSWORD} --force
-  INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
   # influx auth create --org ${ONEAPP_ELCM_INFLUXDB_ORG} --all-access --description "Admin ELCM token" --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT}
 }
 
@@ -259,6 +258,7 @@ configure_grafana()
 fi
 
   msg info "Create InfluxDB datasource in Grafana"
+  INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
   INFLUXDB_DATASOURCE_JSON=$(cat <<EOF
 {
   "name": "${ONEAPP_ELCM_INFLUXDB_BUCKET}",
