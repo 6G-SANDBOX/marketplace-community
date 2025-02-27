@@ -136,13 +136,13 @@ install_pkg_deps()
 
 install_python()
 {
-  if python${PYTHON_VERSION} --version &>/dev/null; then
+  if ${PYTHON_BIN} --version &>/dev/null; then
     msg info "Python ${PYTHON_VERSION} is already installed"
   else
-    msg info "Install python ${PYTHON_VERSION}"
+    msg info "Install Python ${PYTHON_VERSION}"
     add-apt-repository ppa:deadsnakes/ppa -y
     wait_for_dpkg_lock_release
-    apt-get install python${PYTHON_VERSION}-full -y
+    apt-get install ${PYTHON_BIN}-full -y
   fi
 }
 
@@ -182,6 +182,8 @@ install_elcm_backend()
   msg info "Clone ELCM BACKEND Repository"
   git clone --depth 1 --branch ${BACKEND_VERSION} -c advice.detachedHead=false https://gitlab.com/morse-uma/elcm.git ${BACKEND_PATH}
 
+  apt install ${PYTHON_BIN}-venv -y
+  
   msg info "Activate ELCM python virtual environment and install requirements"
   ${PYTHON_BIN} -m venv ${BACKEND_PATH}/venv
   source ${BACKEND_PATH}/venv/bin/activate
