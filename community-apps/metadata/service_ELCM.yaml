@@ -60,10 +60,10 @@ opennebula_template:
   logo: images/logos/ubuntu.png
   user_inputs:
     oneapp_elcm_influxdb_user:      "M|text|ONEAPP_ELCM_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
-    oneapp_elcm_influxdb_password:  "M|password|ONEAPP_ELCM_INFLUXDB_PASSWORD: Password used to login into the InfluxDB."
+    oneapp_elcm_influxdb_password:  "M|password|ONEAPP_ELCM_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
     oneapp_elcm_influxdb_org:       "M|text|ONEAPP_ELCM_INFLUXDB_ORG: Organization name. | |elcmorg"
     oneapp_elcm_influxdb_bucket:    "M|text|ONEAPP_ELCM_INFLUXDB_BUCKET: Bucket name. | |elcmbucket"
-    oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana."
+    oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
 logo: ubuntu.png
 images:
   - name: "autofill"
