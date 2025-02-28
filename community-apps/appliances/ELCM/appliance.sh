@@ -217,7 +217,9 @@ install_elcm_frontend()
   source ${FRONTEND_PATH}/venv/bin/activate
   pip install -r ${FRONTEND_PATH}/requirements.txt
   pip install waitress
+  cd ${FRONTEND_PATH}
   flask db upgrade
+  cd
   deactivate
 
   msg info "Define ELCM frontend systemd service"
