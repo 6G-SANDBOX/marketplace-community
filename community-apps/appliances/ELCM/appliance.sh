@@ -16,14 +16,13 @@ ONEAPP_ELCM_INFLUXDB_PORT="8086"
 ONEAPP_ELCM_INFLUXDB_BUCKET="${ONEAPP_ELCM_INFLUXDB_BUCKET:-elcmbucket}"
 ONEAPP_ELCM_GRAFANA_USER="admin"
 # ONEAPP_ELCM_GRAFANA_PASSWORD="${ONEAPP_ELCM_GRAFANA_PASSWORD:-admin}"
-ONEAPP_ELCM_GRAFANA_HOST="127.0.0.1"
+ONEAPP_ELCM_GRAFANA_HOST="localhost"
 ONEAPP_ELCM_GRAFANA_PORT="3000"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
 PYTHON_VERSION="3.10"
 PYTHON_BIN="python${PYTHON_VERSION}"
 OPENTAP_PATH="/opt/opentap"
-GRAFANA_VERSION="11.5.2"
 BACKEND_VERSION="v3.7.1"
 BACKEND_PATH="/opt/ELCM_BACKEND"
 FRONTEND_VERSION="v3.0.1"
@@ -44,7 +43,7 @@ service_install()
   install_pkg_deps
 
   # python
-  install_python
+  # install_python
 
   # TODO: opentap
   # install_opentap
@@ -137,10 +136,14 @@ install_pkg_deps()
 
 install_python()
 {
-  msg info "Install python version ${PYTHON_VERSION}"
-  add-apt-repository ppa:deadsnakes/ppa -y
-  wait_for_dpkg_lock_release
-  apt-get install python${PYTHON_VERSION}-full -y
+  if ${PYTHON_BIN} --version &>/dev/null; then
+    msg info "Python ${PYTHON_VERSION} is already installed"
+  else
+    msg info "Install Python ${PYTHON_VERSION}"
+    add-apt-repository ppa:deadsnakes/ppa -y
+    wait_for_dpkg_lock_release
+    apt-get install ${PYTHON_BIN}-full -y
+  fi
 }
 
 install_opentap()
@@ -160,17 +163,18 @@ install_influxdb()
   echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
   apt-get update
   apt-get install -y influxdb2
-  systemctl enable --now influxdb
+  systemctl enable --now influxdb.service
 }
 
 install_grafana()
 {
-  msg info "Install Grafana version ${GRAFANA_VERSION}"
-  apt-get install -y adduser libfontconfig1 musl
-  wget https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb
-  dpkg -i grafana_${GRAFANA_VERSION}_amd64.deb
-  systemctl enable --now grafana-server
-  rm -rf grafana_${GRAFANA_VERSION}*
+  msg info "Install Grafana"
+  mkdir -p /etc/apt/keyrings/
+  wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+  echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+  apt-get update
+  apt-get install -y grafana
+  systemctl enable --now grafana-server.service
 }
 
 install_elcm_backend()
@@ -178,6 +182,8 @@ install_elcm_backend()
   msg info "Clone ELCM BACKEND Repository"
   git clone --depth 1 --branch ${BACKEND_VERSION} -c advice.detachedHead=false https://gitlab.com/morse-uma/elcm.git ${BACKEND_PATH}
 
+  apt install ${PYTHON_BIN}-venv -y
+  
   msg info "Activate ELCM python virtual environment and install requirements"
   ${PYTHON_BIN} -m venv ${BACKEND_PATH}/venv
   source ${BACKEND_PATH}/venv/bin/activate
@@ -210,6 +216,10 @@ install_elcm_frontend()
   ${PYTHON_BIN} -m venv ${FRONTEND_PATH}/venv
   source ${FRONTEND_PATH}/venv/bin/activate
   pip install -r ${FRONTEND_PATH}/requirements.txt
+  pip install waitress
+  cd ${FRONTEND_PATH}
+  flask db upgrade
+  cd
   deactivate
 
   msg info "Define ELCM frontend systemd service"
@@ -221,7 +231,7 @@ Description=ELCM Frontend
 Type=simple
 WorkingDirectory=${FRONTEND_PATH}
 Environment="SECRET_KEY=super secret"
-ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5000'
+ExecStart=/bin/bash -c 'source venv/bin/activate && waitress-serve --listen=*:5000 portal:app'
 Restart=always
 
 [Install]
@@ -232,26 +242,25 @@ EOF
 configure_influxdb()
 {
   influx setup --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --org ${ONEAPP_ELCM_INFLUXDB_ORG} --bucket ${ONEAPP_ELCM_INFLUXDB_BUCKET} --username ${ONEAPP_ELCM_INFLUXDB_USER} --password ${ONEAPP_ELCM_INFLUXDB_PASSWORD} --force
-  INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
   # influx auth create --org ${ONEAPP_ELCM_INFLUXDB_ORG} --all-access --description "Admin ELCM token" --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT}
 }
 
 configure_grafana()
 {
-  if [ "${ONEAPP_ELCM_GRAFANA_PASSWORD}" != "admin" ]; then
-#     ONEAPP_ELCM_GRAFANA_UPDATE_PASSWORD_JSON=$(cat <<EOF
-#   {
-#   "oldPassword": "admin",
-#   "newPassword": "${ONEAPP_ELCM_GRAFANA_PASSWORD}",
-#   "confirmNew": "${ONEAPP_ELCM_GRAFANA_PASSWORD}"
-#   }
-# EOF
-# )
-  # curl -X PUT -H "Content-Type: application/json;charset=UTF-8" -d "${ONEAPP_ELCM_GRAFANA_UPDATE_PASSWORD_JSON}" http://${ONEAPP_ELCM_GRAFANA_USER}:admin@${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/user/password
+  msg info "Configure Grafana"
+  msg info "Change admin password"
   grafana-cli admin reset-admin-password ${ONEAPP_ELCM_GRAFANA_PASSWORD}
-fi
 
-  # connect grafana with influxdb
+  msg info "Wait Grafana service up"
+  until curl -s "http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/health" | grep -q '"database": "ok"'; do
+    msg info "Waiting for Grafana to be ready..."
+    sleep 5
+  done
+  msg info "Grafana service is ready"
+
+  msg info "Create InfluxDB datasource in Grafana"
+  INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
+  msg info "InfluxDB user token: ${INFLUXDB_USER_TOKEN}"
   INFLUXDB_DATASOURCE_JSON=$(cat <<EOF
 {
   "name": "${ONEAPP_ELCM_INFLUXDB_BUCKET}",
@@ -271,9 +280,14 @@ fi
 }
 EOF
 )
-  curl -X POST -H "Content-Type: application/json" -d "${INFLUXDB_DATASOURCE_JSON}" http://${ONEAPP_ELCM_GRAFANA_USER}:${ONEAPP_ELCM_GRAFANA_PASSWORD}@${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/datasources
+  curl -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic $(echo -n "${ONEAPP_ELCM_GRAFANA_USER}:${ONEAPP_ELCM_GRAFANA_PASSWORD}" | base64)" \
+  -d "${INFLUXDB_DATASOURCE_JSON}" \
+  "http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/datasources"
 
-  # generate service account in grafana
+  msg info "Create service account grafana"
   SERVICE_ACCOUNT_PAYLOAD=$(cat <<EOF
 {
   "name": "elcmsa",
@@ -291,7 +305,7 @@ EOF
 
   SERVICE_ACCOUNT_ID=$(echo "${SERVICE_ACCOUNT_RESPONSE}" | grep -o '"id":[0-9]*' | cut -d ':' -f2)
 
-  # generate token to service account
+  msg info "Generate token to service account"
   SA_TOKEN_PAYLOAD=$(cat <<EOF
 {
   "name": "elcmsa-token",
