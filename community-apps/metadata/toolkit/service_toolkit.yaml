@@ -55,7 +55,7 @@ opennebula_template:
     oneapp_minio_tls_key:        "O|text64|MinIO TLS key (.key)||"
     oneapp_jenkins_username:                  "O|text|The username for the Jenkins admin user. At least 5 characters||admin"
     oneapp_jenkins_password:                  "M|password|The password for the Jenkins admin user. At least 8 characters"
-    oneapp_jenkins_sites_token:               "M|password|Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    oneapp_jenkins_sites_token:               "M|password|Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault. At least 15 characters, with uppercase, lowercase, numbers and skip special characters \"'`´#$&..."
     oneapp_jenkins_opennebula_endpoint:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')"
     oneapp_jenkins_opennebula_flow_endpoint:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')"
     oneapp_jenkins_opennebula_username:       "M|text|The OpenNebula username used by Jenkins to deploy each component"
