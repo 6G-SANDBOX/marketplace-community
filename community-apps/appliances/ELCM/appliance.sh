@@ -27,7 +27,8 @@ BACKEND_VERSION="v3.7.1"
 BACKEND_PATH="/opt/ELCM_BACKEND"
 FRONTEND_VERSION="v3.0.1"
 FRONTEND_PATH="/opt/ELCM_FRONTEND"
-
+FRONTEND_BRANDING_PATH="${FRONTEND_PATH}/app/static/branding"
+LOGOS_PATH="/opt/logos"
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -85,6 +86,8 @@ service_configure()
 
   # create config file in ELCM frontend
   create_elcm_frontend_config_file
+
+  copy_logos_elcm_frontend
 
   msg info "CONFIGURATION FINISHED"
   return 0
@@ -401,13 +404,20 @@ Analytics:
   URL: <Internet address>/dash # External URL of the Analytics Dashboard
   Secret: # Secret key shared with the Analytics Dashboard, used in order to create secure URLs
 Branding:
-  Platform: 'Untitled'
-  Description: 'Untitled ELCM Portal'
+  Platform: '6G-SANDBOX'
+  Description: 'ELCM Portal'
   DescriptionPage: 'platform.html'
   FavIcon: 'header.png'
   Header: 'header.png'
   Logo: 'logo.png'
 EOF
+}
+
+copy_logos_elcm_frontend()
+{
+  msg info "Copy logo to ELCM frontend"
+  cp ${LOGOS_PATH}/elcm_logo.png ${FRONTEND_BRANDING_PATH}/logo.png
+  cp ${LOGOS_PATH}/elcm_header.png ${FRONTEND_BRANDING_PATH}/header.png
 }
 
 wait_for_dpkg_lock_release()

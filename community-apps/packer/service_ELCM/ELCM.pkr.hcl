@@ -93,6 +93,14 @@ build {
     destination = "/etc/one-appliance/service.d/"
   }
 
+  provisioner "file" {
+    sources     = [
+      "appliances/ELCM/elcm_header.png",
+      "appliances/ELCM/elcm_logo.png",
+      ]
+    destination = "/opt/logos"
+  }
+
   provisioner "shell" {
     scripts = ["${var.input_dir}/82-configure-context.sh"]
   }
