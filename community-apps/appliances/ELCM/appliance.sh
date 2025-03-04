@@ -416,8 +416,8 @@ EOF
 copy_logos_elcm_frontend()
 {
   msg info "Copy logo to ELCM frontend"
-  cp ${LOGOS_PATH}/elcm_logo.png ${FRONTEND_BRANDING_PATH}/logo.png
-  cp ${LOGOS_PATH}/elcm_header.png ${FRONTEND_BRANDING_PATH}/header.png
+  cp ${LOGOS_PATH}/logo.png ${FRONTEND_BRANDING_PATH}/logo.png
+  cp ${LOGOS_PATH}/header.png ${FRONTEND_BRANDING_PATH}/header.png
 }
 
 wait_for_dpkg_lock_release()

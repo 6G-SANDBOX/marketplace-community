@@ -95,8 +95,8 @@ build {
 
   provisioner "file" {
     sources     = [
-      "appliances/ELCM/elcm_header.png",
-      "appliances/ELCM/elcm_logo.png",
+      "appliances/ELCM/header.png",
+      "appliances/ELCM/logo.png",
       ]
     destination = "/opt/logos"
   }
