@@ -93,12 +93,18 @@ build {
     destination = "/etc/one-appliance/service.d/"
   }
 
+  provisioner "shell" {
+    inline = [
+      "mkdir -p /var/lib/misc/logos"
+    ]
+  }
+
   provisioner "file" {
     sources     = [
       "appliances/ELCM/header.png",
       "appliances/ELCM/logo.png",
       ]
-    destination = "/usr/share"
+    destination = "/var/lib/misc/logos"
   }
 
   provisioner "shell" {
