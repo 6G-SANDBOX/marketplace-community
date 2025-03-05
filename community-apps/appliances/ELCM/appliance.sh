@@ -28,7 +28,7 @@ BACKEND_PATH="/opt/ELCM_BACKEND"
 FRONTEND_VERSION="v3.0.1"
 FRONTEND_PATH="/opt/ELCM_FRONTEND"
 FRONTEND_BRANDING_PATH="${FRONTEND_PATH}/app/static/branding"
-LOGOS_PATH="/opt/logos"
+LOGOS_PATH="/usr/share"
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
