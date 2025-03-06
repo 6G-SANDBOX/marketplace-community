@@ -104,7 +104,7 @@ build {
       "appliances/ELCM/header.png",
       "appliances/ELCM/logo.png",
       ]
-    destination = "/var/lib/misc/logos"
+    destination = "/var/lib/misc/logos/"
   }
 
   provisioner "shell" {
