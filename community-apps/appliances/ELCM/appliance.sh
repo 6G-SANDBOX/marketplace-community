@@ -49,6 +49,9 @@ service_install()
   # TODO: opentap
   # install_opentap
 
+  # prometheus
+  install_prometheus
+
   # influxdb
   install_influxdb
 
@@ -156,6 +159,12 @@ install_opentap()
   chmod +x ./opentap.linux
   ./opentap.linux --quiet
   rm opentap.linux
+}
+
+install_prometheus()
+{
+  msg info "Install Prometheus"
+  apt install prometheus -y
 }
 
 install_influxdb()
