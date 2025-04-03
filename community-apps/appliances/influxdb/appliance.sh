@@ -8,11 +8,20 @@ set -o errexit -o pipefail
 
 ONE_SERVICE_RECONFIGURABLE=false
 
+ONEAPP_INFLUXDB_VERSION="${ONEAPP_INFLUXDB_VERSION:-2.7.11}"
 ONEAPP_INFLUXDB_USER="${ONEAPP_INFLUXDB_USER:-admin}"
 ONEAPP_INFLUXDB_ORG="${ONEAPP_ELCM_INFLUXDB_ORG:-dummyorg}"
 ONEAPP_INFLUXDB_BUCKET="${ONEAPP_ELCM_INFLUXDB_BUCKET:-dummybucket}"
 ONEAPP_INFLUXDB_HOST="127.0.0.1"
 ONEAPP_INFLUXDB_PORT="8086"
+if [[ "${ONEAPP_INFLUXDB_VERSION}" == 2* ]]; then
+  VERSION_TYPE="v2"
+else
+  VERSION_TYPE="v1"
+fi
+LOCAL_BIN_PATH="/usr/local/bin"
+INFLUXDB_SERVER_BIN="${LOCAL_BIN_PATH}/influxd"
+INFLUXDB_CLIENT_BIN="${LOCAL_BIN_PATH}/influx"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
 
@@ -30,7 +39,9 @@ service_install()
   install_pkg_deps
 
   # influxdb
-  install_influxdb
+  install_influxdb_server
+
+  install_influxdb_client
 
   systemctl daemon-reload
 
@@ -46,7 +57,6 @@ service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
 
-  # configure user, password and database influxdb
   configure_influxdb
 
   msg info "CONFIGURATION FINISHED"
@@ -81,35 +91,67 @@ install_pkg_deps()
   fi
 }
 
-install_influxdb()
+install_influxdb_server()
 {
-  msg info "Install InfluxDB"
-  wget -q https://repos.influxdata.com/influxdata-archive_compat.key
-  echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
-  echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
-  apt-get update
-  apt-get install -y influxdb2
+  msg info "Install InfluxDB ${VERSION_TYPE} server"
+  if [[ "${VERSION_TYPE}" == "v1" ]]; then
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    cp influxdb-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    cp influxdb-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influx ${LOCAL_BIN_PATH}
+    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}
+  else
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    cp influxdb2-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}
+  fi
+  msg info "Create service for InfluxDB"
+  cat > /etc/systemd/system/influxd.service << EOF
+[Unit]
+Description=InfluxDB server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=${INFLUXDB_SERVER_BIN}
+Restart=always
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
   systemctl enable --now influxdb.service
+}
+
+install_influxdb_client()
+{
+  msg info "Install InfluxDB ${VERSION_TYPE} client"
+  if [[ "${VERSION_TYPE}" == "v2" ]]; then
+    wget -P influxdb2-client-latest https://dl.influxdata.com/influxdb/releases/influxdb2-client-latest-linux-amd64.tar.gz
+    tar xvzf ./influxdb2-client-latest/influxdb2-client-latest-linux-amd64.tar.gz -C influxdb2-client-latest
+    cp influxdb2-client-latest/influx ${LOCAL_BIN_PATH}
+    rm -rf influxdb2-client-latest
+  fi
 }
 
 configure_influxdb()
 {
-  msg info "Configure InfluxDB"
-
-  IS_TOKEN=$(influx auth list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -r '.[] | select(.userName == "'${ONEAPP_INFLUXDB_USER}'") | .token')
-
-  if [ -z "${IS_TOKEN}" ]; then
-    msg info "No token found for user ${ONEAPP_INFLUXDB_USER}, creating new user..."
-    influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
+  msg info "Configure InfluxDB ${VERSION_TYPE}"
+  if [[ "${VERSION_TYPE}" == "v1" ]]; then
+    ${INFLUXDB_CLIENT_BIN} -host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} -execute "CREATE DATABASE ${ONEAPP_INFLUXDB_BUCKET}"
+    ${INFLUXDB_CLIENT_BIN} -host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} -execute "CREATE USER ${ONEAPP_INFLUXDB_USER} WITH PASSWORD '${ONEAPP_INFLUXDB_PASSWORD}' WITH ALL PRIVILEGES"
+  else
+    ${INFLUXDB_CLIENT_BIN} setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
     --org ${ONEAPP_INFLUXDB_ORG} \
     --bucket ${ONEAPP_INFLUXDB_BUCKET} \
     --username ${ONEAPP_INFLUXDB_USER} \
     --password ${ONEAPP_INFLUXDB_PASSWORD} \
     --token ${ONEAPP_INFLUXDB_TOKEN} \
     --force
-    msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
-  else
-    msg info "User ${ONEAPP_INFLUXDB_USER} already has a token."
   fi
 }
 
