@@ -96,7 +96,7 @@ configure_influxdb()
 {
   msg info "Configure InfluxDB"
 
-  USER_EXISTS=$(influx user list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -e ".[] | select(.name == \"$ONEAPP_INFLUXDB_USER\")")
+  USER_EXISTS=$(influx user list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -e ".[] | select(.name == \"${ONEAPP_INFLUXDB_USER}\")")
 
   if [ -z "$USER_EXISTS" ]; then
     influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
