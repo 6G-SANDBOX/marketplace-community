@@ -95,21 +95,14 @@ install_influxdb()
 configure_influxdb()
 {
   msg info "Configure InfluxDB"
-
-  USER_EXISTS=$(influx user list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -e ".[] | select(.name == \"${ONEAPP_INFLUXDB_USER}\")")
-
-  if [ -z "$USER_EXISTS" ]; then
-    influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
-    --org ${ONEAPP_INFLUXDB_ORG} \
-    --bucket ${ONEAPP_INFLUXDB_BUCKET} \
-    --username ${ONEAPP_INFLUXDB_USER} \
-    --password ${ONEAPP_INFLUXDB_PASSWORD} \
-    --token ${ONEAPP_INFLUXDB_TOKEN} \
-    --force
-    msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
-  else
-    msg info "User ${ONEAPP_INFLUXDB_USER} already exists. Skipping setup"
-  fi
+  influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
+  --org ${ONEAPP_INFLUXDB_ORG} \
+  --bucket ${ONEAPP_INFLUXDB_BUCKET} \
+  --username ${ONEAPP_INFLUXDB_USER} \
+  --password ${ONEAPP_INFLUXDB_PASSWORD} \
+  --token ${ONEAPP_INFLUXDB_TOKEN} \
+  --force
+  msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
 }
 
 
