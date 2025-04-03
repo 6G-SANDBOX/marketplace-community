@@ -1,0 +1,76 @@
+---
+name: "6G-Sandbox InfluxDB"
+version: "autofill"
+software_version: "v2.7.11"
+publisher: "University of Malaga"
+description: |-
+  This appliance installs the latest version of InfluxDB from the official repositories and configures them according to the input variables. Configuration of the InfluxDB can be made when instanciating the VM.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_INFLUXDB_USER` - Username used to login into the InfluxDB.
+  * `ONEAPP_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
+  * `ONEAPP_INFLUXDB_ORG` - Organization name.
+  * `ONEAPP_INFLUXDB_BUCKET` - Bucket name.
+
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+short_description: InfluxDB appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - UMA
+  - InfluxDB
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    oneapp_influxdb_user:      "$ONEAPP_INFLUXDB_USER"
+    oneapp_influxdb_password:  "$ONEAPP_INFLUXDB_PASSWORD"
+    oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
+    oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
+  inputs_order: >-
+    ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_influxdb_user:      "M|text|ONEAPP_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
+    oneapp_influxdb_password:  "M|password|ONEAPP_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
+    oneapp_influxdb_org:       "M|text|ONEAPP_INFLUXDB_ORG: Organization name. | |dummyorg"
+    oneapp_influxdb_bucket:    "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket name. | |dummybucket"
+logo: influxdb.png
+images:
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"
