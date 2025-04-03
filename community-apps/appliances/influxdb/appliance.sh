@@ -8,12 +8,8 @@ set -o errexit -o pipefail
 
 ONE_SERVICE_RECONFIGURABLE=false
 
-ONEAPP_INFLUXDB_VERSION="${ONEAPP_INFLUXDB_VERSION:-2.7.11}"
-ONEAPP_INFLUXDB_USER="${ONEAPP_INFLUXDB_USER:-admin}"
-ONEAPP_INFLUXDB_ORG="${ONEAPP_ELCM_INFLUXDB_ORG:-dummyorg}"
-ONEAPP_INFLUXDB_BUCKET="${ONEAPP_ELCM_INFLUXDB_BUCKET:-dummybucket}"
-ONEAPP_INFLUXDB_HOST="127.0.0.1"
-ONEAPP_INFLUXDB_PORT="8086"
+INFLUXDB_HOST="127.0.0.1"
+INFLUXDB_PORT="8086"
 if [[ "${ONEAPP_INFLUXDB_VERSION}" == 2* ]]; then
   VERSION_TYPE="v2"
 else
@@ -95,18 +91,30 @@ install_influxdb_server()
 {
   msg info "Install InfluxDB ${VERSION_TYPE} server"
   if [[ "${VERSION_TYPE}" == "v1" ]]; then
-    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    cp influxdb-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influxd ${LOCAL_BIN_PATH}
-    cp influxdb-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influx ${LOCAL_BIN_PATH}
-    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}
+    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
   else
-    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    cp influxdb2-${ONEAPP_INFLUXDB_VERSION}/usr/bin/influxd ${LOCAL_BIN_PATH}
-    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}
+    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
+  fi
+  if wget --spider "${INFLUXDB_URL}" 2>/dev/null; then
+    msg info "Download InfluxDB ${VERSION_TYPE} server"
+    if [[ "${VERSION_TYPE}" == "v1" ]]; then
+      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
+      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+      cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
+      rm -rf ${EXTRACTED_DIR}
+    else
+      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
+      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+      rm -rf ${EXTRACTED_DIR}
+    fi
+  else
+    msg error "InfluxDB ${VERSION_TYPE} server download failed"
   fi
   msg info "Create service for InfluxDB"
   cat > /etc/systemd/system/influxd.service << EOF
@@ -142,10 +150,10 @@ configure_influxdb()
 {
   msg info "Configure InfluxDB ${VERSION_TYPE}"
   if [[ "${VERSION_TYPE}" == "v1" ]]; then
-    ${INFLUXDB_CLIENT_BIN} -host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} -execute "CREATE DATABASE ${ONEAPP_INFLUXDB_BUCKET}"
-    ${INFLUXDB_CLIENT_BIN} -host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} -execute "CREATE USER ${ONEAPP_INFLUXDB_USER} WITH PASSWORD '${ONEAPP_INFLUXDB_PASSWORD}' WITH ALL PRIVILEGES"
+    ${INFLUXDB_CLIENT_BIN} -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} -execute "CREATE DATABASE ${ONEAPP_INFLUXDB_BUCKET}"
+    ${INFLUXDB_CLIENT_BIN} -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} -execute "CREATE USER ${ONEAPP_INFLUXDB_USER} WITH PASSWORD '${ONEAPP_INFLUXDB_PASSWORD}' WITH ALL PRIVILEGES"
   else
-    ${INFLUXDB_CLIENT_BIN} setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
+    ${INFLUXDB_CLIENT_BIN} setup --host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} \
     --org ${ONEAPP_INFLUXDB_ORG} \
     --bucket ${ONEAPP_INFLUXDB_BUCKET} \
     --username ${ONEAPP_INFLUXDB_USER} \
