@@ -104,6 +104,7 @@ configure_influxdb()
     --bucket ${ONEAPP_INFLUXDB_BUCKET} \
     --username ${ONEAPP_INFLUXDB_USER} \
     --password ${ONEAPP_INFLUXDB_PASSWORD} \
+    --token ${ONEAPP_INFLUXDB_TOKEN} \
     --force
     msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
   else

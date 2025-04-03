@@ -16,6 +16,7 @@ description: |-
   * `ONEAPP_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
   * `ONEAPP_INFLUXDB_ORG` - Organization name.
   * `ONEAPP_INFLUXDB_BUCKET` - Bucket name.
+  * `ONEAPP_INFLUXDB_TOKEN` - Token used to login into the InfluxDB.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 short_description: InfluxDB appliance for KVM
@@ -43,8 +44,9 @@ opennebula_template:
     oneapp_influxdb_password:  "$ONEAPP_INFLUXDB_PASSWORD"
     oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
     oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
+    oneapp_influxdb_token:     "$ONEAPP_INFLUXDB_TOKEN"
   inputs_order: >-
-    ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET
+    ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET,ONEAPP_INFLUXDB_TOKEN
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -63,6 +65,7 @@ opennebula_template:
     oneapp_influxdb_password:  "M|password|ONEAPP_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
     oneapp_influxdb_org:       "M|text|ONEAPP_INFLUXDB_ORG: Organization name. | |dummyorg"
     oneapp_influxdb_bucket:    "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket name. | |dummybucket"
+    oneapp_influxdb_token:     "M|password|ONEAPP_INFLUXDB_TOKEN: Token used to login into the InfluxDB. The token must be at least 10 characters long."
 logo: influxdb.png
 images:
   - name: "autofill"
