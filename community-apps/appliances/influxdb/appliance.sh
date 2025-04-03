@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_RECONFIGURABLE=true
+ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_INFLUXDB_USER="${ONEAPP_INFLUXDB_USER:-admin}"
 ONEAPP_INFLUXDB_ORG="${ONEAPP_ELCM_INFLUXDB_ORG:-dummyorg}"
@@ -96,15 +96,18 @@ configure_influxdb()
 {
   msg info "Configure InfluxDB"
 
-  if influx user list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} | grep -q "${ONEAPP_INFLUXDB_USER}"; then
-    msg info "User ${ONEAPP_INFLUXDB_USER} already exists, skipping setup."
-  else
+  USER_EXISTS=$(influx user list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -e ".[] | select(.name == \"$ONEAPP_INFLUXDB_USER\")")
+
+  if [ -z "$USER_EXISTS" ]; then
     influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
-      --org ${ONEAPP_INFLUXDB_ORG} \
-      --bucket ${ONEAPP_INFLUXDB_BUCKET} \
-      --username ${ONEAPP_INFLUXDB_USER} \
-      --password ${ONEAPP_INFLUXDB_PASSWORD} \
-      --force
+    --org ${ONEAPP_INFLUXDB_ORG} \
+    --bucket ${ONEAPP_INFLUXDB_BUCKET} \
+    --username ${ONEAPP_INFLUXDB_USER} \
+    --password ${ONEAPP_INFLUXDB_PASSWORD} \
+    --force
+    msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
+  else
+    msg info "User ${ONEAPP_INFLUXDB_USER} already exists. Skipping setup"
   fi
 }
 
