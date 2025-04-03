@@ -95,16 +95,23 @@ install_influxdb()
 configure_influxdb()
 {
   msg info "Configure InfluxDB"
-  influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
-  --org ${ONEAPP_INFLUXDB_ORG} \
-  --bucket ${ONEAPP_INFLUXDB_BUCKET} \
-  --username ${ONEAPP_INFLUXDB_USER} \
-  --password ${ONEAPP_INFLUXDB_PASSWORD} \
-  --token ${ONEAPP_INFLUXDB_TOKEN} \
-  --force
-  msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
-}
 
+  IS_TOKEN=$(influx auth list --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} --json | jq -r '.[] | select(.userName == "'${ONEAPP_INFLUXDB_USER}'") | .token')
+
+  if [ -z "${IS_TOKEN}" ]; then
+    msg info "No token found for user ${ONEAPP_INFLUXDB_USER}, creating new user..."
+    influx setup --host http://${ONEAPP_INFLUXDB_HOST}:${ONEAPP_INFLUXDB_PORT} \
+    --org ${ONEAPP_INFLUXDB_ORG} \
+    --bucket ${ONEAPP_INFLUXDB_BUCKET} \
+    --username ${ONEAPP_INFLUXDB_USER} \
+    --password ${ONEAPP_INFLUXDB_PASSWORD} \
+    --token ${ONEAPP_INFLUXDB_TOKEN} \
+    --force
+    msg info "User ${ONEAPP_INFLUXDB_USER} created successfully"
+  else
+    msg info "User ${ONEAPP_INFLUXDB_USER} already has a token."
+  fi
+}
 
 wait_for_dpkg_lock_release()
 {
