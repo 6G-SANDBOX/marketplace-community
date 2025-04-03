@@ -79,8 +79,8 @@ opennebula_template:
     oneapp_tnlcm_jenkins_token:               "M|password|ONEAPP_TNLCM_JENKINS_TOKEN: Token to authenticate while sending POST requests to the Jenkins Server API"
     oneapp_tnlcm_admin_user:                  "O|text|ONEAPP_TNLCM_ADMIN_USER: Name of the TNLCM admin user. At least 5 characters||tnlcm"
     oneapp_tnlcm_admin_password:              "M|password|ONEAPP_TNLCM_ADMIN_PASSWORD: Password of the TNLCM admin user. At least 8 characters"
-    oneapp_tnlcm_sites_branch:                "O|text|ONEAPP_TNLCM_SITES_BRANCH: Name of the branch IN 6G-Sandbox-Sites repository to deploy the trial networks"
-    oneapp_tnlcm_deployment_site:             "O|text|ONEAPP_TNLCM_DEPLOYMENT_SITE: Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
+    oneapp_tnlcm_sites_branch:                "M|text|ONEAPP_TNLCM_SITES_BRANCH: Name of the branch IN 6G-Sandbox-Sites repository to deploy the trial networks"
+    oneapp_tnlcm_deployment_site:             "M|text|ONEAPP_TNLCM_DEPLOYMENT_SITE: Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
     oneapp_tnlcm_deployment_site_token:       "M|password|ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
 logo: tnlcm.png
 images:
