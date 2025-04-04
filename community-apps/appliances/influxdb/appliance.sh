@@ -101,6 +101,7 @@ install_influxdb_server()
       curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
       tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
       rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
       EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
       cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
       cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
@@ -109,6 +110,7 @@ install_influxdb_server()
       curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
       tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
       rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
       EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
       cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
       rm -rf ${EXTRACTED_DIR}
@@ -132,6 +134,7 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
+  systemctl daemon-reload
   systemctl enable --now influxdb.service
 }
 
