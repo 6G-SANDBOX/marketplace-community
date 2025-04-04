@@ -1,7 +1,7 @@
 ---
 name: "6G-Sandbox Monitoring"
 version: "autofill"
-software_version: "v" # TODO:
+software_version: "v0.5.0"
 publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of InfluxDB, Grafana and Prometheus from the official repositories and configures them according to the input variables. Configuration of the InfluxDB, Grafana and Prometheus can be made when instanciating the VM.
