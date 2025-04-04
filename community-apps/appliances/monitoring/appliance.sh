@@ -76,7 +76,11 @@ service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
 
+  wait_for_influxdb_service
+
   configure_influxdb
+
+  wait_for_grafana_service
 
   configure_grafana
 
@@ -198,6 +202,23 @@ EOF
 
 }
 
+wait_for_influxdb_service()
+{
+  msg info "Wait for InfluxDB service to be up and running"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if systemctl is-active --quiet influxdb.service; then
+      return 0
+    fi
+    msg info "InfluxDB service is not active yet. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without InfluxDB service being active"
+}
+
 configure_influxdb()
 {
   msg info "Configure InfluxDB ${VERSION_TYPE}"
@@ -213,6 +234,23 @@ configure_influxdb()
     --token ${ONEAPP_INFLUXDB_TOKEN} \
     --force
   fi
+}
+
+wait_for_grafana_service()
+{
+  msg info "Wait for Grafana service to be up and running"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if systemctl is-active --quiet grafana-server.service; then
+      return 0
+    fi
+    msg info "Grafana service is not active yet. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without grafana-server.service being active"
 }
 
 configure_grafana()
