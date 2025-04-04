@@ -56,6 +56,8 @@ service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
 
+  wait_for_influxdb_service
+
   configure_influxdb
 
   msg info "CONFIGURATION FINISHED"
@@ -140,6 +142,23 @@ install_influxdb_client()
   fi
 }
 
+wait_for_influxdb_service()
+{
+  msg info "Wait for InfluxDB service to be up and running"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if systemctl is-active --quiet influxdb.service; then
+      return 0
+    fi
+    msg info "InfluxDB service is not active yet. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without InfluxDB service being active"
+}
+
 configure_influxdb()
 {
   msg info "Configure InfluxDB ${VERSION_TYPE}"
@@ -148,11 +167,11 @@ configure_influxdb()
     ${INFLUXDB_CLIENT_BIN} -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} -execute "CREATE USER ${ONEAPP_INFLUXDB_USER} WITH PASSWORD '${ONEAPP_INFLUXDB_PASSWORD}' WITH ALL PRIVILEGES"
   else
     ${INFLUXDB_CLIENT_BIN} setup --host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} \
-    --org ${ONEAPP_INFLUXDB_ORG} \
-    --bucket ${ONEAPP_INFLUXDB_BUCKET} \
-    --username ${ONEAPP_INFLUXDB_USER} \
-    --password ${ONEAPP_INFLUXDB_PASSWORD} \
-    --token ${ONEAPP_INFLUXDB_TOKEN} \
+    --org "${ONEAPP_INFLUXDB_ORG}" \
+    --bucket "${ONEAPP_INFLUXDB_BUCKET}" \
+    --username "${ONEAPP_INFLUXDB_USER}" \
+    --password "${ONEAPP_INFLUXDB_PASSWORD}" \
+    --token "${ONEAPP_INFLUXDB_TOKEN}" \
     --force
   fi
 }
