@@ -45,6 +45,8 @@ service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
 
+  wait_for_grafana_service
+
   configure_grafana
 
   msg info "CONFIGURATION FINISHED"
@@ -86,10 +88,28 @@ install_grafana() {
   dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
 }
 
+wait_for_grafana_service()
+{
+  msg info "Wait for Grafana service to be up and running"
+  local timeout=600
+  local interval=5
+
+  for ((i=0; i<timeout; i+=interval)); do
+    if systemctl is-active --quiet grafana-server.service; then
+      return 0
+    fi
+    msg info "Grafana service is not active yet. Retrying in ${interval} seconds..."
+    sleep "${interval}"
+  done
+
+  msg error "Error: 10m timeout without grafana-server.service being active"
+}
+
 configure_grafana()
 {
   msg info "Configure Grafana"
   grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password ${ONEAPP_GRAFANA_PASSWORD}
+  systemctl restart grafana-server.service
 }
 
 wait_for_dpkg_lock_release()
