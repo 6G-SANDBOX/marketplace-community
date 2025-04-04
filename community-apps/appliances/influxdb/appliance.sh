@@ -42,7 +42,7 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now influxdb.service
+  systemctl enable --now influxd.service
 
   # cleanup
   postinstall_cleanup
