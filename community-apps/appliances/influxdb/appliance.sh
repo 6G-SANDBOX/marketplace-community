@@ -41,6 +41,8 @@ service_install()
 
   systemctl daemon-reload
 
+  systemctl enable --now influxdb.service
+
   # cleanup
   postinstall_cleanup
 
@@ -134,8 +136,6 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-  systemctl daemon-reload
-  systemctl enable --now influxdb.service
 }
 
 install_influxdb_client()

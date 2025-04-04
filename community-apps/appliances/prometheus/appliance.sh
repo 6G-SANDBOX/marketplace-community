@@ -36,7 +36,7 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now grafana-server
+  systemctl enable --now prometheus
 
   # cleanup
   postinstall_cleanup
@@ -49,8 +49,6 @@ service_install()
 service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
-
-  # configure_prometheus
 
   msg info "CONFIGURATION FINISHED"
   return 0
@@ -117,8 +115,6 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-  systemctl daemon-reload
-  systemctl enable --now prometheus
 }
 
 wait_for_dpkg_lock_release()
