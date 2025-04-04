@@ -113,32 +113,22 @@ install_influxdb_server()
 {
   msg info "Install InfluxDB ${VERSION_TYPE} server"
   if [[ "${VERSION_TYPE}" == "v1" ]]; then
-    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
+    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
+    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
+    rm -rf ${EXTRACTED_DIR}
   else
-    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
-  fi
-  if wget --spider "${INFLUXDB_URL}" 2>/dev/null; then
-    msg info "Download InfluxDB ${VERSION_TYPE} server"
-    if [[ "${VERSION_TYPE}" == "v1" ]]; then
-      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
-      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
-      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-      cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
-      rm -rf ${EXTRACTED_DIR}
-    else
-      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
-      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
-      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-      rm -rf ${EXTRACTED_DIR}
-    fi
-  else
-    msg error "InfluxDB ${VERSION_TYPE} server download failed"
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
+    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
+    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    rm -rf ${EXTRACTED_DIR}
   fi
   msg info "Create service for InfluxDB"
   cat > /etc/systemd/system/influxd.service << EOF
@@ -172,36 +162,24 @@ install_influxdb_client()
 install_grafana() {
   msg info "Install Grafana ${ONEAPP_GRAFANA_VERSION}"
   apt-get install -y adduser libfontconfig1 musl
-  GRAFANA_URL="https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
-  if wget --spider "${GRAFANA_URL}" 2>/dev/null; then
-    msg info "Downloading Grafana ${ONEAPP_GRAFANA_VERSION}"
-    wget "${GRAFANA_URL}"
-    dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
-  else
-    msg error "Grafana ${ONEAPP_GRAFANA_VERSION} not found at ${GRAFANA_URL}"
-  fi
+  wget https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb
+  dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
 }
 
 install_prometheus() {
   msg info "Install Prometheus ${ONEAPP_PROMETHEUS_VERSION}"
-  PROMETHEUS_URL="https://github.com/prometheus/prometheus/releases/download/v${ONEAPP_PROMETHEUS_VERSION}/prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz"
-  if wget --spider "${PROMETHEUS_URL}" 2>/dev/null; then
-    msg info "Downloading Prometheus ${ONEAPP_PROMETHEUS_VERSION}"
-    wget "${PROMETHEUS_URL}"
-    tar xvzf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
-    rm -rf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
-    msg info "Copying Prometheus and Promtool to ${LOCAL_BIN_PATH}"
-    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'prometheus-*' | head -n 1)
-    cp ${EXTRACTED_DIR}/prometheus ${LOCAL_BIN_PATH}
-    cp ${EXTRACTED_DIR}/promtool ${LOCAL_BIN_PATH}
-    mkdir -p ${PROMETHEUS_ETC}
-    cp ${EXTRACTED_DIR}/prometheus.yml ${PROMETHEUS_CONFIG_FILE}
-    rm -rf ${EXTRACTED_DIR}
-  else
-    msg error "Prometheus ${ONEAPP_PROMETHEUS_VERSION} not found at ${PROMETHEUS_URL}"
-  fi
-    msg info "Create service for Prometheus"
-    cat > /etc/systemd/system/prometheus.service <<EOF
+  wget https://github.com/prometheus/prometheus/releases/download/v${ONEAPP_PROMETHEUS_VERSION}/prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  tar xvzf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  rm -rf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  msg info "Copying Prometheus and Promtool to ${LOCAL_BIN_PATH}"
+  EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'prometheus-*' | head -n 1)
+  cp ${EXTRACTED_DIR}/prometheus ${LOCAL_BIN_PATH}
+  cp ${EXTRACTED_DIR}/promtool ${LOCAL_BIN_PATH}
+  mkdir -p ${PROMETHEUS_ETC}
+  cp ${EXTRACTED_DIR}/prometheus.yml ${PROMETHEUS_CONFIG_FILE}
+  rm -rf ${EXTRACTED_DIR}
+  msg info "Create service for Prometheus"
+  cat > /etc/systemd/system/prometheus.service <<EOF
 [Unit]
 Description=Prometheus
 After=network.target
@@ -239,7 +217,6 @@ configure_grafana()
   msg info "Configure Grafana"
   grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password ${ONEAPP_GRAFANA_PASSWORD}
 }
-
 
 wait_for_dpkg_lock_release()
 {
