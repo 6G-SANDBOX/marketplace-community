@@ -30,7 +30,7 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now grafana-server
+  systemctl enable --now grafana-server.service
 
   # cleanup
   postinstall_cleanup

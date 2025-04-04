@@ -36,7 +36,7 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now prometheus
+  systemctl enable --now prometheus.service
 
   # cleanup
   postinstall_cleanup
