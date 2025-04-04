@@ -81,14 +81,8 @@ install_pkg_deps()
 install_grafana() {
   msg info "Install Grafana ${ONEAPP_GRAFANA_VERSION}"
   apt-get install -y adduser libfontconfig1 musl
-  GRAFANA_URL="https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
-  if wget --spider "${GRAFANA_URL}" 2>/dev/null; then
-    msg info "Downloading Grafana ${ONEAPP_GRAFANA_VERSION}"
-    wget "${GRAFANA_URL}"
-    dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
-  else
-    msg error "Grafana ${ONEAPP_GRAFANA_VERSION} not found at ${GRAFANA_URL}"
-  fi
+  wget https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb
+  dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
 }
 
 configure_grafana()

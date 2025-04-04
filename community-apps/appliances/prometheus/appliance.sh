@@ -84,24 +84,18 @@ install_pkg_deps()
 
 install_prometheus() {
   msg info "Install Prometheus ${ONEAPP_PROMETHEUS_VERSION}"
-  PROMETHEUS_URL="https://github.com/prometheus/prometheus/releases/download/v${ONEAPP_PROMETHEUS_VERSION}/prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz"
-  if wget --spider "${PROMETHEUS_URL}" 2>/dev/null; then
-    msg info "Downloading Prometheus ${ONEAPP_PROMETHEUS_VERSION}"
-    wget "${PROMETHEUS_URL}"
-    tar xvzf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
-    rm -rf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
-    msg info "Copying Prometheus and Promtool to ${LOCAL_BIN_PATH}"
-    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'prometheus-*' | head -n 1)
-    cp ${EXTRACTED_DIR}/prometheus ${LOCAL_BIN_PATH}
-    cp ${EXTRACTED_DIR}/promtool ${LOCAL_BIN_PATH}
-    mkdir -p ${PROMETHEUS_ETC}
-    cp ${EXTRACTED_DIR}/prometheus.yml ${PROMETHEUS_CONFIG_FILE}
-    rm -rf ${EXTRACTED_DIR}
-  else
-    msg error "Prometheus ${ONEAPP_PROMETHEUS_VERSION} not found at ${PROMETHEUS_URL}"
-  fi
-    msg info "Create service for Prometheus"
-    cat > /etc/systemd/system/prometheus.service <<EOF
+  wget https://github.com/prometheus/prometheus/releases/download/v${ONEAPP_PROMETHEUS_VERSION}/prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  tar xvzf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  rm -rf prometheus-${ONEAPP_PROMETHEUS_VERSION}.linux-amd64.tar.gz
+  msg info "Copying Prometheus and Promtool to ${LOCAL_BIN_PATH}"
+  EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'prometheus-*' | head -n 1)
+  cp ${EXTRACTED_DIR}/prometheus ${LOCAL_BIN_PATH}
+  cp ${EXTRACTED_DIR}/promtool ${LOCAL_BIN_PATH}
+  mkdir -p ${PROMETHEUS_ETC}
+  cp ${EXTRACTED_DIR}/prometheus.yml ${PROMETHEUS_CONFIG_FILE}
+  rm -rf ${EXTRACTED_DIR}
+  msg info "Create service for Prometheus"
+  cat > /etc/systemd/system/prometheus.service <<EOF
 [Unit]
 Description=Prometheus
 After=network.target

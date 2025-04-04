@@ -93,32 +93,22 @@ install_influxdb_server()
 {
   msg info "Install InfluxDB ${VERSION_TYPE} server"
   if [[ "${VERSION_TYPE}" == "v1" ]]; then
-    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
+    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
+    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
+    rm -rf ${EXTRACTED_DIR}
   else
-    INFLUXDB_URL="https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz"
-  fi
-  if wget --spider "${INFLUXDB_URL}" 2>/dev/null; then
-    msg info "Download InfluxDB ${VERSION_TYPE} server"
-    if [[ "${VERSION_TYPE}" == "v1" ]]; then
-      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
-      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
-      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-      cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
-      rm -rf ${EXTRACTED_DIR}
-    else
-      curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-      msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
-      EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
-      cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-      rm -rf ${EXTRACTED_DIR}
-    fi
-  else
-    msg error "InfluxDB ${VERSION_TYPE} server download failed"
+    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
+    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
+    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
+    rm -rf ${EXTRACTED_DIR}
   fi
   msg info "Create service for InfluxDB"
   cat > /etc/systemd/system/influxd.service << EOF
