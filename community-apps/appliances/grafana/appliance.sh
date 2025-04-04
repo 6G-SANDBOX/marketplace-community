@@ -8,6 +8,7 @@ set -o errexit -o pipefail
 
 ONE_SERVICE_RECONFIGURABLE=false
 
+ONEAPP_GRAFANA_VERSION="${ONEAPP_GRAFANA_VERSION:-11.6.0}"
 GRAFANA_ADMIN_USER="admin"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
