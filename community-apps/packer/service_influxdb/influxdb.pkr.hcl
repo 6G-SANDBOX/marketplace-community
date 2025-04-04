@@ -30,7 +30,7 @@ source "qemu" "influxdb" {
   format           = "qcow2"
   disk_compression = false
   #skip_resize_disk = true
-  disk_size        = "7168"        # default size increased to 7G
+  disk_size        = "20480"        # default size increased to 20G
 
   output_directory = var.output_dir
 
