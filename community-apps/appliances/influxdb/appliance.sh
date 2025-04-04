@@ -42,7 +42,7 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now influxd.service
+  systemctl enable --now influxdb.service
 
   # cleanup
   postinstall_cleanup
@@ -112,7 +112,7 @@ install_influxdb_server()
     rm -rf ${EXTRACTED_DIR}
   fi
   msg info "Create service for InfluxDB"
-  cat > /etc/systemd/system/influxd.service << EOF
+  cat > /etc/systemd/system/influxdb.service << EOF
 [Unit]
 Description=InfluxDB server
 After=network.target
