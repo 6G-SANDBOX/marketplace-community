@@ -138,9 +138,11 @@ install_influxdb_client()
   msg info "Install InfluxDB ${VERSION_TYPE} client"
   if [[ "${VERSION_TYPE}" == "v2" ]]; then
     curl -fLO "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz"
-    tar xzf "./influxdb2-client/influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz" -C influxdb2-client
-    cp influxdb2-client/influx ${LOCAL_BIN_PATH}
-    rm -rf influxdb2-client
+    mkdir -p /opt/influxdb2-client
+    tar xzf "./influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz" -C /opt/influxdb2-client
+    rm -rf "./influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz"
+    cp /opt/influxdb2-client/influx ${LOCAL_BIN_PATH}
+    rm -rf /opt/influxdb2-client
   fi
 }
 
