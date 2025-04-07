@@ -9,6 +9,9 @@ set -o errexit -o pipefail
 ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_INFLUXDB_VERSION="${ONEAPP_INFLUXDB_VERSION:-2.7.11}"
+ONEAPP_INFLUXDB_CLIENT_VERSION="2.7.5"
+
+ARCH="$(dpkg --print-architecture)"
 INFLUXDB_HOST="127.0.0.1"
 INFLUXDB_PORT="8086"
 if [[ "${ONEAPP_INFLUXDB_VERSION}" == 2* ]]; then
@@ -42,7 +45,9 @@ service_install()
 
   systemctl daemon-reload
 
-  systemctl enable --now influxdb.service
+  if [[ "${VERSION_TYPE}" == "v2" ]]; then
+    systemctl enable --now influxd.service
+  fi
 
   # cleanup
   postinstall_cleanup
@@ -86,7 +91,7 @@ install_pkg_deps()
 
   msg info "Install required packages for ELCM"
   wait_for_dpkg_lock_release
-  if ! apt-get install -y ${DEP_PKGS} ; then
+  if ! apt-get install -y "${DEP_PKGS}" ; then
     msg error "Package(s) installation failed"
     exit 1
   fi
@@ -96,25 +101,22 @@ install_influxdb_server()
 {
   msg info "Install InfluxDB ${VERSION_TYPE} server"
   if [[ "${VERSION_TYPE}" == "v1" ]]; then
-    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    tar xvfz ./influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    rm -rf influxdb-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
-    EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb-*' | head -n 1)
-    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-    cp ${EXTRACTED_DIR}/usr/bin/influx ${LOCAL_BIN_PATH}
-    rm -rf ${EXTRACTED_DIR}
+    addgroup --system --gid 1500 influxdb
+    adduser --system --uid 1500 --ingroup influxdb --home /var/lib/influxdb --shell /bin/false influxdb
+    curl -fLO "https://dl.influxdata.com/influxdb/releases/influxdb-${ONEAPP_INFLUXDB_VERSION}-${ARCH}.deb"
+    apt-get install -y "./${ONEAPP_INFLUXDB_VERSION}"
+    rm -rf "${ONEAPP_INFLUXDB_VERSION}"
   else
-    curl --location -O https://download.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    tar xvfz ./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
-    rm -rf influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_amd64.tar.gz
+    curl -fLO "https://dl.influxdata.com/influxdb/releases/influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_${ARCH}.tar.gz"
+    tar xzf "./influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_${ARCH}.tar.gz"
+    rm -rf "influxdb2-${ONEAPP_INFLUXDB_VERSION}_linux_${ARCH}.tar.gz"
     msg info "Copying InfluxDB to ${LOCAL_BIN_PATH}"
     EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'influxdb2-*' | head -n 1)
-    cp ${EXTRACTED_DIR}/usr/bin/influxd ${LOCAL_BIN_PATH}
-    rm -rf ${EXTRACTED_DIR}
+    cp "${EXTRACTED_DIR}/usr/bin/influxd" ${LOCAL_BIN_PATH}
+    rm -rf "${EXTRACTED_DIR}"
   fi
-  msg info "Create service for InfluxDB"
-  cat > /etc/systemd/system/influxdb.service << EOF
+  msg info "Create service for InfluxDB ${VERSION_TYPE}"
+  cat > /etc/systemd/system/influxd.service << EOF
 [Unit]
 Description=InfluxDB server
 After=network.target
@@ -135,10 +137,10 @@ install_influxdb_client()
 {
   msg info "Install InfluxDB ${VERSION_TYPE} client"
   if [[ "${VERSION_TYPE}" == "v2" ]]; then
-    wget -P influxdb2-client-latest https://dl.influxdata.com/influxdb/releases/influxdb2-client-latest-linux-amd64.tar.gz
-    tar xvzf ./influxdb2-client-latest/influxdb2-client-latest-linux-amd64.tar.gz -C influxdb2-client-latest
-    cp influxdb2-client-latest/influx ${LOCAL_BIN_PATH}
-    rm -rf influxdb2-client-latest
+    curl -fLO "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz"
+    tar xzf "./influxdb2-client/influxdb2-client-${ONEAPP_INFLUXDB_CLIENT_VERSION}-linux-${ARCH}.tar.gz" -C influxdb2-client
+    cp influxdb2-client/influx ${LOCAL_BIN_PATH}
+    rm -rf influxdb2-client
   fi
 }
 
@@ -157,6 +159,7 @@ wait_for_influxdb_service()
   done
 
   msg error "Error: 10m timeout without InfluxDB service being active"
+  exit 1
 }
 
 configure_influxdb()
@@ -166,6 +169,10 @@ configure_influxdb()
     ${INFLUXDB_CLIENT_BIN} -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} -execute "CREATE DATABASE ${ONEAPP_INFLUXDB_BUCKET}"
     ${INFLUXDB_CLIENT_BIN} -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} -execute "CREATE USER ${ONEAPP_INFLUXDB_USER} WITH PASSWORD '${ONEAPP_INFLUXDB_PASSWORD}' WITH ALL PRIVILEGES"
   else
+    if [[ -z "${ONEAPP_INFLUXDB_ORG}" || -z "${ONEAPP_INFLUXDB_TOKEN}" ]]; then
+      msg error "InfluxDB ${VERSION_TYPE} requires organization and token to be set"
+      exit 1
+    fi
     ${INFLUXDB_CLIENT_BIN} setup --host http://${INFLUXDB_HOST}:${INFLUXDB_PORT} \
     --org "${ONEAPP_INFLUXDB_ORG}" \
     --bucket "${ONEAPP_INFLUXDB_BUCKET}" \

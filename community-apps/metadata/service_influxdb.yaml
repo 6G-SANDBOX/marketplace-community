@@ -66,8 +66,8 @@ opennebula_template:
     oneapp_influxdb_version:   "M|text|ONEAPP_INFLUXDB_VERSION: Version of InfluxDB to be installed. The default version is the latest one. | |2.7.11"
     oneapp_influxdb_user:      "M|text|ONEAPP_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
     oneapp_influxdb_password:  "M|password|ONEAPP_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
-    oneapp_influxdb_org:       "M|text|ONEAPP_INFLUXDB_ORG: Organization name. | |dummyorg"
-    oneapp_influxdb_bucket:    "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket name. | |dummybucket"
+    oneapp_influxdb_org:       "O|text|ONEAPP_INFLUXDB_ORG: Organization name. Field only required if the InfluxDB version is 2.X.X."
+    oneapp_influxdb_bucket:    "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket or database name. | |dummybucket"
     oneapp_influxdb_token:     "O|password|ONEAPP_INFLUXDB_TOKEN: Token used to login into the InfluxDB. Field only required if the InfluxDB version is 2.X.X. The token must be at least 8 characters long."
 logo: influxdb.png
 images:

@@ -13,7 +13,7 @@ description: |-
   The appliance configuration can be customized via parameters:
 
   * `ONEAPP_GRAFANA_VERSION` - Version of Grafana to be installed. The default version is the latest one.
-  * `ONEAPP_GRAFANA_PASSWORD` - Password used to login into the Grafana.
+  * `ONEAPP_GRAFANA_ADMIN_PASSWORD` - Password used to login into the Grafana.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 short_description: Grafana appliance for KVM
@@ -37,10 +37,10 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
-    oneapp_grafana_version:   "$ONEAPP_GRAFANA_VERSION"
-    oneapp_grafana_password:  "$ONEAPP_GRAFANA_PASSWORD"
+    oneapp_grafana_version:         "$ONEAPP_GRAFANA_VERSION"
+    oneapp_grafana_admin_password:  "$ONEAPP_GRAFANA_ADMIN_PASSWORD"
   inputs_order: >-
-    ONEAPP_GRAFANA_VERSION,ONEAPP_GRAFANA_PASSWORD
+    ONEAPP_GRAFANA_VERSION,ONEAPP_GRAFANA_ADMIN_PASSWORD
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -55,8 +55,8 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs:
-    oneapp_grafana_version:   "M|text|ONEAPP_GRAFANA_VERSION: Version of Grafana to be installed. The default version is the latest one. | |11.6.0"
-    oneapp_grafana_password:  "M|password|ONEAPP_GRAFANA_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
+    oneapp_grafana_version:         "M|text|ONEAPP_GRAFANA_VERSION: Version of Grafana to be installed. The default version is the latest one. | |11.6.0"
+    oneapp_grafana_admin_password:  "M|password|ONEAPP_GRAFANA_ADMIN_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
 logo: grafana.png
 images:
   - name: "autofill"

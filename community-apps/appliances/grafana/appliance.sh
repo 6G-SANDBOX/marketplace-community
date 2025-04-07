@@ -9,9 +9,12 @@ set -o errexit -o pipefail
 ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_GRAFANA_VERSION="${ONEAPP_GRAFANA_VERSION:-11.6.0}"
+
+ARCH="$(dpkg --print-architecture)"
+
 GRAFANA_ADMIN_USER="admin"
 
-DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
+DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18 adduser libfontconfig1 musl"
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -75,7 +78,7 @@ install_pkg_deps()
 
   msg info "Install required packages for ELCM"
   wait_for_dpkg_lock_release
-  if ! apt-get install -y ${DEP_PKGS} ; then
+  if ! apt-get install -y "${DEP_PKGS}" ; then
     msg error "Package(s) installation failed"
     exit 1
   fi
@@ -83,9 +86,8 @@ install_pkg_deps()
 
 install_grafana() {
   msg info "Install Grafana ${ONEAPP_GRAFANA_VERSION}"
-  apt-get install -y adduser libfontconfig1 musl
-  wget https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb
-  dpkg -i "grafana_${ONEAPP_GRAFANA_VERSION}_amd64.deb"
+  wget "https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_${ARCH}.deb"
+  apt-get install -y "./grafana_${ONEAPP_GRAFANA_VERSION}_${ARCH}.deb"
 }
 
 wait_for_grafana_service()
@@ -103,12 +105,13 @@ wait_for_grafana_service()
   done
 
   msg error "Error: 10m timeout without grafana-server.service being active"
+  exit 1
 }
 
 configure_grafana()
 {
   msg info "Configure Grafana"
-  grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password ${ONEAPP_GRAFANA_PASSWORD}
+  grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password "${ONEAPP_GRAFANA_PASSWORD}"
   systemctl restart grafana-server.service
 }
 
