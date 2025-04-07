@@ -151,7 +151,7 @@ wait_for_influxdb_service()
   local interval=5
 
   for ((i=0; i<timeout; i+=interval)); do
-    if systemctl is-active --quiet influxdb.service; then
+    if systemctl is-active --quiet influxd.service; then
       return 0
     fi
     msg info "InfluxDB service is not active yet. Retrying in ${interval} seconds..."
