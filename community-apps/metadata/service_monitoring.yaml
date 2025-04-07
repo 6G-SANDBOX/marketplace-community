@@ -1,5 +1,5 @@
 ---
-name: "6G-Sandbox Monitoring Stack (influx-grafana-prometheus)"
+name: "6G-Sandbox Monitoring Stack (influxdb-grafana-prometheus)"
 version: "autofill"
 software_version: "v0.5.0"
 publisher: "University of Malaga"
@@ -19,7 +19,7 @@ description: |-
   * `ONEAPP_INFLUXDB_BUCKET` - Bucket name.
   * `ONEAPP_INFLUXDB_TOKEN` - Token used to login into the InfluxDB.
   * `ONEAPP_GRAFANA_VERSION` - Version of Grafana to be installed. The default version is the latest one.
-  * `ONEAPP_GRAFANA_PASSWORD` - Password used to login into the Grafana.
+  * `ONEAPP_GRAFANA_ADMIN_PASSWORD` - Password used to login into the Grafana.
   * `ONEAPP_PROMETHEUS_VERSION` - Version of Prometheus to be installed. The default version is the latest one.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
@@ -44,17 +44,17 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
-    oneapp_influxdb_version:   "$ONEAPP_INFLUXDB_VERSION"
-    oneapp_influxdb_user:      "$ONEAPP_INFLUXDB_USER"
-    oneapp_influxdb_password:  "$ONEAPP_INFLUXDB_PASSWORD"
-    oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
-    oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
-    oneapp_influxdb_token:     "$ONEAPP_INFLUXDB_TOKEN"
-    oneapp_grafana_version:    "$ONEAPP_GRAFANA_VERSION"
-    oneapp_grafana_password:   "$ONEAPP_GRAFANA_PASSWORD"
-    oneapp_prometheus_version: "$ONEAPP_PROMETHEUS_VERSION"
+    oneapp_influxdb_version:         "$ONEAPP_INFLUXDB_VERSION"
+    oneapp_influxdb_user:            "$ONEAPP_INFLUXDB_USER"
+    oneapp_influxdb_password:        "$ONEAPP_INFLUXDB_PASSWORD"
+    oneapp_influxdb_org:             "$ONEAPP_INFLUXDB_ORG"
+    oneapp_influxdb_bucket:          "$ONEAPP_INFLUXDB_BUCKET"
+    oneapp_influxdb_token:           "$ONEAPP_INFLUXDB_TOKEN"
+    oneapp_grafana_version:          "$ONEAPP_GRAFANA_VERSION"
+    oneapp_grafana_admin_password:   "$ONEAPP_GRAFANA_ADMIN_PASSWORD"
+    oneapp_prometheus_version:       "$ONEAPP_PROMETHEUS_VERSION"
   inputs_order: >-
-    ONEAPP_INFLUXDB_VERSION,ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET,ONEAPP_INFLUXDB_TOKEN,ONEAPP_GRAFANA_VERSION,ONEAPP_GRAFANA_PASSWORD,ONEAPP_PROMETHEUS_VERSION
+    ONEAPP_INFLUXDB_VERSION,ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET,ONEAPP_INFLUXDB_TOKEN,ONEAPP_GRAFANA_VERSION,ONEAPP_GRAFANA_ADMIN_PASSWORD,ONEAPP_PROMETHEUS_VERSION
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -69,16 +69,16 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs:
-    oneapp_influxdb_version:   "M|text|ONEAPP_INFLUXDB_VERSION: Version of InfluxDB to be installed. The default version is the latest one. | |2.7.11"
-    oneapp_influxdb_user:      "M|text|ONEAPP_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
-    oneapp_influxdb_password:  "M|password|ONEAPP_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
-    oneapp_influxdb_org:       "M|text|ONEAPP_INFLUXDB_ORG: Organization name. | |dummyorg"
-    oneapp_influxdb_bucket:    "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket name. | |dummybucket"
-    oneapp_influxdb_token:     "O|password|ONEAPP_INFLUXDB_TOKEN: Token used to login into the InfluxDB. Field only required if the InfluxDB version is 2.X.X. The token must be at least 8 characters long."
-    oneapp_grafana_version:   "M|text|ONEAPP_GRAFANA_VERSION: Version of Grafana to be installed. The default version is the latest one. | |11.6.0"
-    oneapp_grafana_password:  "M|password|ONEAPP_GRAFANA_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
-    oneapp_prometheus_version:   "M|text|ONEAPP_PROMETHEUS_VERSION: Version of Prometheus to be installed. The default version is the latest one. | |2.53.4"
-logo: ubuntu.png
+    oneapp_influxdb_version:        "M|text|ONEAPP_INFLUXDB_VERSION: Version of InfluxDB to be installed. The default version is the latest one. | |2.7.11"
+    oneapp_influxdb_user:           "M|text|ONEAPP_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
+    oneapp_influxdb_password:       "M|password|ONEAPP_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
+    oneapp_influxdb_org:            "M|text|ONEAPP_INFLUXDB_ORG: Organization name. | |dummyorg"
+    oneapp_influxdb_bucket:         "M|text|ONEAPP_INFLUXDB_BUCKET: Bucket name. | |dummybucket"
+    oneapp_influxdb_token:          "O|password|ONEAPP_INFLUXDB_TOKEN: Token used to login into the InfluxDB. Field only required if the InfluxDB version is 2.X.X. The token must be at least 8 characters long."
+    oneapp_grafana_version:         "M|text|ONEAPP_GRAFANA_VERSION: Version of Grafana to be installed. The default version is the latest one. | |11.6.0"
+    oneapp_grafana_admin_password:  "M|password|ONEAPP_GRAFANA_ADMIN_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
+    oneapp_prometheus_version:      "M|text|ONEAPP_PROMETHEUS_VERSION: Version of Prometheus to be installed. The default version is the latest one. | |2.53.4"
+logo: monitoring.png
 images:
   - name: "autofill"
     url: "autofill"
