@@ -14,7 +14,7 @@ ARCH="$(dpkg --print-architecture)"
 
 GRAFANA_ADMIN_USER="admin"
 
-DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18 adduser libfontconfig1 musl"
+DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -86,6 +86,7 @@ install_pkg_deps()
 
 install_grafana() {
   msg info "Install Grafana ${ONEAPP_GRAFANA_VERSION}"
+  apt-get install -y adduser libfontconfig1 musl
   wget "https://dl.grafana.com/oss/release/grafana_${ONEAPP_GRAFANA_VERSION}_${ARCH}.deb"
   apt-get install -y "./grafana_${ONEAPP_GRAFANA_VERSION}_${ARCH}.deb"
 }
