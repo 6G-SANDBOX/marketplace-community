@@ -82,7 +82,7 @@ opennebula_template:
     oneapp_tnlcm_sites_branch:                "M|text|ONEAPP_TNLCM_SITES_BRANCH: Name of the branch IN 6G-Sandbox-Sites repository to deploy the trial networks"
     oneapp_tnlcm_deployment_site:             "M|text|ONEAPP_TNLCM_DEPLOYMENT_SITE: Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
     oneapp_tnlcm_deployment_site_token:       "M|password|ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
-logo: tnlcm.png
+logo: ubuntu.png
 images:
   - name: "autofill"
     url: "autofill"

@@ -64,6 +64,6 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs: {}
-logo: tnlcm.png
+logo: ubuntu.png
 disks:
 - "6G-Sandbox TNLCM"
