@@ -63,6 +63,8 @@ service_configure()
 
   wait_for_influxdb_service
 
+  check_health
+
   configure_influxdb
 
   msg info "CONFIGURATION FINISHED"
@@ -162,6 +164,22 @@ wait_for_influxdb_service()
 
   msg error "Error: 10m timeout without InfluxDB service being active"
   exit 1
+}
+
+check_health()
+{
+  msg info "Check InfluxDB health"
+  if [[ "${VERSION_TYPE}" == "v1" ]]; then
+    until ${INFLUXDB_CLIENT_BIN} ping -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT}; do
+      msg info "InfluxDB service is not active yet. Retrying in 5 seconds..."
+      sleep 5
+    done
+  else
+    until ${INFLUXDB_CLIENT_BIN} ping --host http://${INFLUXDB_HOST}:${INFLUXDB_PORT}; do
+      msg info "InfluxDB service is not active yet. Retrying in 5 seconds..."
+      sleep 5
+    done
+  fi
 }
 
 configure_influxdb()
