@@ -79,7 +79,7 @@ install_pkg_deps()
 
   msg info "Install required packages for ELCM"
   wait_for_dpkg_lock_release
-  if ! apt-get install -y "${DEP_PKGS}" ; then
+  if ! apt-get install -y ${DEP_PKGS} ; then
     msg error "Package(s) installation failed"
     exit 1
   fi
