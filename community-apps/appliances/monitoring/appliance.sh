@@ -82,6 +82,8 @@ service_configure()
 
   wait_for_influxdb_service
 
+  check_health
+
   configure_influxdb
 
   wait_for_grafana_service
@@ -223,6 +225,23 @@ wait_for_influxdb_service()
   exit 1
 }
 
+check_health()
+{
+  msg info "Check InfluxDB health"
+  if [[ "${VERSION_TYPE}" == "v1" ]]; then
+    until ${INFLUXDB_CLIENT_BIN} ping -host http://${INFLUXDB_HOST}:${INFLUXDB_PORT}; do
+      msg info "InfluxDB service is not active yet. Retrying in 5 seconds..."
+      sleep 5
+    done
+  else
+    until ${INFLUXDB_CLIENT_BIN} ping --host http://${INFLUXDB_HOST}:${INFLUXDB_PORT}; do
+      msg info "InfluxDB service is not active yet. Retrying in 5 seconds..."
+      sleep 5
+    done
+  fi
+}
+
+
 configure_influxdb()
 {
   msg info "Configure InfluxDB ${VERSION_TYPE}"
@@ -265,6 +284,7 @@ wait_for_grafana_service()
 configure_grafana()
 {
   msg info "Configure Grafana"
+  systemctl stop grafana-server.service
   grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password "${ONEAPP_GRAFANA_ADMIN_PASSWORD}"
   systemctl restart grafana-server.service
 }
