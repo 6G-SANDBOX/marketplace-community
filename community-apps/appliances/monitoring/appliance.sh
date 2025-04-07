@@ -265,7 +265,7 @@ wait_for_grafana_service()
 configure_grafana()
 {
   msg info "Configure Grafana"
-  grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password "${ONEAPP_GRAFANA_PASSWORD}"
+  grafana-cli ${GRAFANA_ADMIN_USER} reset-admin-password "${ONEAPP_GRAFANA_ADMIN_PASSWORD}"
   systemctl restart grafana-server.service
 }
 
