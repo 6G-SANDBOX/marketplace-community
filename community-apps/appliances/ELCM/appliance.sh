@@ -8,25 +8,19 @@ set -o errexit -o pipefail
 
 ONE_SERVICE_RECONFIGURABLE=true
 
-ONEAPP_ELCM_INFLUXDB_USER="${ONEAPP_ELCM_INFLUXDB_USER:-admin}"
-# ONEAPP_ELCM_INFLUXDB_PASSWORD="${ONEAPP_ELCM_INFLUXDB_PASSWORD:-admin}"
-ONEAPP_ELCM_INFLUXDB_ORG="${ONEAPP_ELCM_INFLUXDB_ORG:-elcmorg}"
-ONEAPP_ELCM_INFLUXDB_HOST="127.0.0.1"
-ONEAPP_ELCM_INFLUXDB_PORT="8086"
-ONEAPP_ELCM_INFLUXDB_BUCKET="${ONEAPP_ELCM_INFLUXDB_BUCKET:-elcmbucket}"
 ONEAPP_ELCM_GRAFANA_USER="admin"
-# ONEAPP_ELCM_GRAFANA_PASSWORD="${ONEAPP_ELCM_GRAFANA_PASSWORD:-admin}"
-ONEAPP_ELCM_GRAFANA_HOST="localhost"
-ONEAPP_ELCM_GRAFANA_PORT="3000"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
 PYTHON_VERSION="3.10"
 PYTHON_BIN="python${PYTHON_VERSION}"
-OPENTAP_PATH="/opt/opentap"
 BACKEND_VERSION="v3.7.1"
 BACKEND_PATH="/opt/ELCM_BACKEND"
+BACKEND_HOST="127.0.0.1"
+BACKEND_PORT="5001"
 FRONTEND_VERSION="v3.0.1"
 FRONTEND_PATH="/opt/ELCM_FRONTEND"
+FRONTEND_HOST="127.0.0.1"
+FRONTEND_PORT="5000"
 FRONTEND_BRANDING_PATH="${FRONTEND_PATH}/app/static/branding"
 LOGOS_PATH="/var/lib/misc/logos"
 
@@ -46,17 +40,8 @@ service_install()
   # python
   # install_python
 
-  # TODO: opentap
-  # install_opentap
-
   # prometheus
   install_prometheus
-
-  # influxdb
-  install_influxdb
-
-  # grafana
-  install_grafana
 
   # elcm backend
   install_elcm_backend
@@ -77,9 +62,6 @@ service_install()
 service_configure()
 {
   export DEBIAN_FRONTEND=noninteractive
-
-  # configure user, password and database influxdb
-  configure_influxdb
 
   # configure user, password and datasource grafana
   configure_grafana
@@ -152,41 +134,10 @@ install_python()
   fi
 }
 
-install_opentap()
-{
-  msg info "Install OpenTAP"
-  curl -Lo opentap.linux https://packages.opentap.io/4.0/Objects/www/OpenTAP?os=Linux
-  chmod +x ./opentap.linux
-  ./opentap.linux --quiet
-  rm opentap.linux
-}
-
 install_prometheus()
 {
   msg info "Install Prometheus"
   apt install prometheus -y
-}
-
-install_influxdb()
-{
-  msg info "Install InfluxDB"
-  wget -q https://repos.influxdata.com/influxdata-archive_compat.key
-  echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
-  echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
-  apt-get update
-  apt-get install -y influxdb2
-  systemctl enable --now influxdb.service
-}
-
-install_grafana()
-{
-  msg info "Install Grafana"
-  mkdir -p /etc/apt/keyrings/
-  wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
-  echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
-  apt-get update
-  apt-get install -y grafana
-  systemctl enable --now grafana-server.service
 }
 
 install_elcm_backend()
@@ -211,7 +162,7 @@ Description=ELCM Backend
 Type=simple
 WorkingDirectory=${BACKEND_PATH}
 Environment="SECRET_KEY=super secret"
-ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port 5001'
+ExecStart=/bin/bash -c 'source venv/bin/activate && flask run --host 0.0.0.0 --port ${BACKEND_PORT}'
 Restart=always
 
 [Install]
@@ -243,7 +194,7 @@ Description=ELCM Frontend
 Type=simple
 WorkingDirectory=${FRONTEND_PATH}
 Environment="SECRET_KEY=super secret"
-ExecStart=/bin/bash -c 'source venv/bin/activate && waitress-serve --listen=*:5000 portal:app'
+ExecStart=/bin/bash -c 'source venv/bin/activate && waitress-serve --listen=*:${FRONTEND_PORT} portal:app'
 Restart=always
 
 [Install]
@@ -251,28 +202,9 @@ WantedBy=multi-user.target
 EOF
 }
 
-configure_influxdb()
-{
-  influx setup --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --org ${ONEAPP_ELCM_INFLUXDB_ORG} --bucket ${ONEAPP_ELCM_INFLUXDB_BUCKET} --username ${ONEAPP_ELCM_INFLUXDB_USER} --password ${ONEAPP_ELCM_INFLUXDB_PASSWORD} --force
-  # influx auth create --org ${ONEAPP_ELCM_INFLUXDB_ORG} --all-access --description "Admin ELCM token" --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT}
-}
-
 configure_grafana()
 {
-  msg info "Configure Grafana"
-  msg info "Change admin password"
-  grafana-cli admin reset-admin-password ${ONEAPP_ELCM_GRAFANA_PASSWORD}
-
-  msg info "Wait Grafana service up"
-  until curl -s "http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}/api/health" | grep -q '"database": "ok"'; do
-    msg info "Waiting for Grafana to be ready..."
-    sleep 5
-  done
-  msg info "Grafana service is ready"
-
   msg info "Create InfluxDB datasource in Grafana"
-  INFLUXDB_USER_TOKEN=$(influx auth list --host http://${ONEAPP_ELCM_INFLUXDB_HOST}:${ONEAPP_ELCM_INFLUXDB_PORT} --json | jq -r '.[0].token')
-  msg info "InfluxDB user token: ${INFLUXDB_USER_TOKEN}"
   INFLUXDB_DATASOURCE_JSON=$(cat <<EOF
 {
   "name": "${ONEAPP_ELCM_INFLUXDB_BUCKET}",
@@ -287,7 +219,7 @@ configure_grafana()
     "httpMode": "POST"
   },
   "secureJsonData": {
-    "token": "${INFLUXDB_USER_TOKEN}"
+    "token": "${ONEAPP_ELCM_INFLUXDB_TOKEN}"
   }
 }
 EOF
@@ -339,6 +271,21 @@ EOF
 create_elcm_backend_config_file()
 {
   msg info "Create file config in ELCM backend"
+  if [ "${ONEAPP_ELCM_PORTAL_ENABLE}" = "YES" ]; then
+    ONEAPP_ELCM_PORTAL_ENABLE="True"
+  else
+    ONEAPP_ELCM_PORTAL_ENABLE="False"
+  fi
+  if [ "${ONEAPP_ELCM_INFLUXDB_ENABLE}" = "YES" ]; then
+    ONEAPP_ELCM_INFLUXDB_ENABLE="True"
+  else
+    ONEAPP_ELCM_INFLUXDB_ENABLE="False"
+  fi
+  if [ "${ONEAPP_ELCM_GRAFANA_ENABLE}" = "YES" ]; then
+    ONEAPP_ELCM_GRAFANA_ENABLE="True"
+  else
+    ONEAPP_ELCM_GRAFANA_ENABLE="False"
+  fi
   cat > ${BACKEND_PATH}/config.yml << EOF
 TempFolder: 'Temp'
 ResultsFolder: 'Results'
@@ -348,9 +295,9 @@ Logging:
   AppLevel: INFO
   LogLevel: DEBUG
 Portal:
-  Enabled: True
-  Host: '127.0.0.1'
-  Port: 5000
+  Enabled: ${ONEAPP_ELCM_PORTAL_ENABLE}
+  Host: "${FRONTEND_HOST}"
+  Port: ${FRONTEND_PORT}
 SliceManager:
   Host: '192.168.32.136'
   Port: 8000
@@ -363,22 +310,22 @@ Tap:
   EnsureClosed: True
   EnsureAdbClosed: False
 Grafana:
-  Enabled: True
+  Enabled: ${ONEAPP_ELCM_GRAFANA_ENABLE}
   Host: "${ONEAPP_ELCM_GRAFANA_HOST}"
   Port: ${ONEAPP_ELCM_GRAFANA_PORT}
   Bearer: ${GRAFANA_USER_TOKEN}
   ReportGenerator:
 InfluxDb:
-  Enabled: True
+  Enabled: ${ONEAPP_ELCM_INFLUXDB_ENABLE}
   Host: "${ONEAPP_ELCM_INFLUXDB_HOST}"
   Port: ${ONEAPP_ELCM_INFLUXDB_PORT}
   User: ${ONEAPP_ELCM_INFLUXDB_USER}
   Password: ${ONEAPP_ELCM_INFLUXDB_PASSWORD}
   Database: ${ONEAPP_ELCM_INFLUXDB_BUCKET}
-  Token: ${INFLUXDB_USER_TOKEN}
+  Token: ${ONEAPP_ELCM_INFLUXDB_TOKEN}
   Org: ${ONEAPP_ELCM_INFLUXDB_ORG}
 Metadata:
-  HostIp: "127.0.0.1"
+  HostIp: "${BACKEND_HOST}"
   Facility:
 EastWest:
   Enabled: False
@@ -402,8 +349,8 @@ Logging:
   AppLevel: INFO
   LogLevel: DEBUG
 ELCM:
-  Host: '127.0.0.1'
-  Port: 5001
+  Host: "${BACKEND_HOST}"
+  Port: ${BACKEND_PORT}
 Grafana URL: http://${ONEAPP_ELCM_GRAFANA_HOST}:${ONEAPP_ELCM_GRAFANA_PORT}
 EastWest:
   Enabled: False

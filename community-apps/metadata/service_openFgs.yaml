@@ -34,16 +34,17 @@ opennebula_template:
     netcfg_type: "interfaces"
   cpu: '2'
   vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
   graphics:
     listen: 0.0.0.0
     type: vnc
-  inputs_order:
-  memory: '2048'
+  hypervisor: kvm
+  memory: '4096'
   memory_unit_cost: 'MB'
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-  user_inputs:
 logo: https://open5gs.org/assets/img/open5gs-logo.png
 images:
   - name: "autofill"

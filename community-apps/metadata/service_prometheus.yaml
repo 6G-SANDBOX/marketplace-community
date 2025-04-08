@@ -1,0 +1,67 @@
+---
+name: "6G-Sandbox Prometheus"
+version: "autofill"
+software_version: "v2.53.4"
+publisher: "University of Malaga"
+description: |-
+  This appliance installs the latest version of Prometheus from the official repositories and configures them according to the input variables. Configuration of the Prometheus can be made when instanciating the VM.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_PROMETHEUS_VERSION` - Version of Prometheus to be installed. The default version is the latest one.
+
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+short_description: Prometheus appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - UMA
+  - Prometheus
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    oneapp_prometheus_version:   "$ONEAPP_PROMETHEUS_VERSION"
+  inputs_order: >-
+    ONEAPP_PROMETHEUS_VERSION
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_prometheus_version:   "M|text|ONEAPP_PROMETHEUS_VERSION: Version of Prometheus to be installed. The default version is the latest one. | |2.53.4"
+logo: prometheus.png
+images:
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"

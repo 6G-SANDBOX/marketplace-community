@@ -12,10 +12,18 @@ description: |-
 
   The appliance configuration can be customized via parameters:
 
+  * `ONEAPP_ELCM_PORTAL_ENABLE` - Enable ELCM frontend.
+  * `ONEAPP_ELCM_INFLUXDB_ENABLE` - Enable InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_HOST` - Hostname or IP address of the InfluxDB.
+  * `ONEAPP_ELCM_INFLUXDB_PORT` - Port of the InfluxDB.
   * `ONEAPP_ELCM_INFLUXDB_USER` - Username used to login into the InfluxDB.
   * `ONEAPP_ELCM_INFLUXDB_PASSWORD` - Password used to login into the InfluxDB.
   * `ONEAPP_ELCM_INFLUXDB_ORG` - Organization name.
   * `ONEAPP_ELCM_INFLUXDB_BUCKET` - Bucket name.
+  * `ONEAPP_ELCM_INFLUXDB_TOKEN` - Token used to login into the InfluxDB.
+  * `ONEAPP_ELCM_GRAFANA_ENABLE` - Enable Grafana.
+  * `ONEAPP_ELCM_GRAFANA_HOST` - Hostname or IP address of the Grafana.
+  * `ONEAPP_ELCM_GRAFANA_PORT` - Port of the Grafana.
   * `ONEAPP_ELCM_GRAFANA_PASSWORD` - Password used to login into the Grafana.
 
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
@@ -40,13 +48,21 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
+    oneapp_elcm_portal_enable:      "$ONEAPP_ELCM_PORTAL_ENABLE"
+    oneapp_elcm_influxdb_enable:    "$ONEAPP_ELCM_INFLUXDB_ENABLE"
+    oneapp_elcm_influxdb_host:      "$ONEAPP_ELCM_INFLUXDB_HOST"
+    oneapp_elcm_influxdb_port:      "$ONEAPP_ELCM_INFLUXDB_PORT"
     oneapp_elcm_influxdb_user:      "$ONEAPP_ELCM_INFLUXDB_USER"
     oneapp_elcm_influxdb_password:  "$ONEAPP_ELCM_INFLUXDB_PASSWORD"
     oneapp_elcm_influxdb_org:       "$ONEAPP_ELCM_INFLUXDB_ORG"
     oneapp_elcm_influxdb_bucket:    "$ONEAPP_ELCM_INFLUXDB_BUCKET"
+    oneapp_elcm_influxdb_token:     "$ONEAPP_ELCM_INFLUXDB_TOKEN"
+    oneapp_elcm_grafana_enable:     "$ONEAPP_ELCM_GRAFANA_ENABLE"
+    oneapp_elcm_grafana_host:       "$ONEAPP_ELCM_GRAFANA_HOST"
+    oneapp_elcm_grafana_port:       "$ONEAPP_ELCM_GRAFANA_PORT"
     oneapp_elcm_grafana_password:   "$ONEAPP_ELCM_GRAFANA_PASSWORD"
   inputs_order: >-
-    ONEAPP_ELCM_INFLUXDB_USER,ONEAPP_ELCM_INFLUXDB_PASSWORD,ONEAPP_ELCM_INFLUXDB_ORG,ONEAPP_ELCM_INFLUXDB_BUCKET,ONEAPP_ELCM_GRAFANA_PASSWORD
+    ONEAPP_ELCM_PORTAL_ENABLE,ONEAPP_ELCM_INFLUXDB_ENABLE,ONEAPP_ELCM_INFLUXDB_HOST,ONEAPP_ELCM_INFLUXDB_PORT,ONEAPP_ELCM_INFLUXDB_USER,ONEAPP_ELCM_INFLUXDB_PASSWORD,ONEAPP_ELCM_INFLUXDB_ORG,ONEAPP_ELCM_INFLUXDB_BUCKET,ONEAPP_ELCM_INFLUXDB_TOKEN,ONEAPP_ELCM_GRAFANA_ENABLE,ONEAPP_ELCM_GRAFANA_HOST,ONEAPP_ELCM_GRAFANA_PORT,ONEAPP_ELCM_GRAFANA_PASSWORD
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -61,10 +77,18 @@ opennebula_template:
     arch: x86_64
   logo: images/logos/ubuntu.png
   user_inputs:
+    oneapp_elcm_portal_enable:      "M|boolean|ONEAPP_ELCM_PORTAL_ENABLE: Enable ELCM frontend. | |YES"
+    oneapp_elcm_influxdb_enable:    "M|boolean|ONEAPP_ELCM_INFLUXDB_ENABLE: Enable InfluxDB. | |YES"
+    oneapp_elcm_influxdb_host:      "M|text|ONEAPP_ELCM_INFLUXDB_HOST: Hostname or IP address of the InfluxDB. | | 127.0.0.1"
+    oneapp_elcm_influxdb_port:      "M|text|ONEAPP_ELCM_INFLUXDB_PORT: Port of the InfluxDB. | |8086"
     oneapp_elcm_influxdb_user:      "M|text|ONEAPP_ELCM_INFLUXDB_USER: Username used to login into the InfluxDB. | |admin"
     oneapp_elcm_influxdb_password:  "M|password|ONEAPP_ELCM_INFLUXDB_PASSWORD: Password used to login into the InfluxDB. The password must be at least 8 characters long."
     oneapp_elcm_influxdb_org:       "M|text|ONEAPP_ELCM_INFLUXDB_ORG: Organization name. | |elcmorg"
     oneapp_elcm_influxdb_bucket:    "M|text|ONEAPP_ELCM_INFLUXDB_BUCKET: Bucket name. | |elcmbucket"
+    oneapp_elcm_influxdb_token:     "M|text|ONEAPP_ELCM_INFLUXDB_TOKEN: Token used to login into the InfluxDB. | |elcmtoken"
+    oneapp_elcm_grafana_enable:     "M|boolean|ONEAPP_ELCM_GRAFANA_ENABLE: Enable Grafana. | |YES"
+    oneapp_elcm_grafana_host:       "M|text|ONEAPP_ELCM_GRAFANA_HOST: Hostname or IP address of the InfluxDB. | | 127.0.0.1"
+    oneapp_elcm_grafana_port:       "M|text|ONEAPP_ELCM_GRAFANA_PORT: Port of the InfluxDB. | |3000"
     oneapp_elcm_grafana_password:   "M|password|ONEAPP_ELCM_GRAFANA_PASSWORD: Password used to login into the Grafana. The password must be at least 8 characters long."
 logo: ubuntu.png
 images:
