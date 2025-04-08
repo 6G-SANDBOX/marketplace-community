@@ -6,7 +6,7 @@ publisher: "Telefonica Innovacion Digital"
 description: |-
   OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer) orchestrated by
   [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/appflow_elasticity.html)
-  This service automatically deploys and configures one MinIO VM, one InfluxDB VM, one Jenkins VM and one TNLCM VM all ready to be used in your 6G-Sandbox site.
+  This service automatically deploys and configures one InfluxDB VM, one MinIO VM, one Jenkins VM and one TNLCM VM all ready to be used in your 6G-Sandbox site.
 
   Requires
   [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/overview.html)
@@ -38,8 +38,8 @@ os-arch: x86_64
 hypervisor: KVM
 opennebula_version: 6.0, 6.2, 6.4, 6.6, 6.8, 6.10
 roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
-  minio: "[6G-Sandbox toolkit] MinIO"
   influxdb: "[6G-Sandbox toolkit] InfluxDB"
+  minio: "[6G-Sandbox toolkit] MinIO"
   jenkins: "[6G-Sandbox toolkit] Jenkins"
   tnlcm: "[6G-Sandbox toolkit] TNLCM"
 opennebula_template:
@@ -67,15 +67,31 @@ opennebula_template:
     oneapp_tnlcm_admin_password:              "M|password|Password of the TNLCM admin user. At least 8 characters"
     oneapp_tnlcm_sites_branch:                "M|text|Name of the branch in 6G-Sandbox-Sites repository to deploy the trial networks"
     oneapp_tnlcm_deployment_site:             "M|text|Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
-    oneapp_influxdb_user:                     "M|text|InfluxDB username for InfluxDB server. At least 5 characters||myinfluxdbadmin"
-    oneapp_influxdb_password:                 "M|password|InfluxDB password for InfluxDB server. At least 8 characters"
-    oneapp_influxdb_org:                      "M|text|InfluxDB organization for InfluxDB server. At least 5 characters||myinfluxdborg"
-    oneapp_influxdb_bucket:                   "M|text|InfluxDB bucket for InfluxDB server. At least 5 characters||myinfluxdbbucket"
-    oneapp_influxdb_token:                    "M|password|InfluxDB token for InfluxDB server. At least 8 characters||myinfluxdbtoken"
+    oneapp_influxdb_user:                     "M|text|The username for the InfluxDB admin user. At least 5 characters||myadmin"
+    oneapp_influxdb_password:                 "M|password|The password for the InfluxDB admin user. At least 8 characters"
+    oneapp_influxdb_org:                      "M|text|The organization for the InfluxDB admin user. At least 5 characters||myorg"
+    oneapp_influxdb_bucket:                   "M|text|The bucket for the InfluxDB admin user. At least 5 characters||mybucket"
+    oneapp_influxdb_token:                    "M|password|The token for the InfluxDB admin user. At least 8 characters||my-influxdb-token"
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
   roles:
+    - name: influxdb
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_INFLUXDB_USER         = "$oneapp_influxdb_user"
+        ONEAPP_INFLUXDB_PASSWORD     = "$oneapp_influxdb_password"
+        ONEAPP_INFLUXDB_ORG          = "$oneapp_influxdb_org"
+        ONEAPP_INFLUXDB_BUCKET       = "$oneapp_influxdb_bucket"
+        ONEAPP_INFLUXDB_TOKEN        = "$oneapp_influxdb_token"
+      cooldown: 120
+      elasticity_policies: []
+      scheduled_policies: []
     - name: minio           # letters, numbers or underscore
+      parents: [influxdb]    # Names of the roles that must be deployed before this one.
       cardinality: 1
       max_vms: 1
       vm_template_contents: |
@@ -91,24 +107,8 @@ opennebula_template:
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
       elasticity_policies: []
       scheduled_policies: []
-    - name: influxdb
-      parents: [minio]         # Names of the roles that must be deployed before this one.
-      cardinality: 1
-      max_vms: 1
-      vm_template_contents: |
-        NIC = [
-          NAME = "NIC0",
-          NETWORK_ID = "$Public" ]
-        ONEAPP_INFLUXDB_USER         = "$oneapp_influxdb_user"
-        ONEAPP_INFLUXDB_PASSWORD     = "$oneapp_influxdb_password"
-        ONEAPP_INFLUXDB_ORG          = "$oneapp_influxdb_org"
-        ONEAPP_INFLUXDB_BUCKET       = "$oneapp_influxdb_bucket"
-        ONEAPP_INFLUXDB_TOKEN        = "$oneapp_influxdb_token"
-      cooldown: 120
-      elasticity_policies: []
-      scheduled_policies: []
     - name: jenkins
-      parents: [influxdb]         # Names of the roles that must be deployed before this one.
+      parents: [minio]         # Names of the roles that must be deployed before this one.
       cardinality: 1
       max_vms: 1
       vm_template_contents: |
