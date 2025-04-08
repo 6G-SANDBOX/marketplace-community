@@ -6,7 +6,7 @@ publisher: "Telefonica Innovacion Digital"
 description: |-
   OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer) orchestrated by
   [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/appflow_elasticity.html)
-  This service automatically deploys and configures one MinIO VM, one Jenkins VM, and one TNLCM VM, all ready to be used in your 6G-Sandbox site.
+  This service automatically deploys and configures one MinIO VM, one InfluxDB VM, one Jenkins VM and one TNLCM VM all ready to be used in your 6G-Sandbox site.
 
   Requires
   [OneFlow](https://docs.opennebula.io/stable/management_and_operations/multivm_service_management/overview.html)
@@ -18,8 +18,9 @@ description: |-
   - [6G-Sandbox Jenkins](/appliance/service_jenkins)
   - [6G-Sandbox TNLCM](/appliance/service_TNLCM)
   - [Service MinIO](https://marketplace.opennebula.io/appliance/e2c4538a-1e7a-11ef-949c-97e1d7dcfb6f)
+  - [6G-Sandbox InfluxDB](/appliance/service_influxdb)
 
-short_description: Multi-VM Service that deploys and configures the the MinIO, Jenkins and TNLCM of a 6G-Sandbox site.
+short_description: Multi-VM Service that deploys and configures the the MinIO, InfluxDB, Jenkins and TNLCM of a 6G-Sandbox site.
 tags:
   - service
   - oneflow
@@ -38,11 +39,12 @@ hypervisor: KVM
 opennebula_version: 6.0, 6.2, 6.4, 6.6, 6.8, 6.10
 roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
   minio: "[6G-Sandbox toolkit] MinIO"
+  influxdb: "[6G-Sandbox toolkit] InfluxDB"
   jenkins: "[6G-Sandbox toolkit] Jenkins"
   tnlcm: "[6G-Sandbox toolkit] TNLCM"
 opennebula_template:
   name: 6G-Sandbox toolkit installer
-  description: This service is ment to be deployed once per site. You can effectively delete this template after checking that the MinIO, Jenkins and TNLCM appliances are RUNNING.
+  description: This service is ment to be deployed once per site. You can effectively delete this template after checking that the MinIO, InfluxDB, Jenkins and TNLCM appliances are RUNNING.
   deployment: straight            # each Role is deployed when all its parent Roles are RUNNING
   ready_status_gate: true         # OneFlow will consider VMs are RUNNING when they have READY=YES in their user template
   automatic_deletion: true        # delete Service if it has no running VMs
@@ -65,6 +67,11 @@ opennebula_template:
     oneapp_tnlcm_admin_password:              "M|password|Password of the TNLCM admin user. At least 8 characters"
     oneapp_tnlcm_sites_branch:                "M|text|Name of the branch in 6G-Sandbox-Sites repository to deploy the trial networks"
     oneapp_tnlcm_deployment_site:             "M|text|Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
+    oneapp_influxdb_user:                     "M|text|InfluxDB username for InfluxDB server. At least 5 characters||myinfluxdbadmin"
+    oneapp_influxdb_password:                 "M|password|InfluxDB password for InfluxDB server. At least 8 characters"
+    oneapp_influxdb_org:                      "M|text|InfluxDB organization for InfluxDB server. At least 5 characters||myinfluxdborg"
+    oneapp_influxdb_bucket:                   "M|text|InfluxDB bucket for InfluxDB server. At least 5 characters||myinfluxdbbucket"
+    oneapp_influxdb_token:                    "M|password|InfluxDB token for InfluxDB server. At least 8 characters||myinfluxdbtoken"
   networks:                        # Hash of virtual networks to use in the service.
     Public: "M|network|Public||id:"
   roles:
@@ -84,8 +91,24 @@ opennebula_template:
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
       elasticity_policies: []
       scheduled_policies: []
-    - name: jenkins
+    - name: influxdb
       parents: [minio]         # Names of the roles that must be deployed before this one.
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_INFLUXDB_USER         = "$oneapp_influxdb_user"
+        ONEAPP_INFLUXDB_PASSWORD     = "$oneapp_influxdb_password"
+        ONEAPP_INFLUXDB_ORG          = "$oneapp_influxdb_org"
+        ONEAPP_INFLUXDB_BUCKET       = "$oneapp_influxdb_bucket"
+        ONEAPP_INFLUXDB_TOKEN        = "$oneapp_influxdb_token"
+      cooldown: 120
+      elasticity_policies: []
+      scheduled_policies: []
+    - name: jenkins
+      parents: [influxdb]         # Names of the roles that must be deployed before this one.
       cardinality: 1
       max_vms: 1
       vm_template_contents: |
@@ -113,14 +136,18 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_TNLCM_JENKINS_HOST          = "${jenkins.template.context.eth0_ip}"
-        ONEAPP_TNLCM_JENKINS_USERNAME      = "$oneapp_jenkins_username"
-        ONEAPP_TNLCM_JENKINS_PASSWORD      = "$oneapp_jenkins_password"
-        ONEAPP_TNLCM_ADMIN_USER            = "$oneapp_tnlcm_admin_user"
-        ONEAPP_TNLCM_ADMIN_PASSWORD        = "$oneapp_tnlcm_admin_password"
-        ONEAPP_TNLCM_SITES_BRANCH          = "$oneapp_tnlcm_sites_branch"
-        ONEAPP_TNLCM_DEPLOYMENT_SITE       = "$oneapp_tnlcm_deployment_site"
-        ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN = "$oneapp_jenkins_sites_token"
+        ONEAPP_TNLCM_JENKINS_HOST           = "${jenkins.template.context.eth0_ip}"
+        ONEAPP_TNLCM_JENKINS_USERNAME       = "$oneapp_jenkins_username"
+        ONEAPP_TNLCM_JENKINS_PASSWORD       = "$oneapp_jenkins_password"
+        ONEAPP_TNLCM_ADMIN_USER             = "$oneapp_tnlcm_admin_user"
+        ONEAPP_TNLCM_ADMIN_PASSWORD         = "$oneapp_tnlcm_admin_password"
+        ONEAPP_TNLCM_SITES_BRANCH           = "$oneapp_tnlcm_sites_branch"
+        ONEAPP_TNLCM_DEPLOYMENT_SITE        = "$oneapp_tnlcm_deployment_site"
+        ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN  = "$oneapp_jenkins_sites_token"
+        ONEAPP_TNLCM_INFLUXDB_HOST          = "${influxdb.template.context.eth0_ip}"
+        ONEAPP_TNLCM_INFLUXDB_ORG           = "$oneapp_influxdb_org"
+        ONEAPP_TNLCM_INFLUXDB_BUCKET        = "$oneapp_influxdb_bucket"
+        ONEAPP_TNLCM_INFLUXDB_TOKEN         = "$oneapp_influxdb_token"
       cooldown: 120
       elasticity_policies: []
       scheduled_policies: []
