@@ -13,7 +13,7 @@ build {
 }
 
 
-source "qemu" "influxdb" {
+source "qemu" "monitoring" {
   cpus        = 2 
   memory      = 4096
   accelerator = "kvm"
@@ -51,7 +51,7 @@ source "qemu" "influxdb" {
 
 
 build {
-  sources = ["source.qemu.influxdb"]
+  sources = ["source.qemu.monitoring"]
 
   provisioner "shell" {
     scripts = ["${var.input_dir}/81-configure-ssh.sh"]
@@ -88,7 +88,7 @@ build {
 
   provisioner "file" {
     sources     = [
-      "appliances/influxdb/appliance.sh",
+      "appliances/monitoring/appliance.sh",
       ]
     destination = "/etc/one-appliance/service.d/"
   }
