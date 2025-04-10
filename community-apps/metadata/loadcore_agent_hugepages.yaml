@@ -46,8 +46,8 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
-  cpu: '1'
-  vcpu: '8'
+  cpu: '4'
+  vcpu: '4'
   cpu_model:
     model: "host-passthrough"
   graphics:
