@@ -36,6 +36,9 @@ service_install()
     # pip modules for jenkins user
     install_pip_deps
 
+    # ruby gems for jenkins user
+    install_ruby_deps
+
     # ansible and terraform
     install_ansible_terraform
 
@@ -104,22 +107,25 @@ install_deps()
         msg error "Package(s) installation failed"
         exit 1
     fi
-
-    if [ -n "${DEP_RUBY}" ]; then
-        msg info "Install required ruby gems"
-        if ! gem install ${DEP_RUBY} ; then
-            msg error "ruby gem(s) installation failed"
-            exit 1
-        fi
-    fi
 }
 
 install_pip_deps()
 {
     if [ -n "${DEP_PIP}" ]; then
-        msg info "Install required pip packages for Jenkins"
+        msg info "Install required pip packages for jenkins user"
         if ! sudo -H -u jenkins bash -c "pip3 install ${DEP_PIP}" ; then
             msg error "pip package(s) installation failed"
+            exit 1
+        fi
+    fi
+}
+
+install_ruby_deps()
+{
+    if [ -n "${DEP_RUBY}" ]; then
+        msg info "Install required ruby gems for jenkins user"
+        if ! sudo -H -u jenkins bash -c "cd ~ && gem install --user-install ${DEP_RUBY}" ; then
+            msg error "ruby gem(s) installation failed"
             exit 1
         fi
     fi
