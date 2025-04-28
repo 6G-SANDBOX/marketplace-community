@@ -8,7 +8,7 @@ set -o errexit -o pipefail
 
 ONE_SERVICE_RECONFIGURABLE=false
 
-ONEAPP_MONGODB_VERSION="${ONEAPP_MONGODB_VERSION:-8.0.8}"
+ONEAPP_MONGODB_VERSION="${ONEAPP_MONGODB_VERSION:-8.0}"
 ONEAPP_MONGO_EXPRESS_VERSION="v1.1.0-rc-3"
 ONEAPP_MONGODB_DATABASE="${ONEAPP_MONGODB_DATABASE:-dummydatabase}"
 ONEAPP_MONGODB_USER="${ONEAPP_MONGODB_USER:-admin}"
@@ -109,7 +109,7 @@ install_pkg_deps()
 }
 
 install_mongodb() {
-  msg info "Install MongoDB ${ONEAPP_MONGODB_VERSION}"
+  msg info "Install MongoDB v${ONEAPP_MONGODB_VERSION}"
   curl -fsSL https://www.mongodb.org/static/pgp/server-${ONEAPP_MONGODB_VERSION}.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-${ONEAPP_MONGODB_VERSION}.gpg --dearmor
   echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-${ONEAPP_MONGODB_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -sc 2> /dev/null)/mongodb-org/${ONEAPP_MONGODB_VERSION} multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-${ONEAPP_MONGODB_VERSION}.list
   wait_for_dpkg_lock_release
