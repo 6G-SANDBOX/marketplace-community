@@ -10,10 +10,12 @@ set -o errexit -o pipefail
 # ONEAPP_OCF_PASSWORD="${ONEAPP_OCF_PASSWORD:-'password'}"
 # ONEAPP_OCF_CAPIF_HOSTNAME="${ONEAPP_OCF_CAPIF_HOSTNAME:-'capifcore'}"
 # ONEAPP_OCF_REGISTER_HOSTNAME="${ONEAPP_OCF_REGISTER_HOSTNAME:-'register'}"
-
+PYTHON_VERSION="3.13"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 BASE_DIR=/etc/one-appliance/service.d/
+PYTHON_VENV_DIR="${BASE_DIR}/venv"
+REPORT_TOOLS="${BASE_DIR}/tools/report"
 VARIABLES_FILE="${BASE_DIR}/variables.sh"
 DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 DOCKER_ROBOT_IMAGE_VERSION="1.0"
@@ -42,6 +44,12 @@ service_install()
 
     # install netstat
     install_netstat
+
+    # install python
+    install_python
+
+    # install document tools
+    install_document_tools
 
     # Create docker image for Robot Framework
     create_robot_docker_image
@@ -72,7 +80,7 @@ service_bootstrap()
     run_iperf_server
 
     msg info "Run Basic test"
-    ./run_robot_tests.sh --include example
+    run_basic_test
 
     msg info "BOOTSTRAP FINISHED"
     return 0
@@ -129,6 +137,28 @@ install_netstat()
     apt install -y --no-install-recommends net-tools
 }
 
+install_python()
+{
+    msg info "Install python version ${PYTHON_VERSION}"
+    add-apt-repository ppa:deadsnakes/ppa -y
+    wait_for_dpkg_lock_release
+    apt install python${PYTHON_VERSION}-full -y
+    apt install python${PYTHON_VERSION}-venv -y
+    python${PYTHON_VERSION} -m venv ${PYTHON_VENV_DIR}
+    source ${PYTHON_VENV_DIR}/bin/activate
+    pip install --upgrade pip
+    pip install -r ${REPORT_TOOLS}/requirements.txt
+}
+
+install_document_tools()
+{
+    msg info "Install document tools"
+    apt update
+    apt install -y --no-install-recommends poppler-utils pdftk
+}
+
+
+
 create_robot_docker_image()
 {
     msg info "Create docker image for Robot Framework"
@@ -141,17 +171,11 @@ setup_environment()
     sed -i "s|^export REGISTRY_BASE_URL=.*|export REGISTRY_BASE_URL=\"$REGISTRY_BASE_URL\"|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE_VERSION=.*|export DOCKER_ROBOT_IMAGE_VERSION=$DOCKER_ROBOT_IMAGE_VERSION|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=$DOCKER_ROBOT_IMAGE|" "$VARIABLES_FILE"
-
-    # # Edit docker-compose-capif to expose nginx on port 8443 and leave 443 for ingress nginx
-    # msg info "Expose OpenCAPIF services on port 8080 and 8443"
-    # yq eval ".services.nginx.ports[0] = \"8080:8080\"" -i "$DOCKER_COMPOSE_CAPIF_FILE"
-    # yq eval ".services.nginx.ports[1] = \"8443:443\"" -i "$DOCKER_COMPOSE_CAPIF_FILE"
-
 }
 
 run_basic_test()
 {
-    msg info "Run OpenCAPIF"
+    msg info "Run basic tests"
     ${BASE_DIR}/run_robot_tests.sh --include example
 }
 

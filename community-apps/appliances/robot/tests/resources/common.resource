@@ -3,6 +3,7 @@ Library         /opt/robot-tests/tests/libraries/helpers.py
 Library    Process
 Library    Collections
 Resource        /opt/robot-tests/tests/resources/common/basicRequests.robot
+Library    /opt/robot-tests/tests/libraries/report/report.py
 
 
 *** Variables ***

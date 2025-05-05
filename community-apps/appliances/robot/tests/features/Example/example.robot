@@ -20,3 +20,5 @@ Example 1
 
     Log    Message1: ${TEST_MESSAGE}
     Log    Message2: ${TEST_MESSAGE2}
+
+    Generate Cover    Tests over ONE Appliance     5/5/25    
