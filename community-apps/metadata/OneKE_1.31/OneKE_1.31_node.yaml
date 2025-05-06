@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox OneKE 1.31] node"
-version: 1.31.3-6.10.0-2-20250220-0051      # date +"%Y%m%d-%H%M" -d @EPOCH
+version: 1.31.3-6.10.0-2-20250220-0051  # date +"%Y%m%d-%H%M" -d @<creation_time>
 publisher: OpenNebula Systems
 description: |-
   OneKE 1.31 VM template for Master and Worker VMs.

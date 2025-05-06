@@ -66,14 +66,15 @@ mv "${ORIGIN}" "${DESTINATION}"
 
 
 ### Define build variables
-if [ -n "${SW_VERSION}" ]; then                             # Set build version with sw_version and build timestamp
-    BUILD_VERSION=${SW_VERSION}-$(date +"%Y%m%d-%H%M")      # e.g. v0.4.0-20240723-1016
+IMAGE_EPOCH_TIMESTAMP="$(stat -c %W "${DESTINATION}")"                          # e.g. 1746523232
+IMAGE_READABLE_TIMESTAMP=$(date +"%Y%m%d-%H%M" -d @"${IMAGE_EPOCH_TIMESTAMP}")  # e.g. 20250506-1120
+if [ -n "${SW_VERSION}" ]; then         # Set build version with sw_version and build timestamp
+    BUILD_VERSION=${SW_VERSION}-${IMAGE_READABLE_TIMESTAMP}  # e.g. v0.4.0-20250506-1120
 else
-    BUILD_VERSION=$(date +"%Y%m%d-%H%M")                    # e.g. 20240723-1016
+    BUILD_VERSION=${IMAGE_READABLE_TIMESTAMP}                # e.g. 20250506-1120
 fi
 IMAGE_NAME="${FULL_NAME} ${BUILD_VERSION}"
 IMAGE_URL="${URL_APPLIANCES}/${APP}.qcow2"
-IMAGE_TIMESTAMP="$(stat -c %W "${DESTINATION}")"
 IMAGE_SIZE="$(qemu-img info "${DESTINATION}" | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g')"
 IMAGE_CHK_MD5="$(md5sum "${DESTINATION}" | cut -d' ' -f1)"
 IMAGE_CHK_SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
@@ -84,7 +85,7 @@ IMAGE_CHK_SHA256="$(sha256sum "${DESTINATION}" | cut -d' ' -f1)"
   echo "BUILD_VERSION=\"${BUILD_VERSION}\""
   echo "IMAGE_NAME=\"${IMAGE_NAME}\""
   echo "IMAGE_URL=\"${IMAGE_URL}\""
-  echo "IMAGE_TIMESTAMP=\"${IMAGE_TIMESTAMP}\""
+  echo "IMAGE_TIMESTAMP=\"${IMAGE_EPOCH_TIMESTAMP}\""
   echo "IMAGE_SIZE=\"${IMAGE_SIZE}\""
   echo "IMAGE_CHK_MD5=\"${IMAGE_CHK_MD5}\""
   echo "IMAGE_CHK_SHA256=\"${IMAGE_CHK_SHA256}\""
@@ -96,7 +97,7 @@ test -d "${DIR_METADATA}/" || mkdir -p "${DIR_METADATA}/"
 cat "metadata/${APP}.yaml" | yq eval "
   .name = \"${FULL_NAME}\" |
   .version = \"${BUILD_VERSION}\" |
-  .creation_time = \"${IMAGE_TIMESTAMP}\" |
+  .creation_time = \"${IMAGE_EPOCH_TIMESTAMP}\" |
   .images[0].name = \"${IMAGE_NAME}\" |
   .images[0].url = \"${IMAGE_URL}\" |
   .images[0].size = \"${IMAGE_SIZE}\" |

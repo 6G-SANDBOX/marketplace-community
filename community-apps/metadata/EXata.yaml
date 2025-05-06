@@ -1,0 +1,51 @@
+---
+name: "EXata DT"
+version: "v1.0.0-20250506-1120"
+software_version: "v1.0.0"
+publisher: Keysight
+description: |-
+  Appliance with preinstalled EXata DT as a Docker image.
+short_description: EXata DT appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - EXata
+  - DT
+  - ubuntu
+format: qcow2
+creation_time: "1746523232"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+  cpu: '4'
+  vcpu: '4'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  memory_resize_mode: 'BALLOONING'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+logo: ubuntu.png
+images:
+  - name: "EXata DT v1.0.0-20250506-1120"
+    url: https://rawimages.mobilesandbox.cloud:9443/EXata_v1.0.0.qcow2
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "36700160000"
+    checksum:
+      md5: 660b00304e6bdcb70ab23ef7185eec50
+      sha256: c18d61cacecfd2aeab51bdcffdfc323411d0db2dbe36ae95a7554ff68cdd8c2d

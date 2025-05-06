@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] MinIO"
-version: "v0.5.1-20250411-1309"
+version: "v0.5.1-20250411-1309"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v0.5.1"
 publisher: "Telefonica Innovacion Digital"
 description: |-
