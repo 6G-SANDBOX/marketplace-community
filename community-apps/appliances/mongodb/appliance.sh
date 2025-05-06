@@ -72,6 +72,10 @@ service_configure()
 
   systemctl daemon-reload
 
+  create_database
+
+  create_root_user
+
   configure_mongo_express
   
   systemctl enable --now mongo-express.service
@@ -190,6 +194,18 @@ exec_ping_mongodb()
     sleep 10s
   done
   msg info "MongoDB is ready"
+}
+
+create_database()
+{
+  msg info "Create MongoDB database"
+  mongosh --eval "db.getSiblingDB('${ONEAPP_MONGODB_DATABASE}')"
+}
+
+create_root_user()
+{
+  msg info "Create MongoDB root user"
+  mongosh --eval "db = db.getSiblingDB('${ONEAPP_MONGODB_DATABASE}'); db.createUser({ user: '${ONEAPP_MONGODB_USER}', pwd: '${ONEAPP_MONGODB_PASSWORD}', roles: [ { role: 'readWrite', db: '${ONEAPP_MONGODB_DATABASE}' }, { role: 'dbAdmin', db: '${ONEAPP_MONGODB_DATABASE}' } ] });"
 }
 
 configure_mongo_express()
