@@ -1,0 +1,82 @@
+---
+name: "MongoDB"
+version: "autofill"
+software_version: "v8.0"
+publisher: "University of Malaga"
+description: |-
+  This appliance installs the latest version of MongoDB from the official repositories and configures them according to the input variables. Configuration of the InfluxDB can be made when instanciating the VM.
+
+  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+
+  The appliance configuration can be customized via parameters:
+
+  * `ONEAPP_MONGODB_VERSION` - Version of MongoDB to be installed. The default version is the latest one.
+  * `ONEAPP_MONGODB_USER` - Username used to login into the MongoDB.
+  * `ONEAPP_MONGODB_PASSWORD` - Password used to login into the MongoDB.
+  * `ONEAPP_MONGODB_DATABASE` - Database name.
+  * `ONEAPP_MONGO_EXPRESS_USER` - Username used to login into the Mongo Express.
+  * `ONEAPP_MONGO_EXPRESS_PASSWORD` - Password used to login into the Mongo Express.
+
+  **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
+short_description: MongoDB appliance for KVM
+tags:
+  - 6G-Sandbox
+  - 6G-Library
+  - UMA
+  - MongoDB
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    oneapp_mongodb_version:        "$ONEAPP_MONGODB_VERSION"
+    oneapp_mongodb_user:           "$ONEAPP_MONGODB_USER"
+    oneapp_mongodb_password:       "$ONEAPP_MONGODB_PASSWORD"
+    oneapp_mongodb_database:       "$ONEAPP_MONGODB_DATABASE"
+    oneapp_mongo_express_user:     "$ONEAPP_MONGO_EXPRESS_USER"
+    oneapp_mongo_express_password: "$ONEAPP_MONGO_EXPRESS_PASSWORD"
+  inputs_order: >-
+    ONEAPP_MONGODB_VERSION,ONEAPP_MONGODB_USER,ONEAPP_MONGODB_PASSWORD,ONEAPP_MONGODB_DATABASE,ONEAPP_MONGO_EXPRESS_USER,ONEAPP_MONGO_EXPRESS_PASSWORD
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_mongodb_version:        "M|text|ONEAPP_MONGODB_VERSION: Version of MongoDB to be installed. The default version is the latest one. | |8.0"
+    oneapp_mongodb_user:           "M|text|ONEAPP_MONGODB_USER: Username used to login into the MongoDB. | |admin"
+    oneapp_mongodb_password:       "M|password|ONEAPP_MONGODB_PASSWORD: Password used to login into the MongoDB. The password must be at least 8 characters long."
+    oneapp_mongodb_database:       "M|text|ONEAPP_MONGODB_DATABASE: Database name. | |dummydatabase"
+    oneapp_mongo_express_user:     "M|text|ONEAPP_MONGO_EXPRESS_USER: Username used to login into the Mongo Express. | |admin"
+    oneapp_mongo_express_password: "M|password|ONEAPP_MONGO_EXPRESS_PASSWORD: Password used to login into the Mongo Express. The password must be at least 8 characters long."
+logo: mongodb.png
+images:
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"
