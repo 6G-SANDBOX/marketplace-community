@@ -1,5 +1,5 @@
 ---
-name: "[Testing] Robot Framework Test Appliance"
+name: "Robot Framework Test Appliance"
 version: "autofill"
 software_version: "v1.0.0"
 publisher: Telefonica Innovación Digital

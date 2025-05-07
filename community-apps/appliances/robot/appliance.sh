@@ -45,11 +45,11 @@ service_install()
     # install netstat
     install_netstat
 
-    # install python
-    install_python
+    # # install python
+    # install_python
 
-    # install document tools
-    install_document_tools
+    # # install document tools
+    # install_document_tools
 
     # Create docker image for Robot Framework
     create_robot_docker_image
@@ -137,27 +137,25 @@ install_netstat()
     apt install -y --no-install-recommends net-tools
 }
 
-install_python()
-{
-    msg info "Install python version ${PYTHON_VERSION}"
-    add-apt-repository ppa:deadsnakes/ppa -y
-    wait_for_dpkg_lock_release
-    apt install python${PYTHON_VERSION}-full -y
-    apt install python${PYTHON_VERSION}-venv -y
-    python${PYTHON_VERSION} -m venv ${PYTHON_VENV_DIR}
-    source ${PYTHON_VENV_DIR}/bin/activate
-    pip install --upgrade pip
-    pip install -r ${REPORT_TOOLS}/requirements.txt
-}
+# install_python()
+# {
+#     msg info "Install python version ${PYTHON_VERSION}"
+#     add-apt-repository ppa:deadsnakes/ppa -y
+#     wait_for_dpkg_lock_release
+#     apt install python${PYTHON_VERSION}-full -y
+#     apt install python${PYTHON_VERSION}-venv -y
+#     python${PYTHON_VERSION} -m venv ${PYTHON_VENV_DIR}
+#     source ${PYTHON_VENV_DIR}/bin/activate
+#     pip install --upgrade pip
+#     pip install -r ${REPORT_TOOLS}/requirements.txt
+# }
 
-install_document_tools()
-{
-    msg info "Install document tools"
-    apt update
-    apt install -y --no-install-recommends poppler-utils pdftk
-}
-
-
+# install_document_tools()
+# {
+#     msg info "Install document tools"
+#     apt update
+#     apt install -y --no-install-recommends poppler-utils pdftk
+# }
 
 create_robot_docker_image()
 {
