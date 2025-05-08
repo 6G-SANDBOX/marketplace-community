@@ -11,13 +11,13 @@ ONE_SERVICE_RECONFIGURABLE=true
 ONEAPP_ELCM_GRAFANA_USER="admin"
 
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common libgtk-3-0 libwebkit2gtk-4.0-37 libjavascriptcoregtk-4.0-18"
-PYTHON_VERSION="3.10"
+PYTHON_VERSION="3.12"
 PYTHON_BIN="python${PYTHON_VERSION}"
-BACKEND_VERSION="v3.7.1"
+BACKEND_VERSION="v3.8.0"
 BACKEND_PATH="/opt/ELCM_BACKEND"
 BACKEND_HOST="127.0.0.1"
 BACKEND_PORT="5001"
-FRONTEND_VERSION="v3.0.1"
+FRONTEND_VERSION="v3.1.0"
 FRONTEND_PATH="/opt/ELCM_FRONTEND"
 FRONTEND_HOST="127.0.0.1"
 FRONTEND_PORT="5000"
@@ -38,10 +38,7 @@ service_install()
   install_pkg_deps
 
   # python
-  # install_python
-
-  # prometheus
-  install_prometheus
+  install_python
 
   # elcm backend
   install_elcm_backend
@@ -132,12 +129,6 @@ install_python()
     wait_for_dpkg_lock_release
     apt-get install ${PYTHON_BIN}-full -y
   fi
-}
-
-install_prometheus()
-{
-  msg info "Install Prometheus"
-  apt install prometheus -y
 }
 
 install_elcm_backend()
@@ -366,6 +357,13 @@ Branding:
   FavIcon: 'header.png'
   Header: 'header.png'
   Logo: 'logo.png'
+EmailApi:
+  User: "user"
+  Password: "password"
+  Port: 587
+  Server: "server"
+  TLS: True
+  SSL: False
 EOF
 }
 
