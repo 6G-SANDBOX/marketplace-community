@@ -6,6 +6,9 @@ from OpenSSL.SSL import FILETYPE_PEM
 import socket
 import copy
 import pickle
+import fcntl
+import struct
+
 
 
 def parse_url(input):
@@ -66,42 +69,6 @@ def add_dns_to_hosts(ip_address, host_name):
     dns_file = open("/etc/hosts", "a")
     dns_file.write("{}\n".format(capif_dns))
     dns_file.close()
-
-
-def create_csr(csr_file_path, private_key_path, cn):
-    # create public/private key
-    key = PKey()
-    key.generate_key(TYPE_RSA, 2048)
-
-    # Generate CSR
-    req = X509Req()
-    req.get_subject().CN = cn
-    req.get_subject().O = 'Telefonica I+D'
-    req.get_subject().OU = 'Innovation'
-    req.get_subject().L = 'Madrid'
-    req.get_subject().ST = 'Madrid'
-    req.get_subject().C = 'ES'
-    req.get_subject().emailAddress = 'inno@tid.es'
-    req.set_pubkey(key)
-    req.sign(key, 'sha256')
-
-    with open(csr_file_path, 'wb+') as f:
-        f.write(dump_certificate_request(FILETYPE_PEM, req))
-        f.close()
-        csr_request = dump_certificate_request(FILETYPE_PEM, req)
-    with open(private_key_path, 'wb+') as f:
-        f.write(dump_privatekey(FILETYPE_PEM, key))
-        f.close()
-
-    return csr_request
-
-
-def create_user_csr(username, cn=None):
-    csr_file_path = username+'.csr'
-    private_key_path = username + '.key'
-    if cn == None:
-        cn = username
-    return create_csr(csr_file_path, private_key_path, cn)
 
 
 def get_ip_from_hostname(hostname):
@@ -174,3 +141,44 @@ def filter_users_by_prefix_username(users, prefix):
         if user['username'].startswith(prefix):
             filtered_users.append(user['username'])
     return filtered_users
+
+
+def get_ip_with_mask(ip):
+    if '/' not in ip:
+        if '.' in ip:
+            return ip + '/32';
+        elif ':' in ip:
+            return ip + '/128';
+    return ip;
+
+def ping_command(ip):
+    if ':' in ip:
+        return 'ping -6';
+    return 'ping';
+
+
+def filter_keys(dictionary, keys_to_store=[]):
+    keys = list(dictionary.keys())
+    for key in keys:
+        if key in keys_to_store:
+            print('not removing key ' + key + ' in dictionary file')
+            pass
+        else:
+            print('deleting key ' + key + ' in new dictionary file')
+            dictionary.pop(key)
+    return dictionary
+
+
+def get_ip_for_interface(interface_name):
+    """
+    Return IP associated to interace pass by parameters.
+    Returns None if that interface has no IP assigned or not exists.
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        packed_iface = struct.pack('256s', interface_name[:15].encode('utf-8'))
+        ip = fcntl.ioctl(sock.fileno(), 0x8915, packed_iface)[20:24]  # SIOCGIFADDR
+        return socket.inet_ntoa(ip)
+    except OSError:
+        return None
+

@@ -46,5 +46,5 @@ mkdir -p $RESULT_FOLDER
 docker run $DOCKER_ROBOT_TTY_OPTIONS -ti --rm --network="host" \
     -v $TEST_FOLDER:/opt/robot-tests/tests \
     -v $RESULT_FOLDER:/opt/robot-tests/results ${DOCKER_ROBOT_IMAGE}:${DOCKER_ROBOT_IMAGE_VERSION} \
-    --variable TEST_MESSAGE:$TEST_MESSAGE \
-    --variable TEST_MESSAGE2:$TEST_MESSAGE2 $INPUT_OPTIONS
+    --variable TEST_MESSAGE:"$TEST_MESSAGE" \
+    --variable TEST_MESSAGE2:"$TEST_MESSAGE2" $INPUT_OPTIONS

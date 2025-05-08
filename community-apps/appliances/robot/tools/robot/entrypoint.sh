@@ -16,11 +16,13 @@ while [ -n "$1" ]; do # while loop starts
 
 
         --*)
-                OPTIONS+="$1 $2 "
-                shift
-                ;;
+            OPTIONS+=("$1" "$2")
+            shift
+            ;;
 
-        *) ARGUMENTS+="ROBOT_TESTS_DIRECTORY/$1 " ;;
+        *) 
+            ARGUMENTS+=("ROBOT_TESTS_DIRECTORY/$1")
+            ;;
         esac
         shift
 done
@@ -43,8 +45,8 @@ cat $BASE_REQ_FILE | sort | uniq > $BASE_REQ_FILE.tmp ; mv $BASE_REQ_FILE.tmp $B
 
 if [ -z "$ARGUMENTS" ]
 then
-      ARGUMENTS="ROBOT_TESTS_DIRECTORY/"
+      ARGUMENTS=("ROBOT_TESTS_DIRECTORY/")
 fi
 
 pip install -r $BASE_REQ_FILE
-robot -d ROBOT_RESULTS_DIRECTORY/$timestamp --xunit xunit.xml $OPTIONS $ARGUMENTS
+robot -d ROBOT_RESULTS_DIRECTORY/$timestamp --xunit xunit.xml "${OPTIONS[@]}" "${ARGUMENTS[@]}"
