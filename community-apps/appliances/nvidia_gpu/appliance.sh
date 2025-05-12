@@ -36,6 +36,8 @@ service_install()
 
 service_configure()
 {
+    export DEBIAN_FRONTEND=noninteractive
+
     # Install the latest NVIDIA exporters
     install_drivers
 
