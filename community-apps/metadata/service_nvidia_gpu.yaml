@@ -1,13 +1,17 @@
 ---
-name: "Ubuntua 24.04 + NVIDIA drivers"
+name: "Ubuntu 24.04 + NVIDIA drivers"
 version: "autofill"
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
-  Ubuntu 24.04 image with the Latest NVIDIA drivers and a prometheus exporter
+  An Ubuntu 24.04 image for GPU usage/compatibility.
 
   The image is based on the Ubuntu 24.04 cloud image with the OpenNebula [contextualization package](https://docs.opennebula.io/7.0/product/virtual_machines_operation/guest_operating_systems/kvm_contextualization/).
-  Furthermore, this appliance includes the latest NVIDIA Open drivers for Ubuntu-server, and an [unofficial prometheus exporter](https://github.com/utkuozdemir/nvidia_gpu_exporter).
+  
+  On first boot, this appliance detects the presence of NVIDIA GPUs presented via passthrough (e.g., KVM/QEMU) or vGPU technologies (e.g., NVIDIA GRID, SR-IOV),
+  and downloads the latest available open NVIDIA drivers for ubuntu-server.
+  Furthermore, the appliance includes an [unofficial prometheus exporter](https://github.com/utkuozdemir/nvidia_gpu_exporter), to monitor NVIDIA GPU-related metrics.
+  The exporter endpoint is exposed at http://0.0.0.0:9835
 
   There is no password for the root account. To access the Virtual Machine, add an SSH public key to your user or the template and ssh to the root account.
   
@@ -15,7 +19,8 @@ description: |-
  
   **Note**: Remember to update the template to configure the GPU passthrough/vGPU after importing it
   **Note**: Remember to update the template in order to add a network after importing it.
-short_description: Ubuntu 24.04 image for KVM with  NVIDIA drivers and a prometheus exporter
+  Deploying the appliance without a network with valid Gateway + DNS will result on failure when attempting to download the drivers for your GPU.
+short_description: Ubuntu 24.04 image for KVM with auto-detected NVIDIA drivers and a prometheus exporter
 tags:
   - TID
   - NVIDIA
