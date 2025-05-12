@@ -2,17 +2,13 @@
 
 # ----------------------------------------
 # Script to gather SUT system information
-# Generates a JSON report with various system metrics.
-# Arguments:
-#   $1 - Output JSON file
-#   $2 - iperf server address (hostname or IP)
-#   $3 - Public endpoint for reachability test
+# Generates a structured JSON report.
+# Usage:
+#   $0 <output_file.json> <iperf_server> <public_endpoint>
 # ----------------------------------------
 
-# Validate arguments
 if [ $# -ne 3 ]; then
     echo "Usage: $0 <output_file.json> <iperf_server> <public_endpoint>"
-    echo "Example: $0 sut_info.json iperf.opennebula.local http://example.com"
     exit 1
 fi
 
@@ -20,17 +16,19 @@ OUTPUT_FILE="$1"
 IPERF_SERVER="$2"
 PUBLIC_ENDPOINT="$3"
 
-# Function to get the hostname
+# Get current timestamp in ISO 8601
+get_timestamp() {
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
 get_hostname() {
     hostname
 }
 
-# Function to get interfaces and IP addresses
 get_ip_info() {
-    ip -o -4 addr show | awk '{print $2, $4}' | tr '\n' ';'
+    ip -o -4 addr show | awk '{print "{\"interface\": \"" $2 "\", \"ip\": \"" $4 "\"},"}'
 }
 
-# Function to get basic OS details
 get_os_details() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -40,69 +38,101 @@ get_os_details() {
     fi
 }
 
-# Function to get GPU information (if any)
+# Get CPU info
+get_cpu_info() {
+    MODEL=$(lscpu | grep "Model name" | awk -F: '{print $2}' | xargs)
+    CORES=$(lscpu | grep "^CPU(s):" | awk '{print $2}')
+    SOCKETS=$(lscpu | grep "Socket(s):" | awk '{print $2}')
+    THREADS_PER_CORE=$(lscpu | grep "Thread(s) per core:" | awk '{print $4}')
+    PHYSICAL_CORES=$(( SOCKETS * (CORES / THREADS_PER_CORE) ))
+
+    # Per-core usage with mpstat
+    if command -v mpstat >/dev/null 2>&1; then
+        CORE_USAGES=$(mpstat -P ALL 1 1 | awk '/^[0-9]/ && $3 ~ /^[0-9]+$/ {core=$3; usage=100 - $13; printf("{\"core\": %s, \"usage_percent\": %.2f},", core, usage)}')
+        CORE_USAGES=$(echo "$CORE_USAGES" | sed 's/,$//')  # Remove trailing comma
+        echo "{\"model\": \"${MODEL}\", \"physical_cores\": ${PHYSICAL_CORES}, \"logical_cores\": ${CORES}, \"per_core_usage\": [${CORE_USAGES}]}"
+    else
+        echo "{\"model\": \"${MODEL}\", \"physical_cores\": ${PHYSICAL_CORES}, \"logical_cores\": ${CORES}, \"per_core_usage\": []}"
+    fi
+}
+
 get_gpu_info() {
     if command -v lspci >/dev/null 2>&1; then
-        GPU_INFO=$(lspci | grep -i 'vga\|3d\|nvidia' || echo "No GPU detected")
+        DESC=$(lspci | grep -i 'vga\|3d\|nvidia' | head -n 1)
+        DESC=${DESC:-"No GPU detected"}
     else
-        GPU_INFO="lspci not available to detect GPU"
+        DESC="lspci not available"
     fi
 
     if command -v nvidia-smi >/dev/null 2>&1; then
-        VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n 1 || echo "Unknown VRAM")
-        GPU_INFO="$GPU_INFO, VRAM=${VRAM}MB"
+        VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n 1 || echo "null")
+    else
+        VRAM="null"
     fi
 
-    echo "$GPU_INFO"
+    echo "{\"description\": \"${DESC}\", \"vram_mb\": ${VRAM}}"
 }
 
-# Function to determine the default interface for iperf
+# Get RAM info
+get_ram_info() {
+    read -r _ TOTAL USED FREE <<< $(free -m | awk '/^Mem:/ {print $2, $3, $4}')
+    echo "{\"total_mb\": ${TOTAL}, \"used_mb\": ${USED}, \"free_mb\": ${FREE}}"
+}
+
 get_iperf_interface() {
-    DEF_IF=$(ip route get 8.8.8.8 | awk '{print $5; exit}' || echo "Unknown")
-    echo "$DEF_IF"
+    ip route get $IPERF_SERVER | awk '{print $5; exit}' || echo "Unknown"
 }
 
-# Function to validate DNS resolution and external reachability
 validate_dns_reachability() {
-    PING_RESULT=$(ping -c 2 8.8.8.8 >/dev/null 2>&1 && echo "OK" || echo "FAIL")
-    CURL_RESULT=$(curl -s --max-time 5 "$PUBLIC_ENDPOINT" >/dev/null && echo "OK" || echo "FAIL")
-    echo "Ping: $PING_RESULT, Curl: $CURL_RESULT"
+    PING=$(ping -c 2 8.8.8.8 >/dev/null 2>&1 && echo "OK" || echo "FAIL")
+    # CURL=$(curl -s --max-time 5 "$PUBLIC_ENDPOINT" >/dev/null && echo "OK" || echo "FAIL")
+    # echo "{\"ping_8_8_8_8\": \"$PING\", \"curl_public_endpoint\": \"$CURL\"}"
+    echo "{\"ping_8_8_8_8\": \"$PING\"}"
 }
 
-# Function to validate connectivity to the iperf server
 validate_iperf_reachability() {
-    ping -c 2 "$IPERF_SERVER" >/dev/null 2>&1 && echo "OK" || echo "FAIL"
+    ping -c 2 "$IPERF_SERVER" >/dev/null 2>&1 && echo "\"OK\"" || echo "\"FAIL\""
 }
 
-# Function to get mounted disks and filesystem information
 get_disk_info() {
-    df -h --output=source,fstype,size,used,avail,target | tail -n +2 | tr '\n' ';'
+    df -h --output=source,fstype,size,used,avail,target | tail -n +2 | \
+    awk '{print "{\"device\": \"" $1 "\", \"type\": \"" $2 "\", \"size\": \"" $3 "\", \"used\": \"" $4 "\", \"available\": \"" $5 "\", \"mountpoint\": \"" $6 "\"},"}'
 }
 
 # ---------------- DATA COLLECTION ----------------
 
+TIMESTAMP=$(get_timestamp)
 HOSTNAME=$(get_hostname)
-IP_INFO=$(get_ip_info)
+IP_INFO=$(get_ip_info | sed '$ s/,$//')  # Remove last comma
 OS_DETAILS=$(get_os_details)
 GPU_INFO=$(get_gpu_info)
+CPU_INFO=$(get_cpu_info)
+RAM_MB=$(get_ram_info)
 IPERF_IFACE=$(get_iperf_interface)
 DNS_REACHABILITY=$(validate_dns_reachability)
 IPERF_REACHABILITY=$(validate_iperf_reachability)
-DISK_INFO=$(get_disk_info)
+DISK_INFO=$(get_disk_info | sed '$ s/,$//')  # Remove last comma
 
 # ---------------- JSON CREATION ----------------
 
 cat <<EOF > "$OUTPUT_FILE"
 {
+    "timestamp": "$TIMESTAMP",
     "hostname": "$HOSTNAME",
-    "ip_addresses_and_interfaces": "$IP_INFO",
     "os_details": "$OS_DETAILS",
-    "gpu_info": "$GPU_INFO",
+    "cpu_info": $CPU_INFO,
+    "ram_info": $RAM_INFO,
+    "gpu_info": $GPU_INFO,
+    "ip_addresses_and_interfaces": [
+        $IP_INFO
+    ],
     "iperf_interface": "$IPERF_IFACE",
-    "dns_and_reachability": "$DNS_REACHABILITY",
-    "iperf_server_reachability": "$IPERF_REACHABILITY",
-    "mounted_disks": "$DISK_INFO"
+    "dns_and_reachability": $DNS_REACHABILITY,
+    "iperf_server_reachability": $IPERF_REACHABILITY,
+    "mounted_disks": [
+        $DISK_INFO
+    ]
 }
 EOF
 
-echo "Information successfully collected and saved to $OUTPUT_FILE"
+echo "Structured JSON saved to $OUTPUT_FILE"

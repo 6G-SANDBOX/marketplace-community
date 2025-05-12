@@ -71,15 +71,16 @@ Execute Remote Script
     ${rc}=    Set Variable
     ${stdout}=    Set Variable
 
-    IF    "${output_file}" != "${NONE}"
+    IF    "${local_output_file}" != "${NONE}"
         ${local_output_directory}    ${output_filename}=    Split Path    ${local_output_file}
         ${stdout}    ${rc}=    Execute Command
         ...    /tmp/${script_filename} /tmp/${output_filename} ${args}
         ...    return_stdout=True
         ...    return_rc=True
         Log    ${stdout}
-        SSHLibrary.Get File    /tmp/${output_filename}    ${local_output_file}
+        Run Keyword And Ignore Error  SSHLibrary.Get File    /tmp/${output_filename}    ${local_output_file}
         Log    ${local_output_file}
+        Execute Command    sudo ls -l /tmp/
         Execute Command    sudo rm -f /tmp/${output_filename}
     ELSE
         ${stdout}    ${rc}=    Execute Command
