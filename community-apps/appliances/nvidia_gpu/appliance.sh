@@ -20,8 +20,8 @@ service_install()
     export DEBIAN_FRONTEND=noninteractive
     systemctl stop unattended-upgrades
 
-    # Install the latest NVIDIA exporters
-    install_drivers
+    # Install the required debian packages
+    install_prerequisites
 
     # Install unofficial NVIDIA prometheus exporter
     install_exporter
@@ -36,8 +36,8 @@ service_install()
 
 service_configure()
 {
-    # Technitium DNS
-    configure_dns
+    # Install the latest NVIDIA exporters
+    install_drivers
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -56,7 +56,7 @@ service_bootstrap()
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-install_drivers()
+install_prerequisites()
 {
     msg info "Run apt-get update"
     apt-get update
@@ -65,13 +65,6 @@ install_drivers()
     wait_for_dpkg_lock_release
     if ! apt-get install -y ${DEP_PKGS} ; then
         msg error "Installation of the prerequired packages failed"
-        exit 1
-    fi
-
-    msg info "Install the latest NVIDIA drivers"
-    wait_for_dpkg_lock_release
-    if ! apt-get install -y "$(nvidia-detector)-server-open" ; then
-        msg error "Installation of the latest NVIDIA drivers failed"
         exit 1
     fi
 }
@@ -91,6 +84,19 @@ install_exporter()
         exit 1
     fi
     rm -f "${TEMP_DEB}"
+}
+
+install_drivers()
+{
+    msg info "Run apt-get update"
+    apt-get update
+
+    msg info "Install the latest NVIDIA drivers"
+    wait_for_dpkg_lock_release
+    if ! apt-get install -y "$(nvidia-detector)-server-open" ; then
+        msg error "Installation of the latest NVIDIA drivers failed"
+        exit 1
+    fi
 }
 
 

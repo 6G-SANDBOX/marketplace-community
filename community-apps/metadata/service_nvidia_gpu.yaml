@@ -35,7 +35,7 @@ opennebula_template:
     network: 'YES'
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    netcfg_type: "interfaces"
+    # netcfg_type: "interfaces"
   cpu: '2'
   vcpu: '2'
   graphics:
