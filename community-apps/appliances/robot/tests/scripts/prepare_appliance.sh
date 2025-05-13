@@ -19,18 +19,24 @@ FILENAME=$(basename "$OUTPUT_FILE")
 FILENAME_NOEXT="${FILENAME%.*}"
 
 # Obtener el path del directorio
-PATH=$(dirname "$OUTPUT_FILE")
+FILE_PATH=$(dirname "$OUTPUT_FILE")
 
 # Set non-interactive mode
 export DEBIAN_FRONTEND=noninteractive
 
 # Log files
-LOG_FILE="$PATH/$FILENAME_NOEXT.log"
-JSON_FILE="$PATH/$FILENAME"
+LOG_FILE="$FILE_PATH/$FILENAME_NOEXT.log"
+JSON_FILE="$FILE_PATH/$FILENAME"
+
+# Create log file if it doesn't exist
+if [ ! -f "$JSON_FILE" ]; then
+    echo "{}" > "$JSON_FILE"
+fi
+
 # Create log and JSON files
 echo "FILENAME: $FILENAME"
 echo "FILENAME_NOEXT: $FILENAME_NOEXT"
-echo "PATH: $PATH"
+echo "FILE_PATH: $FILE_PATH"
 echo "OUTPUT_FILE: $OUTPUT_FILE"
 echo "LOG_FILE: $LOG_FILE"
 echo "JSON_FILE: $JSON_FILE"
@@ -46,12 +52,14 @@ install_package() {
         echo "🔹 Installing $PKG_NAME..."
         if eval $INSTALL_CMD; then
             echo "✅ $PKG_NAME installed successfully."
+            jq --arg key "$PKG_NAME" --arg value "Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         else
             echo "❌ ERROR: Failed to install $PKG_NAME." | tee -a $LOG_FILE
             jq --arg key "$PKG_NAME" --arg value "Failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         fi
     else
         echo "✅ $PKG_NAME is already installed."
+        jq --arg key "$PKG_NAME" --arg value "Already Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
     fi
 }
 
