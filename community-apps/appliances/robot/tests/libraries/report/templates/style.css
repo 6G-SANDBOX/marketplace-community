@@ -4,9 +4,9 @@ body{
     font-size: 10px;
     color: #444444;
     line-height: 1;
-    max-width: 1000px;
+    max-width: 100%;
     padding: 10px;
-    zoom: 50%;
+    zoom: 100%;
 }
 h1, h2, h3, h4 {
     color: #111111;
@@ -47,17 +47,17 @@ ul, ol {
 }
 
 li {
-    padding: 0 0 0 10px;
+    padding: 0 0 0 14px;
 }
 
 p {
     font-size: 16px;
     line-height: 24px;
-    max-width: 1000px;
+    max-width: 100%;
 }
 pre {
     padding: 0px 24px;
-    max-width: 1000px;
+    max-width: 100%;
     white-space: pre-wrap;
 }
 code {
@@ -68,15 +68,15 @@ code {
 aside {
     display: block;
     float: right;
-    width: 1000px;
+    width: 100%;
 }
 blockquote {
     margin: 1em 2em;
-    max-width: 1000px;
+    max-width: 100%;
 }
 blockquote p {
     color: #666;
-    max-width: 1000px;
+    max-width: 100%;
 }
 
 hr {
@@ -118,3 +118,7 @@ table tr th :first-child, table tr td :first-child {
 table tr th :last-child, table tr td :last-child {
     margin-bottom: 0;
 }
+
+.page-break {
+    page-break-before: always;
+  }

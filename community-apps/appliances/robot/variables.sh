@@ -13,5 +13,5 @@ export DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 export DOCKER_ROBOT_IMAGE_VERSION="1.0"
 
 # Configuration needed before use installation/uninstallation scripts
-export TEST_MESSAGE="This is a test message"
-export TEST_MESSAGE2="This is a test message 2"
+export TEST_MESSAGE="This"
+export TEST_MESSAGE2="This2"

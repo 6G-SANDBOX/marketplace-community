@@ -54,7 +54,8 @@ RUN apt-get install -y --no-install-recommends  \
     nodejs \
     npm \
     gnupg2 \
-    gpg-agent
+    gpg-agent \
+    wkhtmltopdf
 
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update

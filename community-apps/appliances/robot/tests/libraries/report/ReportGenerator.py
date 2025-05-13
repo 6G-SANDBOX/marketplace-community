@@ -48,7 +48,7 @@ class ReportGenerator:
     def generate_report_page_pdf(self, template,
                                  json_filename,
                                  output_filename_pdf,
-                                 optional_arguments):
+                                 optional_arguments={}):
 
         directory = os.path.dirname(output_filename_pdf)
         filename_with_ext = os.path.basename(output_filename_pdf)
@@ -67,12 +67,12 @@ class ReportGenerator:
 
         # Generate the PDF file
         self.markdown_to_pdf(output_filename_md, output_filename_pdf,
-                             css_filename=CSS_FILENAME)
+                             css_file=CSS_FILENAME)
 
     def generate_report_page(self, template,
                              json_filename,
                              output_filename,
-                             optional_arguments):
+                             optional_arguments={}):
         # load json from file
         with open(json_filename) as json_file:
             json_data = json.load(json_file)
@@ -90,11 +90,26 @@ class ReportGenerator:
     def markdown_to_pdf(self, input_file, output_file, css_file=None):
         with open(input_file, 'r') as f:
             markdown_text = f.read()
-        html = markdown2.markdown(markdown_text)
+        extras = ["tables", "fenced-code-blocks", "strike", "task_list", "toc", "code-friendly"]
+
+        html = markdown2.markdown(markdown_text, extras=extras)
 
         if css_file:
             with open(css_file, 'r') as f:
                 css_content = f.read()
             html = f"<style>{css_content}</style>\n" + html
 
-        pdfkit.from_string(html, output_file)
+        options = {
+            "page-size": "A4",
+            "margin-top": "10mm",
+            "margin-right": "10mm",
+            "margin-bottom": "10mm",
+            "margin-left": "10mm",
+            "encoding": "UTF-8",
+            "quiet": "",
+            "print-media-type": "",
+            "zoom": "4",
+            "dpi": "300"
+        }
+
+        pdfkit.from_string(html, output_file, options=options)

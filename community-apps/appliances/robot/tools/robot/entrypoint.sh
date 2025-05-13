@@ -5,16 +5,14 @@ BASE_REQ_FILE=$BASE_DIRECTORY/requirements.txt
 COMMON_REQ_FILE=ROBOT_COMMON_DIRECTORY/requirements.txt
 TESTS_REQ_FILE=ROBOT_TESTS_DIRECTORY/requirements.txt
 
-ARGUMENTS=
-OPTIONS=
+ARGUMENTS=()
+OPTIONS=()
 
 timestamp=$(date +"%Y%m%d_%H%M%S")
 
 while [ -n "$1" ]; do # while loop starts
 
         case "$1" in
-
-
         --*)
             OPTIONS+=("$1" "$2")
             shift
@@ -26,6 +24,9 @@ while [ -n "$1" ]; do # while loop starts
         esac
         shift
 done
+
+echo "Arguments: ${ARGUMENTS[@]}"
+echo "Options: ${OPTIONS[@]}"
 
 if [[ -f "$BASE_REQ_FILE" ]]; then
     rm $BASE_REQ_FILE
@@ -43,9 +44,8 @@ fi
 
 cat $BASE_REQ_FILE | sort | uniq > $BASE_REQ_FILE.tmp ; mv $BASE_REQ_FILE.tmp $BASE_REQ_FILE
 
-if [ -z "$ARGUMENTS" ]
-then
-      ARGUMENTS=("ROBOT_TESTS_DIRECTORY/")
+if [ ${#ARGUMENTS[@]} -eq 0 ]; then
+    ARGUMENTS=("ROBOT_TESTS_DIRECTORY/")
 fi
 
 pip install -r $BASE_REQ_FILE

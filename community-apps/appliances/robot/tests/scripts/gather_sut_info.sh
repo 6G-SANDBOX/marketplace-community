@@ -48,7 +48,7 @@ get_cpu_info() {
 
     # Per-core usage with mpstat
     if command -v mpstat >/dev/null 2>&1; then
-        CORE_USAGES=$(mpstat -P ALL 1 1 | awk '/^[0-9]/ && $3 ~ /^[0-9]+$/ {core=$3; usage=100 - $13; printf("{\"core\": %s, \"usage_percent\": %.2f},", core, usage)}')
+        CORE_USAGES=$(mpstat -P ALL 1 1 | awk '/^[0-9]/ && $2 ~ /^[0-9]+$/ {core=$2; usage=100 - $12; printf("{\"core\": %s, \"usage_percent\": %.2f},", core, usage)}')
         CORE_USAGES=$(echo "$CORE_USAGES" | sed 's/,$//')  # Remove trailing comma
         echo "{\"model\": \"${MODEL}\", \"physical_cores\": ${PHYSICAL_CORES}, \"logical_cores\": ${CORES}, \"per_core_usage\": [${CORE_USAGES}]}"
     else
@@ -75,7 +75,7 @@ get_gpu_info() {
 
 # Get RAM info
 get_ram_info() {
-    read -r _ TOTAL USED FREE <<< $(free -m | awk '/^Mem:/ {print $2, $3, $4}')
+    read -r TOTAL USED FREE <<< $(free -m | awk '/^Mem:/ {print $2, $3, $4}')
     echo "{\"total_mb\": ${TOTAL}, \"used_mb\": ${USED}, \"free_mb\": ${FREE}}"
 }
 
@@ -121,7 +121,7 @@ cat <<EOF > "$OUTPUT_FILE"
     "hostname": "$HOSTNAME",
     "os_details": "$OS_DETAILS",
     "cpu_info": $CPU_INFO,
-    "ram_info": $RAM_INFO,
+    "ram_info": $RAM_MB,
     "gpu_info": $GPU_INFO,
     "ip_addresses_and_interfaces": [
         $IP_INFO
