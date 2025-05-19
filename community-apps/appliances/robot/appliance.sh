@@ -174,7 +174,7 @@ setup_environment()
 run_basic_test()
 {
     msg info "Run basic tests"
-    ${BASE_DIR}/run_robot_tests.sh --include example
+    DOCKER_ROBOT_TTY_OPTIONS="" ${BASE_DIR}/run_robot_tests.sh --include example
 }
 
 run_iperf_server()

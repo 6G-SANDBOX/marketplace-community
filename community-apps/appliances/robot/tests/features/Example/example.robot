@@ -12,10 +12,19 @@ Test Teardown       Reset Testing Environment
 *** Variables ***
 ${OUTPUT_DIR}                   /opt/robot-tests/results
 ${GATHER_SUT_INFO_SCRIPT}       /opt/robot-tests/tests/scripts/gather_sut_info.sh
-${SUT_INFO_FILE}                /opt/robot-tests/results/sut_info.json
 ${PUBLIC_ENDPOINT}              8.8.8.8
+# Prepare scripts
 ${PREPARE_APPLIANCE_SCRIPT}     /opt/robot-tests/tests/scripts/prepare_appliance.sh
 ${PREPARE_APPLIANCE_FILE}       /opt/robot-tests/results/prepare_appliance.json
+# Basic details scripts
+${GATHER_SUT_INFO_SCRIPT}       /opt/robot-tests/tests/scripts/gather_sut_info.sh
+${GATHER_SUT_INFO_FILE}         /opt/robot-tests/results/sut_info.json
+# Basic Tests scripts
+${BASIC_TEST_SCRIPT}           /opt/robot-tests/tests/scripts/basic_test.sh
+${BASIC_TEST_FILE}             /opt/robot-tests/results/basic_test.json
+# Performance Tests scripts
+${PERFORMANCE_TEST_SCRIPT}     /opt/robot-tests/tests/scripts/performance_test.sh
+${PERFORMANCE_TEST_FILE}       /opt/robot-tests/results/performance_test.json
 
 
 *** Test Cases ***
@@ -55,7 +64,7 @@ Retrieve basic details from SUT
     Execute Remote Script
     ...    ${mgmt_machine_ip}
     ...    ${GATHER_SUT_INFO_SCRIPT}
-    ...    ${SUT_INFO_FILE}
+    ...    ${GATHER_SUT_INFO_FILE}
     ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
 
 Generate General Report
@@ -63,4 +72,4 @@ Generate General Report
 
     ${mgmt_machine_ip}=    Set Variable
     Generate Cover    Tests over ONE Appliance    5/5/25
-    Generate Report Page Pdf    01-base_info.md.j2    ${SUT_INFO_FILE}    ${OUTPUT_DIR}/01-base_info.pdf
+    Generate Report Page Pdf    01-base_info.md.j2    ${GATHER_SUT_INFO_FILE}    ${OUTPUT_DIR}/01-base_info.pdf

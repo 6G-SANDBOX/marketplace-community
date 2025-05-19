@@ -7,6 +7,7 @@ import json
 import markdown2
 import pdfkit
 import os
+from pypdf import PdfMerger
 
 
 TEMPLATES_DIR = "/opt/robot-tests/tests/libraries/report/templates/"
@@ -90,7 +91,8 @@ class ReportGenerator:
     def markdown_to_pdf(self, input_file, output_file, css_file=None):
         with open(input_file, 'r') as f:
             markdown_text = f.read()
-        extras = ["tables", "fenced-code-blocks", "strike", "task_list", "toc", "code-friendly"]
+        extras = ["tables", "fenced-code-blocks",
+                  "strike", "task_list", "toc", "code-friendly"]
 
         html = markdown2.markdown(markdown_text, extras=extras)
 
@@ -113,3 +115,12 @@ class ReportGenerator:
         }
 
         pdfkit.from_string(html, output_file, options=options)
+
+    def join_pdfs(self, pdfs, output_pdf):
+        merger = PdfMerger()
+
+        for pdf in pdfs:
+            merger.append(pdf)
+
+        merger.write(output_pdf)
+        merger.close()

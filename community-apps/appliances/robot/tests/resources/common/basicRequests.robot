@@ -13,7 +13,7 @@ Library             SSHLibrary
 ${HOST}             localhost
 ${USERNAME}         root
 ${PASSWORD}         test
-${PUBLIC_KEY}       /opt/robot-tests/tests/certs/prueba_one_jms
+${PRIVATE_KEY_FILE}       /opt/robot-tests/tests/certs/id_rsa
 
 
 *** Keywords ***
@@ -36,7 +36,7 @@ Remote Ping Connected To Mgmt
     IF    ${use_user_pass_auth}
         Open Connection With User And Password    ${mgmt_machine_ip}    ${user}    ${password}
     ELSE
-        Open Connection With Public Key And Log In    ${mgmt_machine_ip}    ${USERNAME}    ${PUBLIC_KEY}
+        Open Connection With Public Key And Log In    ${mgmt_machine_ip}    ${USERNAME}    ${PRIVATE_KEY_FILE}
     END
 
     ${stdout}    ${rc}=    Execute Command
@@ -61,7 +61,7 @@ Execute Remote Script
     IF    ${use_user_pass_auth}
         Open Connection With User And Password    ${ip}    ${user}    ${password}
     ELSE
-        Open Connection With Public Key And Log In    ${ip}    ${USERNAME}    ${PUBLIC_KEY}
+        Open Connection With Public Key And Log In    ${ip}    ${USERNAME}    ${PRIVATE_KEY_FILE}
     END
 
     ${local_directory}    ${script_filename}=    Split Path    ${local_script_path}
@@ -107,7 +107,7 @@ Execute Remote Commands At Ip
     [Documentation]    Execute ping in remote machine to host indicated
     [Arguments]    ${ip}    ${sudo_active}    @{commands}
 
-    Open Connection With Public Key And Log In    ${ip}    ${USERNAME}    ${PUBLIC_KEY}
+    Open Connection With Public Key And Log In    ${ip}    ${USERNAME}    ${PRIVATE_KEY_FILE}
     ${stdout}=    Run Keyword And Continue On Failure    Execute Remote Commands    ${sudo_active}    @{commands}
     Close Connection
     RETURN    ${stdout}
@@ -136,11 +136,11 @@ Execute Remote Commands
 
 Open Connection With Public Key And Log In
     [Documentation]    Connect to host using public key to login. This login operation is needed before execute any remote command
-    [Arguments]    ${host}    ${username}    ${public_key}
+    [Arguments]    ${host}    ${username}    ${private_key_file}
 
-    Log    Connecting to host ${host} with user ${username} using public key stored in ${public_key}
+    Log    Connecting to host ${host} with user ${username} using public key stored in ${private_key_file}
     ${index}=    Open Connection    ${host}
-    ${output}=    Login With Public Key    ${username}    ${public_key}
+    ${output}=    Login With Public Key    ${username}    ${private_key_file}
     Read Until Regexp    \[?${username}@.*:?~\]?\$
     Should Match Regexp    ${output}    \[?${username}@.*:?~\]?\$
 
