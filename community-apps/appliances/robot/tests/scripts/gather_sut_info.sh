@@ -57,20 +57,30 @@ get_cpu_info() {
 }
 
 get_gpu_info() {
-    if command -v lspci >/dev/null 2>&1; then
-        DESC=$(lspci | grep -i 'vga\|3d\|nvidia' | head -n 1)
-        DESC=${DESC:-"No GPU detected"}
-    else
-        DESC="lspci not available"
-    fi
+    local gpu_list="[]"
 
     if command -v nvidia-smi >/dev/null 2>&1; then
-        VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n 1 || echo "null")
-    else
-        VRAM="null"
+        # Obtener nombres y VRAM
+        mapfile -t gpu_names < <(nvidia-smi --query-gpu=name --format=csv,noheader)
+        mapfile -t gpu_vram  < <(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits)
+
+        if [ ${#gpu_names[@]} -gt 0 ]; then
+            gpu_list="["
+            for i in "${!gpu_names[@]}"; do
+                name="${gpu_names[$i]}"
+                vram="${gpu_vram[$i]}"
+                gpu_list+="{\"description\": \"${name}\", \"vram_mb\": ${vram}},"
+            done
+            gpu_list="${gpu_list%,}]"  # Quitar la última coma y cerrar array
+        fi
     fi
 
-    echo "{\"description\": \"${DESC}\", \"vram_mb\": ${VRAM}}"
+    # Si no hay NVIDIA o nvidia-smi no está
+    if [ "$gpu_list" = "[]" ]; then
+        gpu_list="[ {\"description\": \"No accelerator present\", \"vram_mb\": null} ]"
+    fi
+
+    echo "${gpu_list}"
 }
 
 # Get RAM info

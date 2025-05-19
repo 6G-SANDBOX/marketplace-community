@@ -52,7 +52,15 @@ Network Interface to be used by IPerf tests: **{{iperf_interface}}**
 # Basic Appliance Information
 ***
 ## GPU Information
-**{{gpu_info.description}}**
+{% if gpu_info | length == 1 and gpu_info[0].description == "No accelerator present" %}
+**{{ gpu_info[0].description }}**
+{% else %}
+| GPU Name | GPU Memory (MB)|
+| ---|---|
+{%- for gpu in gpu_info %}
+| {{gpu.description}} | {{gpu.vram_mb}} |
+{%- endfor %}
+{% endif %}
 
 &nbsp;
 ## Disk Information
