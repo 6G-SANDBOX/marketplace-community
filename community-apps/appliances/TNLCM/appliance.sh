@@ -13,9 +13,9 @@ ONEAPP_TNLCM_ADMIN_USER="${ONEAPP_TNLCM_ADMIN_USER:-tnlcm}"
 DEP_PKGS="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev pkg-config wget apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common ansible-core"
 PYTHON_VERSION="3.13"
 # PYTHON_BIN="python${PYTHON_VERSION}"   # unused
-TNLCM_VERSION="v0.5.1"
+TNLCM_VERSION="v0.5.2"
 BACKEND_PATH="/opt/TNLCM_BACKEND"
-# FRONTEND_PATH="/opt/TNLCM_FRONTEND"
+FRONTEND_PATH="/opt/TNLCM_FRONTEND"
 UV_PATH="/opt/uv"
 UV_BIN="${UV_PATH}/uv"
 MONGODB_VERSION="8.0"
@@ -53,7 +53,7 @@ service_install()
     install_nodejs
 
     # tnlcm frontend
-    # install_tnlcm_frontend
+    install_tnlcm_frontend
 
     # yarn
     install_yarn
@@ -97,13 +97,14 @@ service_configure()
         msg info "tnlcm-backend.service was started..."
     fi
 
-    # systemctl enable --now tnlcm-frontend.service
-    # if [ $? -ne 0 ]; then
-    #     msg error "Error starting tnlcm-frontend.service, aborting..."
-    #     exit 1
-    # else
-    #     msg info "tnlcm-frontend.service was started..."
-    # fi
+    msg info "Start tnlcm frontend service"
+    systemctl enable --now tnlcm-frontend.service
+    if [ $? -ne 0 ]; then
+        msg error "Error starting tnlcm-frontend.service, aborting..."
+        exit 1
+    else
+        msg info "tnlcm-frontend.service was started..."
+    fi
 
     msg info "CONFIGURATION FINISHED"
     return 0
@@ -228,7 +229,7 @@ Description=TNLCM Frontend
 [Service]
 Type=simple
 WorkingDirectory=${FRONTEND_PATH}/
-ExecStart=/bin/bash -c '/usr/bin/npm run dev'
+ExecStart=/bin/bash -c '/usr/bin/npm start'
 Restart=always
 
 [Install]
@@ -296,9 +297,25 @@ update_envfiles()
 
     done
 
-    # msg info "Update enviromental variables of the TNLCM frontend"
-    # sed -i "s%^NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=.*%NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST=\"${TNLCM_HOST}\"%" ${FRONTEND_PATH}/.env
-    # msg debug "Variable NEXT_PUBLIC_LINKED_TNLCM_BACKEND_HOST overwritten with value ${TNLCM_HOST}"
+    TNLCM_BACKEND_API="http://${TNLCM_HOST}:5000/api/v1"
+    declare -A frontend_var_map=(
+        ["REACT_APP_TNLCM_BACKEND_API"]="TNLCM_BACKEND_API"
+        ["REACT_APP_SITES_BRANCH"]="ONEAPP_TNLCM_SITES_BRANCH"
+        ["REACT_APP_DEPLOYMENT_SITE"]="ONEAPP_TNLCM_DEPLOYMENT_SITE"
+        ["REACT_APP_DEPLOYMENT_SITE_TOKEN"]="ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN"
+    )
+
+    msg info "Update enviromental variables of the TNLCM frontend"
+    for env_var in "${!frontend_var_map[@]}"; do
+
+        if [ -z "${!frontend_var_map[$env_var]}" ]; then
+            msg warning "Variable ${frontend_var_map[$env_var]} is not defined or empty"
+        else
+            sed -i "s%^${env_var}=.*%${env_var}=\"${!frontend_var_map[$env_var]}\"%" ${FRONTEND_PATH}/.env
+            msg debug "Variable ${env_var} overwritten with value ${!frontend_var_map[$env_var]}"
+        fi
+
+    done
 }
 
 exec_ping_mongo() {

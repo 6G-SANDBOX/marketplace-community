@@ -30,7 +30,7 @@ source "qemu" "TNLCM" {
   format           = "qcow2"
   disk_compression = false
   #skip_resize_disk = true
-  disk_size        = "7168"        # default size increased to 7G
+  disk_size        = "15360"        # default size increased to 15G
 
   output_directory = var.output_dir
 
