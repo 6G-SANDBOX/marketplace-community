@@ -13,7 +13,7 @@ set -o errexit -o pipefail
 PYTHON_VERSION="3.13"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
 REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
-BASE_DIR=/etc/one-appliance/service.d/
+BASE_DIR=/etc/one-appliance/service.d
 PYTHON_VENV_DIR="${BASE_DIR}/venv"
 REPORT_TOOLS="${BASE_DIR}/tools/report"
 VARIABLES_FILE="${BASE_DIR}/variables.sh"
@@ -164,7 +164,7 @@ create_certificates()
     if [[ -z "${ONEAPP_ROBOT_CERT}" ]] || [[ -z "${ONEAPP_ROBOT_KEY}" ]]; then
         msg info "Autogenerating certificates..."
         ssh-keygen -t ed25519 -C "jorgemoratinos" -f ${CERTS_FOLDER}/id_rsa -b 4096 -N ""
-        public_key=$(cat ${CERTS_FOLDER}/id_rsa.pub | base64)
+        public_key=$(cat ${CERTS_FOLDER}/id_rsa.pub)
         onegate vm update --data ONEAPP_ROBOT_CERT="${public_key}"
     else
         msg info "Configuring provided certificates..."
