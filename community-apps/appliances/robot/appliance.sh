@@ -17,6 +17,7 @@ BASE_DIR=/etc/one-appliance/service.d/
 PYTHON_VENV_DIR="${BASE_DIR}/venv"
 REPORT_TOOLS="${BASE_DIR}/tools/report"
 VARIABLES_FILE="${BASE_DIR}/variables.sh"
+CERTS_FOLDER="${BASE_DIR}/tests/certs"
 DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 DOCKER_ROBOT_IMAGE_VERSION="1.0"
 IPERF3_PORT=5000
@@ -68,6 +69,9 @@ service_configure()
 
     # Setup environment variables for deployment
     setup_environment
+
+    # Create TLS certificates
+    create_certificates
 
     return 0
 }
@@ -137,26 +141,6 @@ install_netstat()
     apt install -y --no-install-recommends net-tools
 }
 
-# install_python()
-# {
-#     msg info "Install python version ${PYTHON_VERSION}"
-#     add-apt-repository ppa:deadsnakes/ppa -y
-#     wait_for_dpkg_lock_release
-#     apt install python${PYTHON_VERSION}-full -y
-#     apt install python${PYTHON_VERSION}-venv -y
-#     python${PYTHON_VERSION} -m venv ${PYTHON_VENV_DIR}
-#     source ${PYTHON_VENV_DIR}/bin/activate
-#     pip install --upgrade pip
-#     pip install -r ${REPORT_TOOLS}/requirements.txt
-# }
-
-# install_document_tools()
-# {
-#     msg info "Install document tools"
-#     apt update
-#     apt install -y --no-install-recommends poppler-utils pdftk
-# }
-
 create_robot_docker_image()
 {
     msg info "Create docker image for Robot Framework"
@@ -169,6 +153,24 @@ setup_environment()
     sed -i "s|^export REGISTRY_BASE_URL=.*|export REGISTRY_BASE_URL=\"$REGISTRY_BASE_URL\"|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE_VERSION=.*|export DOCKER_ROBOT_IMAGE_VERSION=$DOCKER_ROBOT_IMAGE_VERSION|" "$VARIABLES_FILE"
     sed -i "s|^export DOCKER_ROBOT_IMAGE=.*|export DOCKER_ROBOT_IMAGE=$DOCKER_ROBOT_IMAGE|" "$VARIABLES_FILE"
+}
+
+create_certificates()
+{
+    # id_rsa
+    msg info "Create folder for certificates: ${CERTS_FOLDER}"
+    mkdir -p ${CERTS_FOLDER}
+
+    if [[ -z "${ONEAPP_ROBOT_CERT}" ]] || [[ -z "${ONEAPP_ROBOT_KEY}" ]]; then
+        msg info "Autogenerating certificates..."
+        ssh-keygen -t ed25519 -C "jorgemoratinos" -f ${CERTS_FOLDER}/id_rsa -b 4096 -N ""
+        public_key=$(cat ${CERTS_FOLDER}/id_rsa.pub | base64)
+        onegate vm update --data ONEAPP_ROBOT_CERT="${public_key}"
+    else
+        msg info "Configuring provided certificates..."
+        echo ${ONEAPP_ROBOT_CERT} | base64 --decode >> ${CERTS_FOLDER}/id_rsa.pub
+        echo ${ONEAPP_ROBOT_KEY} | base64 --decode >> ${CERTS_FOLDER}/id_rsa
+    fi
 }
 
 run_basic_test()

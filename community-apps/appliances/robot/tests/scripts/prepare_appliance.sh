@@ -86,8 +86,8 @@ if lspci | grep -i nvidia; then
         
     # Set up TensorFlow GPU
     # install_package "Python Virtual Env" "virtualenv" "pip install virtualenv"
-    python3 -m venv tf_gpu_env
-    source tf_gpu_env/bin/activate
+    python3 -m venv /tmp/tf_gpu_env
+    source /tmp/tf_gpu_env/bin/activate
     pip install --upgrade pip
     pip install tensorflow
 fi

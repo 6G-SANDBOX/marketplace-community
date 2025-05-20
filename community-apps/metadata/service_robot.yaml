@@ -33,6 +33,9 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
+    token: 'YES'
+    oneapp_robot_cert: "$ONEAPP_ROBOT_CERT"
+    oneapp_robot_key: "$ONEAPP_ROBOT_KEY"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -46,7 +49,9 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
-
+  user_inputs:
+    oneapp_robot_cert:       "O|text|ONEAPP_ROBOT_CERT: public key generated to be loaded on SUT vms."
+    oneapp_robot_key:     "O|password|ONEAPP_ROBOT_KEY: private key to be used by Robot to connect SUT vms."
 logo: robot.png
 images:
   - name: "autofill"
