@@ -7,7 +7,7 @@ import json
 import markdown2
 import pdfkit
 import os
-from pypdf import PdfMerger
+from pypdf import PdfReader, PdfWriter
 
 
 TEMPLATES_DIR = "/opt/robot-tests/tests/libraries/report/templates/"
@@ -117,10 +117,12 @@ class ReportGenerator:
         pdfkit.from_string(html, output_file, options=options)
 
     def join_pdfs(self, pdfs, output_pdf):
-        merger = PdfMerger()
+        writer = PdfWriter()
 
-        for pdf in pdfs:
-            merger.append(pdf)
+        for pdf_path in pdfs:
+            reader = PdfReader(pdf_path)
+            for page in reader.pages:
+                writer.add_page(page)
 
-        merger.write(output_pdf)
-        merger.close()
+        with open(output_pdf, "wb") as f:
+            writer.write(f)

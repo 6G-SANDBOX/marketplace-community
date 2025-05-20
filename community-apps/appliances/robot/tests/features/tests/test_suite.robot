@@ -3,6 +3,7 @@ Resource            /opt/robot-tests/tests/resources/common.resource
 Library             /opt/robot-tests/tests/libraries/bodyRequests.py
 Library             XML
 Library             String
+Library             DateTime
 
 Suite Teardown      Reset Testing Environment
 Test Setup          Reset Testing Environment
@@ -29,28 +30,14 @@ ${BASIC_TEST_FILE}              /opt/robot-tests/results/basic_test.json
 # Performance Tests scripts
 ${PERFORMANCE_TEST_SCRIPT}      /opt/robot-tests/tests/scripts/performance_test.sh
 ${PERFORMANCE_TEST_FILE}        /opt/robot-tests/results/performance_test.json
+# PDF Report
+${PDF_COVER_FILE}               /opt/robot-tests/results/cover.pdf
 
 
 *** Test Cases ***
-# Example 1
-#    [Documentation]    Example test case 1
-#    [Tags]    example-1
-
-#    Log    Message1: ${TEST_MESSAGE}
-#    Log    Message2: ${TEST_MESSAGE2}
-
-#    Generate Cover    Tests over ONE Appliance    5/5/25
-
-# SSH to one machine
-#    [Tags]    example-2
-#    ${mgmt_machine_ip}=    Set Variable    10.11.28.52
-#    ${destination_ip}=    Set Variable    8.8.8.8
-#    Remote Ping Connected To Mgmt
-#    ...    ${mgmt_machine_ip}
-#    ...    ${destination_ip}
-
 Prepare Appliance for testing
-    [Tags]    basic-1
+    [Documentation]    Prepare the appliance for testing
+    [Tags]    step-1
 
     Execute Remote Script
     ...    ${SUT_IP}
@@ -58,7 +45,8 @@ Prepare Appliance for testing
     ...    ${PREPARE_APPLIANCE_FILE}
 
 Retrieve basic details from SUT
-    [Tags]    basic-2
+    [Documentation]    Retrieve basic details from SUT
+    [Tags]    step-2
 
     ${mgmt_machine_ip}=    Set Variable    10.11.28.52
     ${ROBOT_IPERF_SERVER}=    Get Ip For Interface    eth0
@@ -69,8 +57,13 @@ Retrieve basic details from SUT
     ...    ${GATHER_SUT_INFO_FILE}
     ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
 
-Generate General Report
-    [Tags]    basic-3
+Generate Report
+    [Documentation]    Generate General Report
+    [Tags]    step-3
 
-    Generate Cover    Tests over ONE Appliance    5/5/25
+    ${current_date}=    Get Current Date    result_format=%d/%m/%Y %H:%M:%S
+    Generate Cover    Tests over ONE Appliance    ${current_date}
     Generate Report Page Pdf    01-base_info.md.j2    ${GATHER_SUT_INFO_FILE}    ${OUTPUT_DIR}/01-base_info.pdf
+
+    ${PDFS_TO_JOIN}=    Create List    ${PDF_COVER_FILE}    ${OUTPUT_DIR}/01-base_info.pdf
+    Join Pdfs    ${PDFS_TO_JOIN}    ${OUTPUT_DIR}/report.pdf

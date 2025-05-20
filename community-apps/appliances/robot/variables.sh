@@ -7,7 +7,7 @@ export timestamp=$(date +"%Y%m%d_%H%M%S")
 export BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Robot Framework variables
-export DOCKER_ROBOT_TTY_OPTIONS=""
+export DOCKER_ROBOT_TTY_OPTIONS="-ti"
 export REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 export DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 export DOCKER_ROBOT_IMAGE_VERSION="1.0"
