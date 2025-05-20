@@ -29,7 +29,7 @@ source "qemu" "robot" {
   format           = "qcow2"
   disk_compression = false
   #skip_resize_disk = true
-  disk_size        = "15360"
+  disk_size        = "20360"
 
   output_directory = var.output_dir
 

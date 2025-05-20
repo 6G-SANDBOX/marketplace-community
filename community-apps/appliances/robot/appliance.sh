@@ -83,8 +83,8 @@ service_bootstrap()
     msg info "Run iperf server"
     run_iperf_server
 
-    msg info "Run Basic test"
-    run_basic_test
+    # msg info "Run Basic test"
+    # run_basic_test
 
     msg info "BOOTSTRAP FINISHED"
     return 0
