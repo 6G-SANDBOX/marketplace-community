@@ -45,5 +45,4 @@ mkdir -p $RESULT_FOLDER
 
 docker run $DOCKER_ROBOT_TTY_OPTIONS --rm --network="host" \
     -v $TEST_FOLDER:/opt/robot-tests/tests \
-    -v $RESULT_FOLDER:/opt/robot-tests/results ${DOCKER_ROBOT_IMAGE}:${DOCKER_ROBOT_IMAGE_VERSION} \
-    --variable PRIVATE_KEY_FILE:"$PRIVATE_KEY_FILE" $INPUT_OPTIONS
+    -v $RESULT_FOLDER:/opt/robot-tests/results ${DOCKER_ROBOT_IMAGE}:${DOCKER_ROBOT_IMAGE_VERSION} $INPUT_OPTIONS

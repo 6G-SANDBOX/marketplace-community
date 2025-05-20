@@ -11,7 +11,6 @@ export DOCKER_ROBOT_TTY_OPTIONS="-ti"
 export REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 export DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 export DOCKER_ROBOT_IMAGE_VERSION="1.0"
-export PRIVATE_KEY_FILE="${BASE_DIR}/tests/certs/id_rsa"
 
 # Configuration needed before use installation/uninstallation scripts
 export TEST_MESSAGE="This"
