@@ -1,7 +1,7 @@
 ---
 name: "ELCM"
 version: "autofill"
-software_version: "v3.8.0"
+software_version: "v3.8.1"
 publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of [ELCM](https://github.com/6G-SANDBOX/ELCM) and [ELCM_FRONTEND](https://github.com/6G-SANDBOX/portal) from the official repositories and configures them according to the input variables. Configuration of the ELCM can be made when instanciating the VM.
