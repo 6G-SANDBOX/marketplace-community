@@ -1,0 +1,4 @@
+# Requirements file for tests.
+markdown2==2.5.3
+pdfkit==1.0.0
+pypdf==5.5.0

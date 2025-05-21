@@ -9,3 +9,5 @@ community-apps/appliances/*/.*/*
 !community-apps/appliances/*/.*/*/.placeholder
 marketplace/appliances/*
 .vscode
+*.DS_Store
+__pycache__/
