@@ -9,6 +9,33 @@ JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
 
 source /tmp/tf_gpu_env/bin/activate
 
+# Ensure pip and required packages are installed
+python -m pip install --upgrade pip
+
+REQUIRED_PIP_PACKAGES=(
+    "tensorflow==2.18.0"
+    "nvidia-cuda-runtime-cu12"
+    "nvidia-cudnn-cu12"
+    "nvidia-cublas-cu12"
+)
+
+for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
+    if ! pip show $(echo "$pkg" | cut -d= -f1) &>/dev/null; then
+        echo "🔧 Installing $pkg..."
+        pip install "$pkg"
+    else
+        echo "✅ $pkg already installed."
+    fi
+done
+
+# Check if libcudnn8 (system-wide) is installed
+if ! dpkg -s libcudnn8 &>/dev/null; then
+    echo "🔧 Installing libcudnn8..."
+    sudo apt-get update && sudo apt-get install -y libcudnn8
+else
+    echo "✅ libcudnn8 already installed."
+fi
+
 # Create JSON file with initial structure
 echo "{}" > "$JSON_FILE"
 
