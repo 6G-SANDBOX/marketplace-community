@@ -12,7 +12,7 @@ Test Teardown       Reset Testing Environment
 
 *** Variables ***
 # Test variables
-${SUT_IP}                       10.95.82.211
+${SUT_IP}
 ${PUBLIC_ENDPOINT}              8.8.8.8
 
 # output folder
@@ -22,7 +22,7 @@ ${OUTPUT_DIR}                   /opt/robot-tests/results
 ${PREPARE_APPLIANCE_SCRIPT}     /opt/robot-tests/tests/scripts/prepare_appliance.sh
 ${PREPARE_APPLIANCE_FILE}       /opt/robot-tests/results/prepare_appliance.json
 # Basic details scripts
-${GATHER_SUT_INFO_SCRIPT}       /opt/robot-tests/tests/scripts/gather_sut_info.sh
+${GATHER_SUT_INFO_SCRIPT}       /opt/robot-tests/tests/scripts/sut_info.sh
 ${GATHER_SUT_INFO_FILE}         /opt/robot-tests/results/sut_info.json
 # Basic Tests scripts
 ${BASIC_TEST_SCRIPT}            /opt/robot-tests/tests/scripts/basic_test.sh
@@ -30,8 +30,6 @@ ${BASIC_TEST_FILE}              /opt/robot-tests/results/basic_test.json
 # Performance Tests scripts
 ${PERFORMANCE_TEST_SCRIPT}      /opt/robot-tests/tests/scripts/performance_test.sh
 ${PERFORMANCE_TEST_FILE}        /opt/robot-tests/results/performance_test.json
-# PDF Report
-${PDF_COVER_FILE}               /opt/robot-tests/results/cover.pdf
 
 
 *** Test Cases ***
@@ -48,7 +46,6 @@ Retrieve basic details from SUT
     [Documentation]    Retrieve basic details from SUT
     [Tags]    step-2
 
-    ${mgmt_machine_ip}=    Set Variable    10.11.28.52
     ${ROBOT_IPERF_SERVER}=    Get Ip For Interface    eth0
 
     Execute Remote Script
@@ -57,13 +54,39 @@ Retrieve basic details from SUT
     ...    ${GATHER_SUT_INFO_FILE}
     ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
 
-Generate Report
-    [Documentation]    Generate General Report
+Performance Tests
+    [Documentation]    Run performance tests
     [Tags]    step-3
 
-    ${current_date}=    Get Current Date    result_format=%d/%m/%Y %H:%M:%S
-    Generate Cover    Tests over ONE Appliance    ${current_date}
-    Generate Report Page Pdf    01-base_info.md.j2    ${GATHER_SUT_INFO_FILE}    ${OUTPUT_DIR}/01-base_info.pdf
+    Execute Remote Script
+    ...    ${SUT_IP}
+    ...    ${PERFORMANCE_TEST_SCRIPT}
+    ...    ${PERFORMANCE_TEST_FILE}
+    ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
 
-    ${PDFS_TO_JOIN}=    Create List    ${PDF_COVER_FILE}    ${OUTPUT_DIR}/01-base_info.pdf
+Generate Report
+    [Documentation]    Generate General Report
+    [Tags]    step-4
+
+    # Generate Cover
+    ${current_date}=    Get Current Date    result_format=%d/%m/%Y %H:%M:%S
+    Generate Cover    Tests over ONE Appliance    ${current_date}    ${OUTPUT_DIR}/00-cover.pdf
+
+    # Generate basic details report pages
+    Generate Report Page Pdf
+    ...    01-base_info.md.j2
+    ...    ${GATHER_SUT_INFO_FILE}
+    ...    ${OUTPUT_DIR}/01-base_info.pdf
+
+    # Generate perfomance report pages
+    Generate Report Page Pdf
+    ...    02-performance_info.md.j2
+    ...    ${PERFORMANCE_TEST_FILE}
+    ...    ${OUTPUT_DIR}/02-performance_info.pdf
+
+    # Join all PDFs into one report
+    ${PDFS_TO_JOIN}=    Create List
+    ...    ${OUTPUT_DIR}/00-cover.pdf
+    ...    ${OUTPUT_DIR}/01-base_info.pdf
+    ...    ${OUTPUT_DIR}/02-performance_info.pdf
     Join Pdfs    ${PDFS_TO_JOIN}    ${OUTPUT_DIR}/report.pdf

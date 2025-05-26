@@ -12,6 +12,3 @@ export REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 export DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 export DOCKER_ROBOT_IMAGE_VERSION="1.0"
 
-# Configuration needed before use installation/uninstallation scripts
-export TEST_MESSAGE="This"
-export TEST_MESSAGE2="This2"

@@ -9,18 +9,23 @@ import pdfkit
 import os
 from pypdf import PdfReader, PdfWriter
 
-
+# Constants for the report generation
 TEMPLATES_DIR = "/opt/robot-tests/tests/libraries/report/templates/"
 CSS_FILENAME = TEMPLATES_DIR + "style.css"
+# The cover image for the report
+COVER_IMAGE = "/opt/robot-tests/tests/libraries/report/opennebula.png"
+# The font file for Georgia
+FONT_FILENAME = "/opt/robot-tests/tests/libraries/report/fonts/georgia/georgia.ttf"
+FONT_NAME = "Georgia"
 
 
 class ReportGenerator:
-    def generate_cover(self, title, date):
+    def generate_cover(self, title, date, output_file):
         cover = canvas.Canvas(
-            "/opt/robot-tests/results/cover.pdf", pagesize=A4)
+            output_file, pagesize=A4)
         pdfmetrics.registerFont(TTFont(
-            'Georgia', '/opt/robot-tests/tests/libraries/report/fonts/georgia/georgia.ttf'))
-        cover.setFont("Georgia", 30)
+            FONT_NAME, FONT_FILENAME))
+        cover.setFont(FONT_NAME, 30)
 
         # A4 = 595x891
         PAGE_WIDTH = A4[0]
@@ -30,14 +35,14 @@ class ReportGenerator:
         cover.drawString(100, 750, "Functional and Performance Report")
 
         if title is not None:
-            cover.setFont("Georgia", 20)
+            cover.setFont(FONT_NAME, 20)
             cover.drawString(100, 700, "%s" % (title))
         if date is not None:
-            cover.setFont("Georgia", 20)
+            cover.setFont(FONT_NAME, 20)
             cover.drawString(100, 670, "Date: %s" % (date))
         cover.setFillColorRGB(0.0, 0.478, 0.745, 1)
         cover.rect(30, 20, 40, 800, 0, 1)
-        cover.drawImage("/opt/robot-tests/tests/libraries/report/opennebula.png",
+        cover.drawImage(COVER_IMAGE,
                         160, 350, 0.5*PAGE_WIDTH, preserveAspectRatio=True)
         cover.save()
 
