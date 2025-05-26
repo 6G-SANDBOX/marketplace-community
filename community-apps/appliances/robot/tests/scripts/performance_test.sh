@@ -45,7 +45,7 @@ run_benchmark() {
     COMMAND=$2
     KEY_NAME=$3
 
-    echo -e "\n🔹 Running $TEST_NAME benchmark..." | tee -a $LOG_FILE
+    echo -e "\n�� Running $TEST_NAME benchmark..." | tee -a $LOG_FILE
     RESULT=$(eval $COMMAND 2>&1 | tee -a $LOG_FILE)
 
     if [[ $? -ne 0 ]]; then
@@ -208,7 +208,29 @@ fi
 
 # Run storage benchmarks
 run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
-run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt /dev/sda" "hdparm_read_speed"
+
+# Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
+ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
+BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
+
+# Fallback if lsblk fails (e.g., on LVM/loop)
+if [ -z "$BLOCK_DEV" ]; then
+    BLOCK_DEV=$(basename "$ROOT_DEV")
+fi
+
+# Prepend /dev/ if needed
+if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
+    BLOCK_DEV="/dev/$BLOCK_DEV"
+fi
+
+# Check if the device exists
+if [ -b "$BLOCK_DEV" ]; then
+    run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
+else
+    echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
+    jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+fi
+
 # Clean up leftover files from FIO or others
 rm -f randwrite* *.fio
 
