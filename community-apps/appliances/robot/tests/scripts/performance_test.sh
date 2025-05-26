@@ -246,3 +246,120 @@ echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
+
+
+generate_json_from_log() {
+    echo "🔸 Generating final JSON output from log..."
+
+    # Host info
+    HOST_INFO=$(hostnamectl)
+    HOSTNAME=$(echo "$HOST_INFO" | grep 'Static hostname' | awk '{print $3}' || echo "unknown")
+    OS=$(echo "$HOST_INFO" | grep 'Operating System' | cut -d: -f2- | xargs || echo "unknown")
+    KERNEL=$(echo "$HOST_INFO" | grep 'Kernel' | cut -d: -f2- | xargs || echo "unknown")
+    ARCH=$(echo "$HOST_INFO" | grep 'Architecture' | cut -d: -f2- | xargs || echo "unknown")
+    VIRT=$(echo "$HOST_INFO" | grep 'Virtualization' | cut -d: -f2- | xargs || echo "unknown")
+    MODEL=$(echo "$HOST_INFO" | grep 'Hardware Model' | cut -d: -f2- | xargs || echo "unknown")
+
+    # GPU Info
+    GPU_NAME=$(grep -m1 'NVIDIA GeForce' "$LOG_FILE" | sed 's/.*NVIDIA \(GeForce.*\)\.\.\./\1/')
+    GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
+    GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
+    GPU_UTIL=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $(NF-5)}' | tr -d '%')
+    TF_GPU_TIME=$(grep "GPU Stress Test Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+    RESNET_TIME=$(grep "ResNet50 Training Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+
+    # Disk
+    IOPS=$(grep "IOPS=" "$LOG_FILE" | awk -F'IOPS=' '{print $2}' | awk -F',' '{print $1}' | head -n1)
+    FIO_BW=$(grep "BW=" "$LOG_FILE" | awk -F'BW=' '{print $2}' | awk '{print $1}' | head -n1)
+    FIO_LAT=$(grep "avg=" "$LOG_FILE" | grep "lat" | head -n1 | awk '{print $3}')
+    CACHED_READ=$(grep "Timing cached reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    BUFFERED_READ=$(grep "Timing buffered disk reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    HDPARM_DEV=$(grep '^/dev/' "$LOG_FILE" | head -n 1 | awk -F: '{print $1}')
+
+    # Memory
+    MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
+    MEM_STATUS="ok"
+    if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
+
+    # Network
+    NET_DOWN=$(grep -A1 "Iperf3 - Download" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
+    NET_UP=$(grep -A1 "Iperf3 - Upload" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
+
+    # Sanitize and set defaults
+    GPU_NAME=${GPU_NAME:-"none"}
+    GPU_MEM=$(echo "${GPU_MEM:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_TEMP=$(echo "${GPU_TEMP:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_UTIL=$(echo "${GPU_UTIL:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    TF_GPU_TIME=$(echo "${TF_GPU_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    RESNET_TIME=$(echo "${RESNET_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    IOPS=$(echo "${IOPS:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    FIO_BW=$(echo "${FIO_BW:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    FIO_LAT=$(echo "${FIO_LAT:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    CACHED_READ=$(echo "${CACHED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    BUFFERED_READ=$(echo "${BUFFERED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    HDPARM_DEV=${HDPARM_DEV:-"/dev/unknown"}
+    NET_DOWN=${NET_DOWN:-"not available"}
+    NET_UP=${NET_UP:-"not available"}
+
+    jq -n \
+        --arg hostname "$HOSTNAME" \
+        --arg os "$OS" \
+        --arg kernel "$KERNEL" \
+        --arg arch "$ARCH" \
+        --arg virt "$VIRT" \
+        --arg model "$MODEL" \
+        --arg gpu "$GPU_NAME" \
+        --argjson gpu_mem "$GPU_MEM" \
+        --argjson gpu_temp "$GPU_TEMP" \
+        --argjson gpu_util "$GPU_UTIL" \
+        --argjson tf_gpu_time "$TF_GPU_TIME" \
+        --argjson resnet_time "$RESNET_TIME" \
+        --argjson iops "$IOPS" \
+        --argjson fio_bw "$FIO_BW" \
+        --argjson fio_lat "$FIO_LAT" \
+        --argjson cached_read "$CACHED_READ" \
+        --argjson buffered_read "$BUFFERED_READ" \
+        --arg hdparm_dev "$HDPARM_DEV" \
+        --arg mem_status "$MEM_STATUS" \
+        --arg net_down "$NET_DOWN" \
+        --arg net_up "$NET_UP" \
+        '{
+            machine_info: {
+                hostname: $hostname,
+                os: $os,
+                kernel: $kernel,
+                arch: $arch,
+                virtualization: $virt,
+                hardware_model: $model
+            },
+            gpu: {
+                name: $gpu,
+                memory_total_mib: $gpu_mem,
+                temperature_c: $gpu_temp,
+                utilization_gpu_percent: $gpu_util,
+                tensorflow_gpu_stress_time_sec: $tf_gpu_time,
+                resnet50_training_time_sec: $resnet_time
+            },
+            disk: {
+                fio_randwrite: {
+                    iops: $iops,
+                    bandwidth_mib_s: $fio_bw,
+                    latency_avg_usec: $fio_lat
+                },
+                hdparm: {
+                    cached_read_mb_s: $cached_read,
+                    buffered_disk_read_mb_s: $buffered_read,
+                    device_tested: $hdparm_dev
+                }
+            },
+            memory: {
+                memtester_512mb: $mem_status
+            },
+            network: {
+                iperf3_download: $net_down,
+                iperf3_upload: $net_up
+            }
+        }' > "$JSON_FILE"
+
+    echo "✅ JSON file generated: $JSON_FILE"
+}
