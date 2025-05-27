@@ -350,6 +350,9 @@ EOF
 python3 - <<EOF
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+plt.style.use("seaborn-v0_8-whitegrid")  # Clean grid style
 
 log_file = "$GPU_MONITOR_LOG"
 plot_file = "$GPU_PLOT_FILE"
@@ -358,21 +361,30 @@ try:
     df = pd.read_csv(log_file, names=[
         "timestamp", "util_gpu", "util_mem", "mem_used", "mem_total", "temp"
     ])
-    df["timestamp"] = pd.to_datetime(df["timestamp"], errors='coerce')
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     df.dropna(subset=["timestamp"], inplace=True)
     df["mem_percent"] = df["mem_used"] / df["mem_total"] * 100
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(df["timestamp"], df["util_gpu"], label="GPU Utilization (%)", linewidth=2)
-    plt.plot(df["timestamp"], df["mem_percent"], label="Memory Usage (%)", linewidth=2)
-    plt.plot(df["timestamp"], df["temp"], label="GPU Temp (°C)", linewidth=2)
-    plt.xlabel("Time")
-    plt.ylabel("Percent / Temp")
-    plt.title("GPU Monitoring During TensorFlow Tests")
-    plt.legend()
-    plt.grid(True)
+    fig, ax = plt.subplots(figsize=(14, 6), dpi=300)
+
+    ax.plot(df["timestamp"], df["util_gpu"], label="GPU Utilization (%)", linewidth=2.5)
+    ax.plot(df["timestamp"], df["mem_percent"], label="Memory Usage (%)", linewidth=2.5)
+    ax.plot(df["timestamp"], df["temp"], label="GPU Temp (°C)", linewidth=2.5)
+
+    ax.set_xlabel("Time", fontsize=12)
+    ax.set_ylabel("Percentage / Temperature", fontsize=12)
+    ax.set_title("GPU Monitoring During TensorFlow Tests", fontsize=14)
+
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+    plt.xticks(rotation=45)
+    plt.yticks(fontsize=10)
+    plt.xticks(fontsize=10)
+
+    ax.legend(loc="upper left", fontsize=10, frameon=True, edgecolor="gray")
+    ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+
     plt.tight_layout()
-    plt.savefig(plot_file)
+    plt.savefig(plot_file, bbox_inches="tight", facecolor="white")
     print(f"✅ GPU plot saved to: {plot_file}")
 except Exception as e:
     print(f"❌ Error generating GPU plot: {e}")
