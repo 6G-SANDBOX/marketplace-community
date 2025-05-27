@@ -8,6 +8,17 @@ body{
     padding: 10px;
     zoom: 100%;
 }
+.watermark {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    opacity: 0.15;
+}
+.watermark img {
+    width: 70%;
+}
 h1, h2, h3, h4 {
     color: #111111;
     font-weight: 400;

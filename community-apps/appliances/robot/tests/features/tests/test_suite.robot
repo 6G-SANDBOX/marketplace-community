@@ -71,8 +71,9 @@ Generate Report
     # Generate Cover
     ${current_date}=    Get Current Date    result_format=%d/%m/%Y %H:%M:%S
     Generate Cover    Tests over ONE Appliance    ${current_date}    ${OUTPUT_DIR}/00-cover.pdf
+    Create Watermark   ${OUTPUT_DIR}/watermark.pdf
 
-    # Generate basic details report pages
+    # Generate Functional report pages
     Generate Report Page Pdf
     ...    01-base_info.md.j2
     ...    ${GATHER_SUT_INFO_FILE}
@@ -84,9 +85,16 @@ Generate Report
     ...    ${PERFORMANCE_TEST_FILE}
     ...    ${OUTPUT_DIR}/02-performance_info.pdf
 
-    # Join all PDFs into one report
+    # Create a list of PDFs to join
     ${PDFS_TO_JOIN}=    Create List
-    ...    ${OUTPUT_DIR}/00-cover.pdf
     ...    ${OUTPUT_DIR}/01-base_info.pdf
     ...    ${OUTPUT_DIR}/02-performance_info.pdf
-    Join Pdfs    ${PDFS_TO_JOIN}    ${OUTPUT_DIR}/report.pdf
+
+    Apply Watermark     ${PDFS_TO_JOIN}  ${OUTPUT_DIR}/watermark.pdf
+
+    # Join all PDFs
+    ${PDFS_TO_JOIN}=    Create List
+    ...    ${OUTPUT_DIR}/00-cover.pdf
+    ...    @{PDFS_TO_JOIN}
+
+    Join Pdfs    ${PDFS_TO_JOIN}    ${OUTPUT_DIR}/final_report.pdf
