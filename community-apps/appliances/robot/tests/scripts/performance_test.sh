@@ -62,10 +62,10 @@ run_benchmark() {
 
 sysbench_cpu() {
 
-    # Ejecutar sysbench y capturar salida
+    # Execute sysbench and get the output
     SB_OUT=$(sysbench --threads=$(nproc) cpu --cpu-max-prime=20000 run)
 
-    # Extraer valores clave
+    # extract relevant metrics from sysbench output
     CPU_SPEED=$(echo "$SB_OUT" | awk '/events per second:/ {print $NF}')
     TOTAL_TIME=$(echo "$SB_OUT" | awk '/total time:/ {print $NF}' | sed 's/s//')
     TOTAL_EVENTS=$(echo "$SB_OUT" | awk '/total number of events:/ {print $NF}')
@@ -137,16 +137,24 @@ generate_json_from_log() {
     RESNET_TIME=$(grep "ResNet50 Training Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
     TF_GPU_MATRIX=$(grep "Running GPU stress test with" "$LOG_FILE" | sed -n 's/.*on \([0-9]\+x[0-9]\+\) matrices.*/\1/p')
     TF_GPU_ITER=$(echo "${TF_GPU_ITER:-0}" | grep -Eo '^[0-9]+$' || echo "0")
-    RESNET_LOSS=($(grep "loss:" "$LOG_FILE" | awk '{print $NF}' | grep -E '^[0-9.+-eE]+$'))
 
-    LOSS_JSON="[]"
-    if [ "${#RESNET_LOSS[@]}" -gt 0 ]; then
-        LOSS_JSON=$(printf '%s\\n' "${RESNET_LOSS[@]}" | jq -R 'select(test("^[0-9.eE+-]+$")) | tonumber' | jq -s .)
-        if ! echo "$LOSS_JSON" | jq empty 2>/dev/null; then
-            echo "⚠️ Warning: Invalid loss JSON detected, falling back to empty array."
-            LOSS_JSON="[]"
+    # Extract loss values from training log
+    RESNET_LOSS=()
+    while IFS= read -r line; do
+        LOSS_VAL=$(echo "$line" | grep -oE 'loss:[[:space:]]*[0-9.]+' | awk -F ':' '{print $2}' | xargs)
+        if [[ "$LOSS_VAL" =~ ^[0-9.]+$ ]]; then
+            RESNET_LOSS+=("$LOSS_VAL")
         fi
-    fi
+    done < <(grep -E 'loss:[[:space:]]*[0-9.]+' "$LOG_FILE")
+
+
+    # Write to a JSON array file for use in jq
+    LOSS_FILE="/tmp/loss_array.json"
+    if [ "${#RESNET_LOSS[@]}" -gt 0 ]; then
+        printf '%s\n' "${RESNET_LOSS[@]}" | jq -R 'select(test("^[0-9.eE+-]+$")) | tonumber' | jq -s . > "$LOSS_FILE"
+    else
+        echo "[]" > "$LOSS_FILE"
+fi
 
 
     # Disk
@@ -182,7 +190,7 @@ generate_json_from_log() {
     NET_DOWN=${NET_DOWN:-"not available"}
     NET_UP=${NET_UP:-"not available"}
 
-    jq -n \
+    jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
         --arg os "$OS" \
         --arg kernel "$KERNEL" \
@@ -228,7 +236,7 @@ generate_json_from_log() {
                 },
                 resnet50_training: {
                   total_time_sec: $resnet_time,
-                  loss_per_epoch: $loss_list
+                  "loss_per_epoch": $loss_list[0]
                 }
             },
             disk: {
@@ -262,15 +270,12 @@ echo "Machine Info: $(hostnamectl)" | tee -a $LOG_FILE
 echo "==========================================" | tee -a $LOG_FILE
 
 # Run CPU benchmarks
-# run_benchmark "CPU Sysbench" "sysbench --threads=$(nproc) cpu --cpu-max-prime=20000 run" "cpu_sysbench"
 sysbench_cpu
 run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
-# stress-ng --cpu 4 --cpu-method all --timeout 60 --metrics-brief -> bogos
 
 # Run GPU benchmarks if GPU is detected
 if lspci | grep -i nvidia; then
     run_benchmark "GPU NVIDIA-SMI" "nvidia-smi" "gpu_nvidia_smi"
-    # run_benchmark "GPU LuxMark" "luxmark"
 
     # TensorFlow GPU Stress Test - Matrix Multiplication
     echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
@@ -320,7 +325,7 @@ with tf.device('/GPU:0'):
     y_train = tf.random.uniform([32, 1000], maxval=1)
 
     start_time = time.time()
-    model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=1)
+    model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=2)
     elapsed_time = time.time() - start_time
 
 print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
