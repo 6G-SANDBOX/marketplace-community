@@ -115,138 +115,6 @@ sysbench_cpu() {
         }')
     jq --arg key "cpu_sysbench" --arg value "$sysbench_json" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
 }
-# # Generar JSON
-# cat <<EOF
-# {
-#   "cpu_speed_events_per_sec": ${CPU_SPEED},
-#   "total_time_sec": ${TOTAL_TIME},
-#   "total_events": ${TOTAL_EVENTS},
-#   "latency_ms": {
-#     "min": ${LAT_MIN},
-#     "avg": ${LAT_AVG},
-#     "max": ${LAT_MAX},
-#     "percentile_95": ${LAT_95},
-#     "sum": ${LAT_SUM}
-#   },
-#   "threads_fairness": {
-#     "events_avg": ${EVENTS_AVG},
-#     "events_stddev": ${EVENTS_STD},
-#     "exec_time_avg": ${EXEC_AVG},
-#     "exec_time_stddev": ${EXEC_STD}
-#   }
-# }
-# EOF
-
-# Start logging results
-echo "========== Benchmarking Results ==========" > $LOG_FILE
-echo "Date: $(date)" | tee -a $LOG_FILE
-echo "Machine Info: $(hostnamectl)" | tee -a $LOG_FILE
-echo "==========================================" | tee -a $LOG_FILE
-
-# Run CPU benchmarks
-# run_benchmark "CPU Sysbench" "sysbench --threads=$(nproc) cpu --cpu-max-prime=20000 run" "cpu_sysbench"
-sysbench_cpu
-run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
-# stress-ng --cpu 4 --cpu-method all --timeout 60 --metrics-brief -> bogos
-
-# Run GPU benchmarks if GPU is detected
-if lspci | grep -i nvidia; then
-    run_benchmark "GPU NVIDIA-SMI" "nvidia-smi" "gpu_nvidia_smi"
-    # run_benchmark "GPU LuxMark" "luxmark"
-
-    # TensorFlow GPU Stress Test - Matrix Multiplication
-    echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
-    python3 - <<EOF | tee -a $LOG_FILE
-import tensorflow as tf
-import time
-
-gpus = tf.config.list_physical_devices('GPU')
-if not gpus:
-    print("No GPU detected!")
-    exit()
-
-def stress_gpu(iterations=1000, size=4096):
-    print(f"Running GPU stress test with {iterations} iterations on {size}x{size} matrices...")
-    with tf.device('/GPU:0'):
-        A = tf.random.normal([size, size])
-        B = tf.random.normal([size, size])
-        
-        start_time = time.time()
-        for _ in range(iterations):
-            _ = tf.matmul(A, B)
-        elapsed_time = time.time() - start_time
-
-    print(f"GPU Stress Test Completed in {elapsed_time:.2f} seconds.")
-
-stress_gpu()
-EOF
-    echo "✅ TensorFlow GPU stress test completed." | tee -a $LOG_FILE
-
-    # TensorFlow Deep Learning Test - ResNet50
-    echo "🔹 Running TensorFlow ResNet50 Training Benchmark..." | tee -a $LOG_FILE
-    python3 - <<EOF | tee -a $LOG_FILE
-import tensorflow as tf
-from tensorflow.keras.applications import ResNet50
-import time
-
-with tf.device('/GPU:0'):
-    model = ResNet50(weights=None, input_shape=(224, 224, 3), classes=1000)
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
-
-    x_train = tf.random.normal([32, 224, 224, 3])
-    y_train = tf.random.uniform([32, 1000], maxval=1)
-
-    start_time = time.time()
-    model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=1)
-    elapsed_time = time.time() - start_time
-
-print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
-EOF
-    echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
-fi
-
-
-# Run storage benchmarks
-run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
-
-# Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
-ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
-BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
-
-# Fallback if lsblk fails (e.g., on LVM/loop)
-if [ -z "$BLOCK_DEV" ]; then
-    BLOCK_DEV=$(basename "$ROOT_DEV")
-fi
-
-# Prepend /dev/ if needed
-if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
-    BLOCK_DEV="/dev/$BLOCK_DEV"
-fi
-
-# Check if the device exists
-if [ -b "$BLOCK_DEV" ]; then
-    run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
-else
-    echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
-    jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
-fi
-
-# Clean up leftover files from FIO or others
-rm -f randwrite* *.fio
-
-# Run RAM benchmark
-run_benchmark "Memory Test (Memtester)" "memtester 512M 1" "memtester"
-
-# Run network benchmarks
-run_benchmark "Network Performance (Iperf3 - Download)" "iperf3 -c iperf.he.net -t 10" "iperf3_download"
-run_benchmark "Network Performance (Iperf3 - Upload)" "iperf3 -c iperf.he.net -t 10 -R" "iperf3_upload"
-
-# Completion message
-echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
-
-# Completion message
-echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
-
 
 generate_json_from_log() {
     echo "🔸 Generating final JSON output from log..."
@@ -261,7 +129,7 @@ generate_json_from_log() {
     MODEL=$(echo "$HOST_INFO" | grep 'Hardware Model' | cut -d: -f2- | xargs || echo "unknown")
 
     # GPU Info
-    GPU_NAME=$(grep -m1 'NVIDIA GeForce' "$LOG_FILE" | sed 's/.*NVIDIA \(GeForce.*\)\.\.\./\1/')
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 || echo "unknown")
     GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
     GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
     GPU_UTIL=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $(NF-5)}' | tr -d '%')
@@ -363,3 +231,121 @@ generate_json_from_log() {
 
     echo "✅ JSON file generated: $JSON_FILE"
 }
+
+# Start logging results
+echo "========== Benchmarking Results ==========" > $LOG_FILE
+echo "Date: $(date)" | tee -a $LOG_FILE
+echo "Machine Info: $(hostnamectl)" | tee -a $LOG_FILE
+echo "==========================================" | tee -a $LOG_FILE
+
+# Run CPU benchmarks
+# run_benchmark "CPU Sysbench" "sysbench --threads=$(nproc) cpu --cpu-max-prime=20000 run" "cpu_sysbench"
+sysbench_cpu
+run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
+# stress-ng --cpu 4 --cpu-method all --timeout 60 --metrics-brief -> bogos
+
+# Run GPU benchmarks if GPU is detected
+if lspci | grep -i nvidia; then
+    run_benchmark "GPU NVIDIA-SMI" "nvidia-smi" "gpu_nvidia_smi"
+    # run_benchmark "GPU LuxMark" "luxmark"
+
+    # TensorFlow GPU Stress Test - Matrix Multiplication
+    echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
+    TF_LOG="/tmp/tf_output.log"
+    python3 - <<EOF > "$TF_LOG"
+import tensorflow as tf
+import time
+
+gpus = tf.config.list_physical_devices('GPU')
+if not gpus:
+    print("No GPU detected!")
+    exit()
+
+def stress_gpu(iterations=1000, size=4096):
+    print(f"Running GPU stress test with {iterations} iterations on {size}x{size} matrices...")
+    with tf.device('/GPU:0'):
+        A = tf.random.normal([size, size])
+        B = tf.random.normal([size, size])
+        
+        start_time = time.time()
+        for _ in range(iterations):
+            _ = tf.matmul(A, B)
+        elapsed_time = time.time() - start_time
+
+    print(f"GPU Stress Test Completed in {elapsed_time:.2f} seconds.")
+
+stress_gpu()
+EOF
+    echo "✅ TensorFlow GPU stress test completed." | tee -a $LOG_FILE
+    # Append TensorFlow logs to the main log
+    cat "$TF_LOG" >> "$LOG_FILE"
+
+    # TensorFlow Deep Learning Test - ResNet50
+    echo "🔹 Running TensorFlow ResNet50 Training Benchmark..." | tee -a $LOG_FILE
+    # Run ResNet50 test similarly, log to file, append to main log
+    RESNET_LOG="/tmp/resnet_output.log"
+    python3 - <<EOF > "$RESNET_LOG"
+import tensorflow as tf
+from tensorflow.keras.applications import ResNet50
+import time
+
+with tf.device('/GPU:0'):
+    model = ResNet50(weights=None, input_shape=(224, 224, 3), classes=1000)
+    model.compile(optimizer='adam', loss='categorical_crossentropy')
+
+    x_train = tf.random.normal([32, 224, 224, 3])
+    y_train = tf.random.uniform([32, 1000], maxval=1)
+
+    start_time = time.time()
+    model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=1)
+    elapsed_time = time.time() - start_time
+
+print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
+EOF
+    echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
+    cat "$RESNET_LOG" >> "$LOG_FILE"
+fi
+
+
+# Run storage benchmarks
+run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
+
+# Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
+ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
+BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
+
+# Fallback if lsblk fails (e.g., on LVM/loop)
+if [ -z "$BLOCK_DEV" ]; then
+    BLOCK_DEV=$(basename "$ROOT_DEV")
+fi
+
+# Prepend /dev/ if needed
+if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
+    BLOCK_DEV="/dev/$BLOCK_DEV"
+fi
+
+# Check if the device exists
+if [ -b "$BLOCK_DEV" ]; then
+    run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
+else
+    echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
+    jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+fi
+
+# Clean up leftover files from FIO or others
+rm -f randwrite* *.fio
+
+# Run RAM benchmark
+run_benchmark "Memory Test (Memtester)" "memtester 512M 1" "memtester"
+
+# Run network benchmarks
+run_benchmark "Network Performance (Iperf3 - Download)" "iperf3 -c iperf.he.net -t 10" "iperf3_download"
+run_benchmark "Network Performance (Iperf3 - Upload)" "iperf3 -c iperf.he.net -t 10 -R" "iperf3_upload"
+
+# Completion message
+echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
+
+# Completion message
+echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
+
+generate_json_from_log
