@@ -84,7 +84,7 @@ sysbench_cpu() {
 
     EVENTS_AVG=$(echo "$SB_OUT" | grep "events (avg/stddev):" | sed -E 's/.*: *([0-9.]+)\/[0-9.]+/\1/')
     EVENTS_STD=$(echo "$SB_OUT" | grep "events (avg/stddev):" | sed -E 's/.*: *[0-9.]+\/([0-9.]+)/\1/')
-    
+
     EXEC_AVG=$(echo "$SB_OUT" | grep "execution time (avg/stddev):" | sed -E 's/.*: *([0-9.]+)\/[0-9.]+/\1/')
     EXEC_STD=$(echo "$SB_OUT" | grep "execution time (avg/stddev):" | sed -E 's/.*: *[0-9.]+\/([0-9.]+)/\1/')
 
@@ -206,6 +206,24 @@ fi
     CACHE_SIZE=$(lscpu | grep "L3 cache" | awk -F: '{print $2}' | tr -d '[:space:]' | sed 's/K//')
     SYSBENCH_JSON=$(cat /tmp/sysbench_metrics.json)
 
+    # Parse stress-ng output from log
+    STRESS_LOG=$(awk '/Running CPU Stress Test benchmark/,/Completed CPU Stress Test benchmark/' "$LOG_FILE")
+
+    STRESS_WORKERS=$(echo "$STRESS_LOG" | grep "dispatching hogs" | grep -oE '[0-9]+(?= cpu)')
+    STRESS_SKIPPED=$(echo "$STRESS_LOG" | grep "skipped:" | awk '{print $NF}')
+    STRESS_PASSED=$(echo "$STRESS_LOG" | grep "passed:" | grep -oE 'passed: [0-9]+' | awk '{print $2}')
+    STRESS_FAILED=$(echo "$STRESS_LOG" | grep "failed:" | awk '{print $NF}')
+    STRESS_UNTRUST=$(echo "$STRESS_LOG" | grep "metrics untrustworthy:" | awk '{print $NF}')
+    STRESS_DURATION=$(echo "$STRESS_LOG" | grep "successful run completed" | grep -oE '[0-9]+\.[0-9]+' | tail -1)
+
+    # Set defaults if missing
+    STRESS_WORKERS=${STRESS_WORKERS:-0}
+    STRESS_SKIPPED=${STRESS_SKIPPED:-0}
+    STRESS_PASSED=${STRESS_PASSED:-0}
+    STRESS_FAILED=${STRESS_FAILED:-0}
+    STRESS_UNTRUST=${STRESS_UNTRUST:-0}
+    STRESS_DURATION=${STRESS_DURATION:-0}
+
     jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
         --arg os "$OS" \
@@ -238,6 +256,12 @@ fi
         --arg cpu_freq_mhz "$CPU_FREQ" \
         --arg cache_size_kb "$CACHE_SIZE" \
         --argjson cpu "$SYSBENCH_JSON" \
+        --argjson stress_workers "$STRESS_WORKERS" \
+        --argjson stress_skipped "$STRESS_SKIPPED" \
+        --argjson stress_passed "$STRESS_PASSED" \
+        --argjson stress_failed "$STRESS_FAILED" \
+        --argjson stress_untrust "$STRESS_UNTRUST" \
+        --argjson stress_duration "$STRESS_DURATION" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -253,6 +277,14 @@ fi
                   "threads": $threads,
                   "cpu_freq_mhz": $cpu_freq_mhz,
                   "l3_cache_kb": $cache_size_kb,
+                  "stress_ng": {
+                    "cpu_workers": $stress_workers,
+                    "skipped": $stress_skipped,
+                    "passed": $stress_passed,
+                    "failed": $stress_failed,
+                    "metrics_untrustworthy": $stress_untrust,
+                    "duration_sec": $stress_duration
+                  },
                   "sysbench_metrics": $cpu
                 }
             },
