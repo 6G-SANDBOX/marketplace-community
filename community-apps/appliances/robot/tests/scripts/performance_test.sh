@@ -133,8 +133,21 @@ generate_json_from_log() {
     GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
     GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
     GPU_UTIL=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $(NF-5)}' | tr -d '%')
-    TF_GPU_TIME=$(grep "GPU Stress Test Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+    TF_GPU_ITER=$(grep "Running GPU stress test with" "$LOG_FILE" | awk '{for(i=1;i<=NF;i++) if ($i=="with") print $(i+1)}' | head -n1)
     RESNET_TIME=$(grep "ResNet50 Training Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+    TF_GPU_MATRIX=$(grep "Running GPU stress test with" "$LOG_FILE" | sed -n 's/.*on \([0-9]\+x[0-9]\+\) matrices.*/\1/p')
+    TF_GPU_ITER=$(echo "${TF_GPU_ITER:-0}" | grep -Eo '^[0-9]+$' || echo "0")
+    RESNET_LOSS=($(grep "loss:" "$LOG_FILE" | awk '{print $NF}' | grep -E '^[0-9.+-eE]+$'))
+
+    LOSS_JSON="[]"
+    if [ "${#RESNET_LOSS[@]}" -gt 0 ]; then
+        LOSS_JSON=$(printf '%s\\n' "${RESNET_LOSS[@]}" | jq -R 'select(test("^[0-9.eE+-]+$")) | tonumber' | jq -s .)
+        if ! echo "$LOSS_JSON" | jq empty 2>/dev/null; then
+            echo "⚠️ Warning: Invalid loss JSON detected, falling back to empty array."
+            LOSS_JSON="[]"
+        fi
+    fi
+
 
     # Disk
     IOPS=$(grep "IOPS=" "$LOG_FILE" | awk -F'IOPS=' '{print $2}' | awk -F',' '{print $1}' | head -n1)
@@ -158,7 +171,7 @@ generate_json_from_log() {
     GPU_MEM=$(echo "${GPU_MEM:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     GPU_TEMP=$(echo "${GPU_TEMP:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     GPU_UTIL=$(echo "${GPU_UTIL:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
-    TF_GPU_TIME=$(echo "${TF_GPU_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    TF_GPU_TIME=$(grep "GPU Stress Test Completed" "$LOG_FILE" | grep -Eo '[0-9]+\.[0-9]+' | tail -1)
     RESNET_TIME=$(echo "${RESNET_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     IOPS=$(echo "${IOPS:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     FIO_BW=$(echo "${FIO_BW:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
@@ -182,11 +195,14 @@ generate_json_from_log() {
         --argjson gpu_util "$GPU_UTIL" \
         --argjson tf_gpu_time "$TF_GPU_TIME" \
         --argjson resnet_time "$RESNET_TIME" \
+        --argjson tf_gpu_iterations "$TF_GPU_ITER" \
+        --argjson loss_list "$LOSS_JSON" \
         --argjson iops "$IOPS" \
         --argjson fio_bw "$FIO_BW" \
         --argjson fio_lat "$FIO_LAT" \
         --argjson cached_read "$CACHED_READ" \
         --argjson buffered_read "$BUFFERED_READ" \
+        --arg tf_gpu_matrix "$TF_GPU_MATRIX" \
         --arg hdparm_dev "$HDPARM_DEV" \
         --arg mem_status "$MEM_STATUS" \
         --arg net_down "$NET_DOWN" \
@@ -205,8 +221,15 @@ generate_json_from_log() {
                 memory_total_mib: $gpu_mem,
                 temperature_c: $gpu_temp,
                 utilization_gpu_percent: $gpu_util,
-                tensorflow_gpu_stress_time_sec: $tf_gpu_time,
-                resnet50_training_time_sec: $resnet_time
+                tensorflow_gpu_stress: {
+                  time_sec: $tf_gpu_time,
+                  iterations: $tf_gpu_iterations,
+                  matrix_size: $tf_gpu_matrix
+                },
+                resnet50_training: {
+                  total_time_sec: $resnet_time,
+                  loss_per_epoch: $loss_list
+                }
             },
             disk: {
                 fio_randwrite: {
