@@ -196,6 +196,15 @@ fi
     NET_DOWN=${NET_DOWN:-"not available"}
     NET_UP=${NET_UP:-"not available"}
 
+    # Collect CPU information
+    CPU_MODEL=$(lscpu | grep -i 'Model name' | awk -F: '{print $2}' | xargs)
+    CPU_CORES=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
+    SOCKETS=$(lscpu | grep "^Socket(s):" | awk '{print $2}')
+    THREADS=$(nproc)
+    CPU_FREQ=$(lscpu | grep "MHz" | grep -i 'cpu MHz' | awk '{print $3}')
+    CACHE_SIZE=$(lscpu | grep "^L3 cache" | awk '{print $3}')
+
+
     jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
         --arg os "$OS" \
@@ -221,6 +230,12 @@ fi
         --arg mem_status "$MEM_STATUS" \
         --arg net_down "$NET_DOWN" \
         --arg net_up "$NET_UP" \
+        --arg cpu_model "$CPU_MODEL" \
+        --argjson cpu_cores "$CPU_CORES" \
+        --argjson sockets "$SOCKETS" \
+        --argjson threads "$THREADS" \
+        --arg cpu_freq_mhz "$CPU_FREQ" \
+        --arg cache_size_kb "$CACHE_SIZE" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -228,7 +243,15 @@ fi
                 kernel: $kernel,
                 arch: $arch,
                 virtualization: $virt,
-                hardware_model: $model
+                hardware_model: $model,
+                "cpu_info": {
+                  "model": $cpu_model,
+                  "cores_per_socket": $cpu_cores,
+                  "sockets": $sockets,
+                  "threads": $threads,
+                  "cpu_freq_mhz": $cpu_freq_mhz,
+                  "l3_cache_kb": $cache_size_kb
+                }
             },
             gpu: {
                 name: $gpu,
@@ -389,6 +412,8 @@ try:
 except Exception as e:
     print(f"❌ Error generating GPU plot: {e}")
 EOF
+
+
 
 fi
 
