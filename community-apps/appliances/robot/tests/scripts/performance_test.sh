@@ -7,6 +7,10 @@ export DEBIAN_FRONTEND=noninteractive
 LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
 JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
 
+# plot files
+GPU_MONITOR_LOG="/tmp/gpu_monitor.csv"
+GPU_PLOT_FILE="gpu_usage_plot.png"
+
 source /tmp/tf_gpu_env/bin/activate
 
 # Ensure pip and required packages are installed
@@ -17,6 +21,8 @@ REQUIRED_PIP_PACKAGES=(
     "nvidia-cuda-runtime-cu12"
     "nvidia-cudnn-cu12"
     "nvidia-cublas-cu12"
+    "matplotlib"
+    "pandas"
 )
 
 for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
@@ -277,6 +283,11 @@ run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --tim
 if lspci | grep -i nvidia; then
     run_benchmark "GPU NVIDIA-SMI" "nvidia-smi" "gpu_nvidia_smi"
 
+    # start monitoring
+    nvidia-smi --query-gpu=timestamp,utilization.gpu,utilization.memory,memory.used,memory.total,temperature.gpu \
+    --format=csv,noheader,nounits -l 1 > "$GPU_MONITOR_LOG" &
+    GPU_MONITOR_PID=$!
+
     # TensorFlow GPU Stress Test - Matrix Multiplication
     echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
     TF_LOG="/tmp/tf_output.log"
@@ -332,6 +343,41 @@ print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
 EOF
     echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
     cat "$RESNET_LOG" >> "$LOG_FILE"
+
+    # Stop monitoring
+    kill $GPU_MONITOR_PID
+
+python3 - <<EOF
+import pandas as pd
+import matplotlib.pyplot as plt
+
+log_file = "$GPU_MONITOR_LOG"
+plot_file = "$GPU_PLOT_FILE"
+
+try:
+    df = pd.read_csv(log_file, names=[
+        "timestamp", "util_gpu", "util_mem", "mem_used", "mem_total", "temp"
+    ])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors='coerce')
+    df.dropna(subset=["timestamp"], inplace=True)
+    df["mem_percent"] = df["mem_used"] / df["mem_total"] * 100
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(df["timestamp"], df["util_gpu"], label="GPU Utilization (%)", linewidth=2)
+    plt.plot(df["timestamp"], df["mem_percent"], label="Memory Usage (%)", linewidth=2)
+    plt.plot(df["timestamp"], df["temp"], label="GPU Temp (°C)", linewidth=2)
+    plt.xlabel("Time")
+    plt.ylabel("Percent / Temp")
+    plt.title("GPU Monitoring During TensorFlow Tests")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(plot_file)
+    print(f"✅ GPU plot saved to: {plot_file}")
+except Exception as e:
+    print(f"❌ Error generating GPU plot: {e}")
+EOF
+
 fi
 
 
