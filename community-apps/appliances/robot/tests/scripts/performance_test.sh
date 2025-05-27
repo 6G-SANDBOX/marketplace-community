@@ -9,6 +9,33 @@ JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
 
 source /tmp/tf_gpu_env/bin/activate
 
+# Ensure pip and required packages are installed
+python -m pip install --upgrade pip
+
+REQUIRED_PIP_PACKAGES=(
+    "tensorflow==2.18.0"
+    "nvidia-cuda-runtime-cu12"
+    "nvidia-cudnn-cu12"
+    "nvidia-cublas-cu12"
+)
+
+for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
+    if ! pip show $(echo "$pkg" | cut -d= -f1) &>/dev/null; then
+        echo "🔧 Installing $pkg..."
+        pip install "$pkg"
+    else
+        echo "✅ $pkg already installed."
+    fi
+done
+
+# Check if libcudnn8 (system-wide) is installed
+if ! dpkg -s libcudnn8 &>/dev/null; then
+    echo "🔧 Installing libcudnn8..."
+    sudo apt-get update && sudo apt-get install -y libcudnn8
+else
+    echo "✅ libcudnn8 already installed."
+fi
+
 # Create JSON file with initial structure
 echo "{}" > "$JSON_FILE"
 
@@ -18,7 +45,7 @@ run_benchmark() {
     COMMAND=$2
     KEY_NAME=$3
 
-    echo -e "\n🔹 Running $TEST_NAME benchmark..." | tee -a $LOG_FILE
+    echo -e "\n�� Running $TEST_NAME benchmark..." | tee -a $LOG_FILE
     RESULT=$(eval $COMMAND 2>&1 | tee -a $LOG_FILE)
 
     if [[ $? -ne 0 ]]; then
@@ -88,27 +115,122 @@ sysbench_cpu() {
         }')
     jq --arg key "cpu_sysbench" --arg value "$sysbench_json" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
 }
-# # Generar JSON
-# cat <<EOF
-# {
-#   "cpu_speed_events_per_sec": ${CPU_SPEED},
-#   "total_time_sec": ${TOTAL_TIME},
-#   "total_events": ${TOTAL_EVENTS},
-#   "latency_ms": {
-#     "min": ${LAT_MIN},
-#     "avg": ${LAT_AVG},
-#     "max": ${LAT_MAX},
-#     "percentile_95": ${LAT_95},
-#     "sum": ${LAT_SUM}
-#   },
-#   "threads_fairness": {
-#     "events_avg": ${EVENTS_AVG},
-#     "events_stddev": ${EVENTS_STD},
-#     "exec_time_avg": ${EXEC_AVG},
-#     "exec_time_stddev": ${EXEC_STD}
-#   }
-# }
-# EOF
+
+generate_json_from_log() {
+    echo "🔸 Generating final JSON output from log..."
+
+    # Host info
+    HOST_INFO=$(hostnamectl)
+    HOSTNAME=$(echo "$HOST_INFO" | grep 'Static hostname' | awk '{print $3}' || echo "unknown")
+    OS=$(echo "$HOST_INFO" | grep 'Operating System' | cut -d: -f2- | xargs || echo "unknown")
+    KERNEL=$(echo "$HOST_INFO" | grep 'Kernel' | cut -d: -f2- | xargs || echo "unknown")
+    ARCH=$(echo "$HOST_INFO" | grep 'Architecture' | cut -d: -f2- | xargs || echo "unknown")
+    VIRT=$(echo "$HOST_INFO" | grep 'Virtualization' | cut -d: -f2- | xargs || echo "unknown")
+    MODEL=$(echo "$HOST_INFO" | grep 'Hardware Model' | cut -d: -f2- | xargs || echo "unknown")
+
+    # GPU Info
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 || echo "unknown")
+    GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
+    GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
+    GPU_UTIL=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $(NF-5)}' | tr -d '%')
+    TF_GPU_TIME=$(grep "GPU Stress Test Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+    RESNET_TIME=$(grep "ResNet50 Training Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
+
+    # Disk
+    IOPS=$(grep "IOPS=" "$LOG_FILE" | awk -F'IOPS=' '{print $2}' | awk -F',' '{print $1}' | head -n1)
+    FIO_BW=$(grep "BW=" "$LOG_FILE" | awk -F'BW=' '{print $2}' | awk '{print $1}' | head -n1)
+    FIO_LAT=$(grep "avg=" "$LOG_FILE" | grep "lat" | head -n1 | awk '{print $3}')
+    CACHED_READ=$(grep "Timing cached reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    BUFFERED_READ=$(grep "Timing buffered disk reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    HDPARM_DEV=$(grep '^/dev/' "$LOG_FILE" | head -n 1 | awk -F: '{print $1}')
+
+    # Memory
+    MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
+    MEM_STATUS="ok"
+    if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
+
+    # Network
+    NET_DOWN=$(grep -A1 "Iperf3 - Download" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
+    NET_UP=$(grep -A1 "Iperf3 - Upload" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
+
+    # Sanitize and set defaults
+    GPU_NAME=${GPU_NAME:-"none"}
+    GPU_MEM=$(echo "${GPU_MEM:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_TEMP=$(echo "${GPU_TEMP:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_UTIL=$(echo "${GPU_UTIL:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    TF_GPU_TIME=$(echo "${TF_GPU_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    RESNET_TIME=$(echo "${RESNET_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    IOPS=$(echo "${IOPS:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    FIO_BW=$(echo "${FIO_BW:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    FIO_LAT=$(echo "${FIO_LAT:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    CACHED_READ=$(echo "${CACHED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    BUFFERED_READ=$(echo "${BUFFERED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    HDPARM_DEV=${HDPARM_DEV:-"/dev/unknown"}
+    NET_DOWN=${NET_DOWN:-"not available"}
+    NET_UP=${NET_UP:-"not available"}
+
+    jq -n \
+        --arg hostname "$HOSTNAME" \
+        --arg os "$OS" \
+        --arg kernel "$KERNEL" \
+        --arg arch "$ARCH" \
+        --arg virt "$VIRT" \
+        --arg model "$MODEL" \
+        --arg gpu "$GPU_NAME" \
+        --argjson gpu_mem "$GPU_MEM" \
+        --argjson gpu_temp "$GPU_TEMP" \
+        --argjson gpu_util "$GPU_UTIL" \
+        --argjson tf_gpu_time "$TF_GPU_TIME" \
+        --argjson resnet_time "$RESNET_TIME" \
+        --argjson iops "$IOPS" \
+        --argjson fio_bw "$FIO_BW" \
+        --argjson fio_lat "$FIO_LAT" \
+        --argjson cached_read "$CACHED_READ" \
+        --argjson buffered_read "$BUFFERED_READ" \
+        --arg hdparm_dev "$HDPARM_DEV" \
+        --arg mem_status "$MEM_STATUS" \
+        --arg net_down "$NET_DOWN" \
+        --arg net_up "$NET_UP" \
+        '{
+            machine_info: {
+                hostname: $hostname,
+                os: $os,
+                kernel: $kernel,
+                arch: $arch,
+                virtualization: $virt,
+                hardware_model: $model
+            },
+            gpu: {
+                name: $gpu,
+                memory_total_mib: $gpu_mem,
+                temperature_c: $gpu_temp,
+                utilization_gpu_percent: $gpu_util,
+                tensorflow_gpu_stress_time_sec: $tf_gpu_time,
+                resnet50_training_time_sec: $resnet_time
+            },
+            disk: {
+                fio_randwrite: {
+                    iops: $iops,
+                    bandwidth_mib_s: $fio_bw,
+                    latency_avg_usec: $fio_lat
+                },
+                hdparm: {
+                    cached_read_mb_s: $cached_read,
+                    buffered_disk_read_mb_s: $buffered_read,
+                    device_tested: $hdparm_dev
+                }
+            },
+            memory: {
+                memtester_512mb: $mem_status
+            },
+            network: {
+                iperf3_download: $net_down,
+                iperf3_upload: $net_up
+            }
+        }' > "$JSON_FILE"
+
+    echo "✅ JSON file generated: $JSON_FILE"
+}
 
 # Start logging results
 echo "========== Benchmarking Results ==========" > $LOG_FILE
@@ -129,7 +251,8 @@ if lspci | grep -i nvidia; then
 
     # TensorFlow GPU Stress Test - Matrix Multiplication
     echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
-    python3 - <<EOF | tee -a $LOG_FILE
+    TF_LOG="/tmp/tf_output.log"
+    python3 - <<EOF > "$TF_LOG"
 import tensorflow as tf
 import time
 
@@ -154,10 +277,14 @@ def stress_gpu(iterations=1000, size=4096):
 stress_gpu()
 EOF
     echo "✅ TensorFlow GPU stress test completed." | tee -a $LOG_FILE
+    # Append TensorFlow logs to the main log
+    cat "$TF_LOG" >> "$LOG_FILE"
 
     # TensorFlow Deep Learning Test - ResNet50
     echo "🔹 Running TensorFlow ResNet50 Training Benchmark..." | tee -a $LOG_FILE
-    python3 - <<EOF | tee -a $LOG_FILE
+    # Run ResNet50 test similarly, log to file, append to main log
+    RESNET_LOG="/tmp/resnet_output.log"
+    python3 - <<EOF > "$RESNET_LOG"
 import tensorflow as tf
 from tensorflow.keras.applications import ResNet50
 import time
@@ -176,12 +303,35 @@ with tf.device('/GPU:0'):
 print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
 EOF
     echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
+    cat "$RESNET_LOG" >> "$LOG_FILE"
 fi
 
 
 # Run storage benchmarks
 run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
-run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt /dev/sda" "hdparm_read_speed"
+
+# Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
+ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
+BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
+
+# Fallback if lsblk fails (e.g., on LVM/loop)
+if [ -z "$BLOCK_DEV" ]; then
+    BLOCK_DEV=$(basename "$ROOT_DEV")
+fi
+
+# Prepend /dev/ if needed
+if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
+    BLOCK_DEV="/dev/$BLOCK_DEV"
+fi
+
+# Check if the device exists
+if [ -b "$BLOCK_DEV" ]; then
+    run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
+else
+    echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
+    jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+fi
+
 # Clean up leftover files from FIO or others
 rm -f randwrite* *.fio
 
@@ -197,3 +347,5 @@ echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
+
+generate_json_from_log
