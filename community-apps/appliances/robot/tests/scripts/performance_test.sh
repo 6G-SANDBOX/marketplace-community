@@ -201,8 +201,8 @@ fi
     CPU_CORES=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
     SOCKETS=$(lscpu | grep "^Socket(s):" | awk '{print $2}')
     THREADS=$(nproc)
-    CPU_FREQ=$(lscpu | grep "MHz" | grep -i 'cpu MHz' | awk '{print $3}')
-    CACHE_SIZE=$(lscpu | grep "^L3 cache" | awk '{print $3}')
+    CPU_FREQ=$(awk -F: '/cpu MHz/ {print $2; exit}' /proc/cpuinfo | xargs)
+    CACHE_SIZE=$(lscpu | grep "L3 cache" | awk -F: '{print $2}' | tr -d '[:space:]' | sed 's/K//')
 
 
     jq --slurpfile loss_list "$LOSS_FILE" -n \
