@@ -82,11 +82,12 @@ sysbench_cpu() {
     LAT_95=$(echo "$SB_OUT" | awk '/95th percentile:/ {print $3}')
     LAT_SUM=$(echo "$SB_OUT" | awk '/sum:/ {print $2}')
 
-    EVENTS_AVG=$(echo "$SB_OUT" | awk '/events \(avg\/stddev\):/ {split($2,a,"/"); print a[1]}')
-    EVENTS_STD=$(echo "$SB_OUT" | awk '/events \(avg\/stddev\):/ {split($2,a,"/"); print a[2]}')
+    EVENTS_AVG=$(echo "$SB_OUT" | grep "events (avg/stddev):" | sed -E 's/.*: *([0-9.]+)\/[0-9.]+/\1/')
+    EVENTS_STD=$(echo "$SB_OUT" | grep "events (avg/stddev):" | sed -E 's/.*: *[0-9.]+\/([0-9.]+)/\1/')
+    
+    EXEC_AVG=$(echo "$SB_OUT" | grep "execution time (avg/stddev):" | sed -E 's/.*: *([0-9.]+)\/[0-9.]+/\1/')
+    EXEC_STD=$(echo "$SB_OUT" | grep "execution time (avg/stddev):" | sed -E 's/.*: *[0-9.]+\/([0-9.]+)/\1/')
 
-    EXEC_AVG=$(echo "$SB_OUT" | awk '/execution time \(avg\/stddev\):/ {split($2,a,"/"); print a[1]}')
-    EXEC_STD=$(echo "$SB_OUT" | awk '/execution time \(avg\/stddev\):/ {split($2,a,"/"); print a[2]}')
 
     sysbench_json=$(jq -n \
         --arg cpu_speed "$CPU_SPEED" \
@@ -119,7 +120,7 @@ sysbench_cpu() {
                 exec_time_stddev: $exec_std
             }
         }')
-    jq --arg key "cpu_sysbench" --arg value "$sysbench_json" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+    echo "$sysbench_json" > /tmp/sysbench_metrics.json
 }
 
 generate_json_from_log() {
@@ -203,7 +204,7 @@ fi
     THREADS=$(nproc)
     CPU_FREQ=$(awk -F: '/cpu MHz/ {print $2; exit}' /proc/cpuinfo | xargs)
     CACHE_SIZE=$(lscpu | grep "L3 cache" | awk -F: '{print $2}' | tr -d '[:space:]' | sed 's/K//')
-
+    SYSBENCH_JSON=$(cat /tmp/sysbench_metrics.json)
 
     jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
@@ -236,6 +237,7 @@ fi
         --argjson threads "$THREADS" \
         --arg cpu_freq_mhz "$CPU_FREQ" \
         --arg cache_size_kb "$CACHE_SIZE" \
+        --argjson cpu "$SYSBENCH_JSON" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -250,7 +252,8 @@ fi
                   "sockets": $sockets,
                   "threads": $threads,
                   "cpu_freq_mhz": $cpu_freq_mhz,
-                  "l3_cache_kb": $cache_size_kb
+                  "l3_cache_kb": $cache_size_kb,
+                  "sysbench_metrics": $cpu
                 }
             },
             gpu: {
