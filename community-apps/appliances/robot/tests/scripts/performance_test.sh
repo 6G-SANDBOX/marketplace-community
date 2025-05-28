@@ -6,6 +6,19 @@ export DEBIAN_FRONTEND=noninteractive
 # Iperf3 server configuration
 IPERF3_SERVER="10.95.82.70"  # You can change this to your desired server IP or hostname
 
+# Default is to run memory test
+RUN_MEMTEST=true
+
+# Parse optional argument --no-memtest
+for arg in "$@"; do
+    case $arg in
+        --no-memtest)
+        RUN_MEMTEST=false
+        shift
+        ;;
+    esac
+done
+
 # Log files
 LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
 JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
@@ -180,20 +193,32 @@ fi
     MEM_STATUS="ok"
     if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
 
-    # Network parsing - improved for robustness
-    IPERF3_DOWN=$(awk '/Running Network Performance \(Iperf3 - Download\) benchmark/,/Completed Network Performance \(Iperf3 - Download\) benchmark/' "$LOG_FILE" \
-        | grep -Eo '[0-9]+\.[0-9]+ Gbits/sec' | tail -1 | awk '{print $1}')
 
-    IPERF3_UP=$(awk '/Running Network Performance \(Iperf3 - Upload\) benchmark/,/Completed Network Performance \(Iperf3 - Upload\) benchmark/' "$LOG_FILE" \
-    | grep -Eo '[0-9]+\.[0-9]+ Gbits/sec' | tail -1 | awk '{print $1}')
+    # Download block (receiver + sender)
+    IPERF3_DOWN_BLOCK=$(awk '/Running Network Performance \(Iperf3 - Download\) benchmark/,/Completed Network Performance \(Iperf3 - Download\) benchmark/' "$LOG_FILE")
 
-    # Include units in the final values
-    NET_DOWN="${IPERF3_DOWN:+${IPERF3_DOWN} Gbps}"
-    NET_UP="${IPERF3_UP:+${IPERF3_UP} Gbps}"
-    
-    # Defaults if not parsed
-    NET_DOWN=${NET_DOWN:-"not available"}
-    NET_UP=${NET_UP:-"not available"}
+    # Upload block (receiver + sender)
+    IPERF3_UP_BLOCK=$(awk '/Running Network Performance \(Iperf3 - Upload\) benchmark/,/Completed Network Performance \(Iperf3 - Upload\) benchmark/' "$LOG_FILE")
+
+    # Extract final download bandwidth (receiver)
+    NET_DOWN=$(echo "$IPERF3_DOWN_BLOCK" | awk '/receiver$/ {print $(NF-2) " " $(NF-1)}' | tail -n1)
+
+    # Extract final upload bandwidth (receiver)
+    NET_UP=$(echo "$IPERF3_UP_BLOCK" | awk '/receiver$/ {print $(NF-2) " " $(NF-1)}' | tail -n1)
+
+
+    # Extract download retransmissions (sender)
+    NET_RETRANS_DOWN=$(echo "$IPERF3_DOWN_BLOCK" | awk '/sender[[:space:]]*$/ && /Retr/ {print $(NF-1)}' | tail -n1)
+
+    # Extract upload retransmissions (sender)
+    NET_RETRANS_UP=$(echo "$IPERF3_UP_BLOCK" | awk '/sender[[:space:]]*$/ && /Retr/ {print $(NF-1)}' | tail -n1)
+
+
+    # Set fallbacks
+    NET_DOWN=${NET_DOWN:-"unavailable"}
+    NET_UP=${NET_UP:-"unavailable"}
+    NET_RETRANS_DOWN=${NET_RETRANS_DOWN:-"unavailable"}
+    NET_RETRANS_UP=${NET_RETRANS_UP:-"unavailable"}
 
     # Sanitize and set defaults
     GPU_NAME=${GPU_NAME:-"none"}
@@ -208,8 +233,6 @@ fi
     CACHED_READ=$(echo "${CACHED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     BUFFERED_READ=$(echo "${BUFFERED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     HDPARM_DEV=${HDPARM_DEV:-"/dev/unknown"}
-    NET_DOWN=${NET_DOWN:-"not available"}
-    NET_UP=${NET_UP:-"not available"}
 
     # Collect CPU information
     CPU_MODEL=$(lscpu | grep -i 'Model name' | awk -F: '{print $2}' | xargs)
@@ -263,6 +286,8 @@ fi
         --arg mem_status "$MEM_STATUS" \
         --arg net_down "$NET_DOWN" \
         --arg net_up "$NET_UP" \
+        --arg net_retrans_down "$NET_RETRANS_DOWN" \
+        --arg net_retrans_up "$NET_RETRANS_UP" \
         --arg cpu_model "$CPU_MODEL" \
         --argjson cpu_cores "$CPU_CORES" \
         --argjson sockets "$SOCKETS" \
@@ -334,7 +359,11 @@ fi
             },
             network: {
                 iperf3_download: $net_down,
-                iperf3_upload: $net_up
+                iperf3_upload: $net_up,
+                retransmissions: {
+                    download: $net_retrans_down,
+                    upload: $net_retrans_up
+                }
             }
         }' > "$JSON_FILE"
 
@@ -496,12 +525,24 @@ fi
 rm -f randwrite* *.fio
 
 # Run RAM benchmark
-run_benchmark "Memory Test (Memtester)" "memtester 512M 1" "memtester"
+if [ "$RUN_MEMTEST" = true ]; then
+    run_benchmark "Memory Test (Memtester)" "memtester 512M 1" "memtester"
+else
+    echo "⚠️  Skipping Memory Test (Memtester) as per configuration." | tee -a "$LOG_FILE"
+fi
 
-# Run network benchmarks
+# Network - Download
+echo "�� Running Network Performance (Iperf3 - Download) benchmark..." | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 2>&1 | tee -a $LOG_FILE
+echo "✅ Completed Network Performance (Iperf3 - Download) benchmark." | tee -a $LOG_FILE
+echo "------------------------------------------------" | tee -a $LOG_FILE
 
-run_benchmark "Network Performance (Iperf3 - Download)" "iperf3 -c $IPERF3_SERVER -t 10" "iperf3_download_raw"
-run_benchmark "Network Performance (Iperf3 - Upload)" "iperf3 -c $IPERF3_SERVER -t 10 -R" "iperf3_upload_raw"
+# Network - Upload
+echo "�� Running Network Performance (Iperf3 - Upload) benchmark..." | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 -R 2>&1 | tee -a $LOG_FILE
+echo "✅ Completed Network Performance (Iperf3 - Upload) benchmark." | tee -a $LOG_FILE
+echo "------------------------------------------------" | tee -a $LOG_FILE
+
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
