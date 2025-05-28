@@ -209,7 +209,7 @@ fi
     # Parse stress-ng output from log
     STRESS_LOG=$(awk '/Running CPU Stress Test benchmark/,/Completed CPU Stress Test benchmark/' "$LOG_FILE")
 
-    STRESS_WORKERS=$(echo "$STRESS_LOG" | grep "dispatching hogs" | grep -oE '[0-9]+(?= cpu)')
+    STRESS_WORKERS=$(echo "$STRESS_LOG" | grep "dispatching hogs" | grep -oE '[0-9]+ cpu' | awk '{print $1}')
     STRESS_SKIPPED=$(echo "$STRESS_LOG" | grep "skipped:" | awk '{print $NF}')
     STRESS_PASSED=$(echo "$STRESS_LOG" | grep "passed:" | grep -oE 'passed: [0-9]+' | awk '{print $2}')
     STRESS_FAILED=$(echo "$STRESS_LOG" | grep "failed:" | awk '{print $NF}')
