@@ -115,12 +115,16 @@ This section runs a FIO random write test to measure the disk's IOPS, bandwidth,
 This section runs a HDPARM test to measure the disk's cached read speed and buffered disk read speed.
 | Cached Read Speed (MB/s) | Buffered Disk Read Speed (MB/s) | Device Tested |
 |--------------------------|----------------------------------|----------------|
+| {{ disk.hdparm.cached_read_mb_s }} | {{ disk.hdparm.buffered_disk_read_mb_s }} | {{ disk.hdparm.device_tested }} |
 
 &nbsp;
 ## **Network**
 For this tests Iperf3 is used to measure the network performance.
 
-
+| Iperf3 Test | Retransmissions | Result |
+|--------------|-----------------|--------|
+| Download | {{ network.retransmissions.download }} | {{ network.iperf3_download }} |
+| Upload | {{ network.retransmissions.upload }} | {{ network.iperf3_upload }} |
 
 
 
