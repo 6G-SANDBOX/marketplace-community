@@ -3,6 +3,9 @@
 # Set non-interactive mode
 export DEBIAN_FRONTEND=noninteractive
 
+# Iperf3 server configuration
+IPERF3_SERVER="10.95.82.70"  # You can change this to your desired server IP or hostname
+
 # Log files
 LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
 JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
@@ -177,9 +180,20 @@ fi
     MEM_STATUS="ok"
     if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
 
-    # Network
-    NET_DOWN=$(grep -A1 "Iperf3 - Download" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
-    NET_UP=$(grep -A1 "Iperf3 - Upload" "$LOG_FILE" | grep "error" | sed 's/.*error - //')
+    # Network parsing - improved for robustness
+    IPERF3_DOWN=$(awk '/Running Network Performance \(Iperf3 - Download\) benchmark/,/Completed Network Performance \(Iperf3 - Download\) benchmark/' "$LOG_FILE" \
+        | grep -Eo '[0-9]+\.[0-9]+ Gbits/sec' | tail -1 | awk '{print $1}')
+
+    IPERF3_UP=$(awk '/Running Network Performance \(Iperf3 - Upload\) benchmark/,/Completed Network Performance \(Iperf3 - Upload\) benchmark/' "$LOG_FILE" \
+    | grep -Eo '[0-9]+\.[0-9]+ Gbits/sec' | tail -1 | awk '{print $1}')
+
+    # Include units in the final values
+    NET_DOWN="${IPERF3_DOWN:+${IPERF3_DOWN} Gbps}"
+    NET_UP="${IPERF3_UP:+${IPERF3_UP} Gbps}"
+    
+    # Defaults if not parsed
+    NET_DOWN=${NET_DOWN:-"not available"}
+    NET_UP=${NET_UP:-"not available"}
 
     # Sanitize and set defaults
     GPU_NAME=${GPU_NAME:-"none"}
@@ -485,8 +499,9 @@ rm -f randwrite* *.fio
 run_benchmark "Memory Test (Memtester)" "memtester 512M 1" "memtester"
 
 # Run network benchmarks
-run_benchmark "Network Performance (Iperf3 - Download)" "iperf3 -c iperf.he.net -t 10" "iperf3_download"
-run_benchmark "Network Performance (Iperf3 - Upload)" "iperf3 -c iperf.he.net -t 10 -R" "iperf3_upload"
+
+run_benchmark "Network Performance (Iperf3 - Download)" "iperf3 -c $IPERF3_SERVER -t 10" "iperf3_download_raw"
+run_benchmark "Network Performance (Iperf3 - Upload)" "iperf3 -c $IPERF3_SERVER -t 10 -R" "iperf3_upload_raw"
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
