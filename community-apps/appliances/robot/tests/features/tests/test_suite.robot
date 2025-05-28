@@ -58,6 +58,8 @@ Performance Tests
     [Documentation]    Run performance tests
     [Tags]    step-3
 
+    ${ROBOT_IPERF_SERVER}=    Get Ip For Interface    eth0
+
     Execute Remote Script
     ...    ${SUT_IP}
     ...    ${PERFORMANCE_TEST_SCRIPT}

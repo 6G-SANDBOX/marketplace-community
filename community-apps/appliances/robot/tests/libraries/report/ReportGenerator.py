@@ -119,6 +119,10 @@ class ReportGenerator:
                              json_filename,
                              output_filename,
                              optional_arguments={}):
+        print("Generating report page with template:", template)
+        print("JSON filename:", json_filename)
+        print("Output filename:", output_filename)
+        print("Optional arguments:", optional_arguments)
         # load json from file
         with open(json_filename) as json_file:
             json_data = json.load(json_file)
