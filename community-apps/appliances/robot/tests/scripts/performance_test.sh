@@ -206,13 +206,11 @@ fi
     # Extract final upload bandwidth (receiver)
     NET_UP=$(echo "$IPERF3_UP_BLOCK" | awk '/receiver$/ {print $(NF-2) " " $(NF-1)}' | tail -n1)
 
+    # Extract download retransmissions (sender line ending with 'sender')
+    NET_RETRANS_DOWN=$(echo "$IPERF3_DOWN_BLOCK" | awk '/sender$/ {print $(NF-1)}' | tail -n1)
 
-    # Extract download retransmissions (sender)
-    NET_RETRANS_DOWN=$(echo "$IPERF3_DOWN_BLOCK" | awk '/sender[[:space:]]*$/ && /Retr/ {print $(NF-1)}' | tail -n1)
-
-    # Extract upload retransmissions (sender)
-    NET_RETRANS_UP=$(echo "$IPERF3_UP_BLOCK" | awk '/sender[[:space:]]*$/ && /Retr/ {print $(NF-1)}' | tail -n1)
-
+    # Extract upload retransmissions (sender line ending with 'sender')
+    NET_RETRANS_UP=$(echo "$IPERF3_UP_BLOCK" | awk '/sender$/ {print $(NF-1)}' | tail -n1)
 
     # Set fallbacks
     NET_DOWN=${NET_DOWN:-"unavailable"}
