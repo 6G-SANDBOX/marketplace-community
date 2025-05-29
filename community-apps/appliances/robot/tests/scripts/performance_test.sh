@@ -203,11 +203,57 @@ fi
     FIO_LATENCY=${FIO_LATENCY:-0}
     FIO_CPU_USR="${FIO_CPU_USR:-0}%"
     FIO_CPU_SYS="${FIO_CPU_SYS:-0}%"
+
     # Memory
     MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
     MEM_STATUS="ok"
     if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
+    # Memory test details
+    MEMTEST_BLOCK=$(awk '/Running Memory Test \(Memtester\) benchmark/,/Completed Memory Test \(Memtester\) benchmark/' "$LOG_FILE")
+    # Extract each test line and status
+    MEMTEST_RESULTS=$(echo "$MEMTEST_BLOCK" | grep -E '^\s{2,}[A-Za-z].*:\s+(ok|FAIL)' | awk -F ':' '{gsub(/^[ \t]+/, "", $1); gsub(/^[ \t]+/, "", $2); print "\"" $1 "\": \"" $2 "\"" }' | paste -sd "," -)
+    # Wrap in JSON or fallback
+    if [[ -n "$MEMTEST_RESULTS" ]]; then
+        MEMTEST_JSON="{ $MEMTEST_RESULTS }"
+    else
+        MEMTEST_JSON="{}"
+    fi
 
+    # Memory Sysbench
+    MEM_SPEED_BLOCK=$(awk '/Running Memory Speed Test \(Sysbench\)/,/Completed Memory Speed Test \(Sysbench\)/' "$LOG_FILE")
+
+    MEM_BLOCK_SIZE=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'block size:\s+\K[0-9]+(?=KiB)' | head -1)
+    MEM_TOTAL_SIZE=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'total size:\s+\K[0-9]+(?=MiB)' | head -1)
+    MEM_OPS_TOTAL=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'Total operations:\s+\K[0-9]+' | head -1)
+    MEM_OPS_PER_SEC=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'Total operations:.*\(\K[0-9.]+' | head -1)
+    MEM_TRANSFER=$(echo "$MEM_SPEED_BLOCK" | grep -oP '([0-9.]+) MiB transferred' | grep -oP '^[0-9.]+' | head -1)
+
+    MEM_LAT_MIN=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'min:\s+\K[0-9.]+' | head -1)
+    MEM_LAT_AVG=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'avg:\s+\K[0-9.]+' | head -1)
+    MEM_LAT_MAX=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'max:\s+\K[0-9.]+' | head -1)
+    MEM_LAT_95=$(echo "$MEM_SPEED_BLOCK" | grep -oP '95th percentile:\s+\K[0-9.]+' | head -1)
+    MEM_LAT_SUM=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'sum:\s+\K[0-9.]+' | head -1)
+
+    MEM_EVENTS_AVG=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'events \(avg/stddev\):\s+\K[0-9.]+' | head -1)
+    MEM_EVENTS_STD=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'events \(avg/stddev\):\s+[0-9.]+/\K[0-9.]+' | head -1)
+    MEM_EXEC_AVG=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'execution time \(avg/stddev\):\s+\K[0-9.]+' | head -1)
+    MEM_EXEC_STD=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'execution time \(avg/stddev\):\s+[0-9.]+/\K[0-9.]+' | head -1)
+
+    # Set defaults
+    MEM_BLOCK_SIZE=${MEM_BLOCK_SIZE:-0}
+    MEM_TOTAL_SIZE=${MEM_TOTAL_SIZE:-0}
+    MEM_OPS_TOTAL=${MEM_OPS_TOTAL:-0}
+    MEM_OPS_PER_SEC=${MEM_OPS_PER_SEC:-0}
+    MEM_TRANSFER=${MEM_TRANSFER:-0}
+    MEM_LAT_MIN=${MEM_LAT_MIN:-0}
+    MEM_LAT_AVG=${MEM_LAT_AVG:-0}
+    MEM_LAT_MAX=${MEM_LAT_MAX:-0}
+    MEM_LAT_95=${MEM_LAT_95:-0}
+    MEM_LAT_SUM=${MEM_LAT_SUM:-0}
+    MEM_EVENTS_AVG=${MEM_EVENTS_AVG:-0}
+    MEM_EVENTS_STD=${MEM_EVENTS_STD:-0}
+    MEM_EXEC_AVG=${MEM_EXEC_AVG:-0}
+    MEM_EXEC_STD=${MEM_EXEC_STD:-0}
 
     # Download block (receiver + sender)
     IPERF3_DOWN_BLOCK=$(awk '/Running Network Performance \(Iperf3 - Download\) benchmark/,/Completed Network Performance \(Iperf3 - Download\) benchmark/' "$LOG_FILE")
@@ -328,6 +374,21 @@ fi
         --argjson stress_failed "$STRESS_FAILED" \
         --argjson stress_untrust "$STRESS_UNTRUST" \
         --argjson stress_duration "$STRESS_DURATION" \
+        --argjson memtester_tests "$MEMTEST_JSON" \
+        --argjson mem_block_size "$MEM_BLOCK_SIZE" \
+        --argjson mem_total_size "$MEM_TOTAL_SIZE" \
+        --argjson mem_ops_total "$MEM_OPS_TOTAL" \
+        --argjson mem_ops_per_sec "$MEM_OPS_PER_SEC" \
+        --argjson mem_transfer "$MEM_TRANSFER" \
+        --argjson mem_lat_min "$MEM_LAT_MIN" \
+        --argjson mem_lat_avg "$MEM_LAT_AVG" \
+        --argjson mem_lat_max "$MEM_LAT_MAX" \
+        --argjson mem_lat_95 "$MEM_LAT_95" \
+        --argjson mem_lat_sum "$MEM_LAT_SUM" \
+        --argjson mem_events_avg "$MEM_EVENTS_AVG" \
+        --argjson mem_events_std "$MEM_EVENTS_STD" \
+        --argjson mem_exec_avg "$MEM_EXEC_AVG" \
+        --argjson mem_exec_std "$MEM_EXEC_STD" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -387,7 +448,28 @@ fi
                 }
             },
             memory: {
-                memtester_512mb: $mem_status
+                memtester_512mb: $mem_status,
+                memtester_tests: $memtester_tests,
+                "sysbench_memory": {
+                    "block_size_kib": $mem_block_size,
+                    "total_size_mib": $mem_total_size,
+                    "total_ops": $mem_ops_total,
+                    "ops_per_sec": $mem_ops_per_sec,
+                    "transferred_mib": $mem_transfer,
+                    "latency_ms": {
+                        "min": $mem_lat_min,
+                        "avg": $mem_lat_avg,
+                        "max": $mem_lat_max,
+                        "percentile_95": $mem_lat_95,
+                        "sum": $mem_lat_sum
+                    },
+                    "threads_fairness": {
+                        "events_avg": $mem_events_avg,
+                        "events_stddev": $mem_events_std,
+                        "exec_time_avg": $mem_exec_avg,
+                        "exec_time_stddev": $mem_exec_std
+                    }
+                }
             },
             network: {
                 iperf3_download: $net_down,
@@ -411,6 +493,9 @@ echo "==========================================" | tee -a $LOG_FILE
 # Run CPU benchmarks
 sysbench_cpu
 run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
+
+# Run Memory benchmarks
+run_benchmark "Memory Speed Test (Sysbench)" "sysbench memory --memory-block-size=1M --memory-total-size=200g run"
 
 # Run GPU benchmarks if GPU is detected
 if lspci | grep -i nvidia; then
@@ -515,6 +600,7 @@ EOF
     # Stop monitoring
     kill $GPU_MONITOR_PID
 
+    if [[ -s "$GPU_MONITOR_LOG" && $(grep -c ':' "$GPU_MONITOR_LOG") -gt 1 ]]; then
 python3 - <<EOF
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -557,7 +643,19 @@ try:
 except Exception as e:
     print(f"❌ Error generating GPU plot: {e}")
 EOF
+    else
+        echo "⚠️ Skipping GPU plot generation: insufficient or invalid monitoring data. Generating error image..." | tee -a $LOG_FILE
+        python3 - <<EOF
+import matplotlib.pyplot as plt
 
+plt.figure(figsize=(8, 4))
+plt.text(0.5, 0.5, "TensorFlow GPU Benchmark Failed", fontsize=14,
+         ha='center', va='center', color='red')
+plt.axis('off')
+plt.savefig("$GPU_PLOT_FILE", bbox_inches='tight', facecolor='white')
+print("❌ Generated error image instead of GPU usage plot.")
+EOF
+    fi
 
 
 fi
@@ -600,19 +698,15 @@ fi
 
 # Network - Download
 echo "�� Running Network Performance (Iperf3 - Download) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 2>&1 | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 >> "$LOG_FILE" 2>&1
 echo "✅ Completed Network Performance (Iperf3 - Download) benchmark." | tee -a $LOG_FILE
 echo "------------------------------------------------" | tee -a $LOG_FILE
 
 # Network - Upload
 echo "�� Running Network Performance (Iperf3 - Upload) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 -R 2>&1 | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 -R >> "$LOG_FILE" 2>&1
 echo "✅ Completed Network Performance (Iperf3 - Upload) benchmark." | tee -a $LOG_FILE
 echo "------------------------------------------------" | tee -a $LOG_FILE
-
-
-# Completion message
-echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
