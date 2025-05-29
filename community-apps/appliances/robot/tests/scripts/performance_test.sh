@@ -228,6 +228,9 @@ fi
     MEM_OPS_PER_SEC=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'Total operations:.*\(\K[0-9.]+' | head -1)
     MEM_TRANSFER=$(echo "$MEM_SPEED_BLOCK" | grep -oP '([0-9.]+) MiB transferred' | grep -oP '^[0-9.]+' | head -1)
 
+    MEM_TRANSFER_SPEED=$(printf "%s\n" "$MEM_SPEED_BLOCK" | grep "transferred" | grep -oP '\(\K[0-9.]+' | head -1)
+    MEM_TRANSFER_UNIT=$(printf "%s\n" "$MEM_SPEED_BLOCK" | grep "transferred" | grep -oP '\(\d+\.\d+\s*\K[A-Za-z/]+(?=\))' | head -1)
+    MEM_TRANSFER_COMBINED="${MEM_TRANSFER_SPEED:-0} ${MEM_TRANSFER_UNIT:-MiB/sec}"
     MEM_LAT_MIN=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'min:\s+\K[0-9.]+' | head -1)
     MEM_LAT_AVG=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'avg:\s+\K[0-9.]+' | head -1)
     MEM_LAT_MAX=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'max:\s+\K[0-9.]+' | head -1)
@@ -240,6 +243,7 @@ fi
     MEM_EXEC_STD=$(echo "$MEM_SPEED_BLOCK" | grep -oP 'execution time \(avg/stddev\):\s+[0-9.]+/\K[0-9.]+' | head -1)
 
     # Set defaults
+    MEM_TRANSFER_SPEED=${MEM_TRANSFER_SPEED:-0}
     MEM_BLOCK_SIZE=${MEM_BLOCK_SIZE:-0}
     MEM_TOTAL_SIZE=${MEM_TOTAL_SIZE:-0}
     MEM_OPS_TOTAL=${MEM_OPS_TOTAL:-0}
@@ -389,6 +393,7 @@ fi
         --argjson mem_events_std "$MEM_EVENTS_STD" \
         --argjson mem_exec_avg "$MEM_EXEC_AVG" \
         --argjson mem_exec_std "$MEM_EXEC_STD" \
+        --arg mem_transfer_speed "$MEM_TRANSFER_COMBINED" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -456,6 +461,7 @@ fi
                     "total_ops": $mem_ops_total,
                     "ops_per_sec": $mem_ops_per_sec,
                     "transferred_mib": $mem_transfer,
+                    "transfer_speed": $mem_transfer_speed,
                     "latency_ms": {
                         "min": $mem_lat_min,
                         "avg": $mem_lat_avg,
