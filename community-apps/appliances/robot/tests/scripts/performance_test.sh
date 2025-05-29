@@ -155,7 +155,7 @@ generate_json_from_log() {
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 || echo "unknown")
     GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
     GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
-    GPU_UTIL=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $(NF-5)}' | tr -d '%')
+    GPU_UTIL=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits)
     TF_GPU_ITER=$(grep "Running GPU stress test with" "$LOG_FILE" | awk '{for(i=1;i<=NF;i++) if ($i=="with") print $(i+1)}' | head -n1)
     RESNET_TIME=$(grep "ResNet50 Training Completed" "$LOG_FILE" | awk '{print $(NF-1)}')
     TF_GPU_MATRIX=$(grep "Running GPU stress test with" "$LOG_FILE" | sed -n 's/.*on \([0-9]\+x[0-9]\+\) matrices.*/\1/p')
@@ -187,7 +187,22 @@ fi
     CACHED_READ=$(grep "Timing cached reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
     BUFFERED_READ=$(grep "Timing buffered disk reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
     HDPARM_DEV=$(grep '^/dev/' "$LOG_FILE" | head -n 1 | awk -F: '{print $1}')
-
+    # Disk - Enhanced FIO parsing
+    FIO_BLOCK=$(awk '/Running Disk Read\/Write Performance \(FIO\) benchmark/,/Completed Disk Read\/Write Performance \(FIO\) benchmark/' "$LOG_FILE")
+    FIO_IOPS=$(echo "$FIO_BLOCK" | grep -oP 'iops\s+:.*avg=\K[0-9.]+' | head -1)
+    FIO_BW=$(echo "$FIO_BLOCK" | grep -oP 'write: IOPS=.*BW=\K[0-9.]+' | head -1)
+    FIO_LATENCY=$(echo "$FIO_BLOCK" | grep -oP 'lat \(usec\):.*avg=\K[0-9.]+' | head -1)
+    FIO_P99=$(echo "$FIO_BLOCK" | grep '99.00th' | sed -n 's/.*99\.00th=\[\s*\([0-9.]\+\)\].*/\1/p' | head -1)
+    FIO_P99=$(awk "BEGIN {print (${FIO_P99:-0} / 1000)}")  # convert to usec
+    FIO_CPU_USR=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+: usr=\K[0-9.]+' | head -1)
+    FIO_CPU_SYS=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+:.*sys=\K[0-9.]+' | head -1)
+ 
+    # Fallback defaults
+    FIO_IOPS=${FIO_IOPS:-0}
+    FIO_BW=${FIO_BW:-0}
+    FIO_LATENCY=${FIO_LATENCY:-0}
+    FIO_CPU_USR="${FIO_CPU_USR:-0}%"
+    FIO_CPU_SYS="${FIO_CPU_SYS:-0}%"
     # Memory
     MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
     MEM_STATUS="ok"
@@ -222,7 +237,9 @@ fi
     GPU_NAME=${GPU_NAME:-"none"}
     GPU_MEM=$(echo "${GPU_MEM:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     GPU_TEMP=$(echo "${GPU_TEMP:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_TEMP="${GPU_TEMP}C"
     GPU_UTIL=$(echo "${GPU_UTIL:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    GPU_UTIL="${GPU_UTIL}%"
     TF_GPU_TIME=$(grep "GPU Stress Test Completed" "$LOG_FILE" | grep -Eo '[0-9]+\.[0-9]+' | tail -1)
     RESNET_TIME=$(echo "${RESNET_TIME:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     IOPS=$(echo "${IOPS:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
@@ -231,6 +248,11 @@ fi
     CACHED_READ=$(echo "${CACHED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     BUFFERED_READ=$(echo "${BUFFERED_READ:-0}" | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
     HDPARM_DEV=${HDPARM_DEV:-"/dev/unknown"}
+
+    TF_GPU_TIME=${TF_GPU_TIME:-"error"}
+    RESNET_TIME=${RESNET_TIME:-"error"}
+    TF_GPU_MATRIX=${TF_GPU_MATRIX:-"error"}
+    TF_GPU_ITER=${TF_GPU_ITER:-0}
 
     # Collect CPU information
     CPU_MODEL=$(lscpu | grep -i 'Model name' | awk -F: '{print $2}' | xargs)
@@ -259,6 +281,10 @@ fi
     STRESS_UNTRUST=${STRESS_UNTRUST:-0}
     STRESS_DURATION=${STRESS_DURATION:-0}
 
+    RESNET_TIME=$(echo "$RESNET_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "error")
+    TF_GPU_TIME=$(echo "$TF_GPU_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "error")
+
+
     jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
         --arg os "$OS" \
@@ -268,15 +294,18 @@ fi
         --arg model "$MODEL" \
         --arg gpu "$GPU_NAME" \
         --argjson gpu_mem "$GPU_MEM" \
-        --argjson gpu_temp "$GPU_TEMP" \
-        --argjson gpu_util "$GPU_UTIL" \
+        --arg gpu_temp "$GPU_TEMP" \
+        --arg gpu_util "$GPU_UTIL" \
         --argjson tf_gpu_time "$TF_GPU_TIME" \
         --argjson resnet_time "$RESNET_TIME" \
         --argjson tf_gpu_iterations "$TF_GPU_ITER" \
         --argjson loss_list "$LOSS_JSON" \
-        --argjson iops "$IOPS" \
+        --argjson fio_iops "$FIO_IOPS" \
         --argjson fio_bw "$FIO_BW" \
-        --argjson fio_lat "$FIO_LAT" \
+        --argjson fio_lat "$FIO_LATENCY" \
+        --argjson fio_p99 "$FIO_P99" \
+        --arg fio_cpu_usr "$FIO_CPU_USR" \
+        --arg fio_cpu_sys "$FIO_CPU_SYS" \
         --argjson cached_read "$CACHED_READ" \
         --argjson buffered_read "$BUFFERED_READ" \
         --arg tf_gpu_matrix "$TF_GPU_MATRIX" \
@@ -342,9 +371,14 @@ fi
             },
             disk: {
                 fio_randwrite: {
-                    iops: $iops,
+                    iops: $fio_iops,
                     bandwidth_mib_s: $fio_bw,
-                    latency_avg_usec: $fio_lat
+                    latency_avg_usec: $fio_lat,
+                    clat_99th_percentile_usec: $fio_p99,
+                    cpu_usage_percent: {
+                        user: $fio_cpu_usr,
+                        system: $fio_cpu_sys
+                    }                    
                 },
                 hdparm: {
                     cached_read_mb_s: $cached_read,
@@ -390,31 +424,48 @@ if lspci | grep -i nvidia; then
     # TensorFlow GPU Stress Test - Matrix Multiplication
     echo "🔹 Running TensorFlow GPU stress test (Matrix Multiplication)..." | tee -a $LOG_FILE
     TF_LOG="/tmp/tf_output.log"
-    python3 - <<EOF > "$TF_LOG"
+    python3 - <<EOF > "$TF_LOG" 2>&1
 import tensorflow as tf
 import time
 
-gpus = tf.config.list_physical_devices('GPU')
-if not gpus:
-    print("No GPU detected!")
-    exit()
+try:
+    gpus = tf.config.list_physical_devices('GPU')
+    if not gpus:
+        print("No GPU detected!")
+        exit()
 
-def stress_gpu(iterations=1000, size=4096):
-    print(f"Running GPU stress test with {iterations} iterations on {size}x{size} matrices...")
-    with tf.device('/GPU:0'):
-        A = tf.random.normal([size, size])
-        B = tf.random.normal([size, size])
-        
-        start_time = time.time()
-        for _ in range(iterations):
-            _ = tf.matmul(A, B)
-        elapsed_time = time.time() - start_time
+    def stress_gpu(iterations=1000, size=4096):
+        print(f"Running GPU stress test with {iterations} iterations on {size}x{size} matrices...")
+        with tf.device('/GPU:0'):
+            A = tf.random.normal([size, size])
+            B = tf.random.normal([size, size])
 
-    print(f"GPU Stress Test Completed in {elapsed_time:.2f} seconds.")
+            start_time = time.time()
+            for _ in range(iterations):
+                _ = tf.matmul(A, B)
+            elapsed_time = time.time() - start_time
 
-stress_gpu()
+        print(f"GPU Stress Test Completed in {elapsed_time:.2f} seconds.")
+
+    stress_gpu()
+
+except Exception as e:
+    print(f"ERROR: TensorFlow stress test failed: {e}")
+    exit(1)
 EOF
-    echo "✅ TensorFlow GPU stress test completed." | tee -a $LOG_FILE
+
+    TF_STATUS=$?
+    cat "$TF_LOG" >> "$LOG_FILE"
+
+    if [[ $TF_STATUS -ne 0 ]]; then
+        echo "❌ ERROR: TensorFlow GPU stress test failed." | tee -a "$LOG_FILE"
+        echo "------------------------------------------------" | tee -a $LOG_FILE
+        TF_GPU_TIME="error"
+        else
+            echo "✅ TensorFlow GPU stress test completed." | tee -a $LOG_FILE
+            echo "------------------------------------------------" | tee -a $LOG_FILE
+    fi
+
     # Append TensorFlow logs to the main log
     cat "$TF_LOG" >> "$LOG_FILE"
 
@@ -422,25 +473,43 @@ EOF
     echo "🔹 Running TensorFlow ResNet50 Training Benchmark..." | tee -a $LOG_FILE
     # Run ResNet50 test similarly, log to file, append to main log
     RESNET_LOG="/tmp/resnet_output.log"
-    python3 - <<EOF > "$RESNET_LOG"
+    python3 - <<EOF > "$RESNET_LOG" 2>&1
 import tensorflow as tf
 from tensorflow.keras.applications import ResNet50
 import time
 
-with tf.device('/GPU:0'):
-    model = ResNet50(weights=None, input_shape=(224, 224, 3), classes=1000)
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
+try:
+    with tf.device('/GPU:0'):
+        model = ResNet50(weights=None, input_shape=(224, 224, 3), classes=1000)
+        model.compile(optimizer='adam', loss='categorical_crossentropy')
 
-    x_train = tf.random.normal([32, 224, 224, 3])
-    y_train = tf.random.uniform([32, 1000], maxval=1)
+        x_train = tf.random.normal([32, 224, 224, 3])
+        y_train = tf.random.uniform([32, 1000], maxval=1)
 
-    start_time = time.time()
-    model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=2)
-    elapsed_time = time.time() - start_time
+        start_time = time.time()
+        model.fit(x_train, y_train, epochs=10, batch_size=32, verbose=2)
+        elapsed_time = time.time() - start_time
 
-print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
+    print(f"ResNet50 Training Completed in {elapsed_time:.2f} seconds.")
+
+except Exception as e:
+    print(f"ERROR: ResNet50 training failed: {e}")
+    exit(1)
 EOF
-    echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
+    RESNET_STATUS=$?
+    cat "$RESNET_LOG" >> "$LOG_FILE"
+
+    if [[ $RESNET_STATUS -ne 0 ]]; then
+        echo "❌ ERROR: TensorFlow ResNet50 test failed." | tee -a "$LOG_FILE"
+        echo "------------------------------------------------" | tee -a $LOG_FILE
+        RESNET_TIME="error"
+        TF_GPU_ITER=0
+        TF_GPU_MATRIX="error"
+        echo "[]" > "$LOSS_FILE"
+        else
+            echo "✅ TensorFlow ResNet50 Training Benchmark completed." | tee -a $LOG_FILE
+            echo "------------------------------------------------" | tee -a $LOG_FILE
+    fi
     cat "$RESNET_LOG" >> "$LOG_FILE"
 
     # Stop monitoring
