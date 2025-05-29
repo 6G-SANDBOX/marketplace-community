@@ -3,19 +3,50 @@
 # Set non-interactive mode
 export DEBIAN_FRONTEND=noninteractive
 
+# Help message
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --no-memtest           Skip memory test (memtester)"
+    echo "  --no-cpu-stress        Skip CPU stress test (stress-ng)"
+    echo "  --no-mem-speed         Skip memory speed test (sysbench memory)"
+    echo "  --no-gpu-nvidia-smi    Skip GPU test using nvidia-smi"
+    echo "  --no-disk-perf         Skip disk performance test (FIO)"
+    echo "  --no-disk-read         Skip disk read speed test (hdparm)"
+    echo "  --no-network           Skip network performance tests (iperf3)"
+    echo "  --help                 Show this help message and exit"
+    echo ""
+    exit 0
+}
+
+
 # Iperf3 server configuration
 IPERF3_SERVER="10.95.82.70"  # You can change this to your desired server IP or hostname
 
-# Default is to run memory test
+# Defaults
 RUN_MEMTEST=true
+RUN_CPU_STRESS=true
+RUN_MEM_SPEED=true
+RUN_GPU_NVIDIA_SMI=true
+RUN_DISK_PERF=true
+RUN_DISK_READ=true
+RUN_NETWORK=true
+GPU_MONITOR_ENABLED=false
+GPU_MONITOR_EXECUTED=false
 
-# Parse optional argument --no-memtest
+# Parse CLI arguments
 for arg in "$@"; do
     case $arg in
-        --no-memtest)
-        RUN_MEMTEST=false
-        shift
-        ;;
+        --no-memtest) RUN_MEMTEST=false ;;
+        --no-cpu-stress) RUN_CPU_STRESS=false ;;
+        --no-mem-speed) RUN_MEM_SPEED=false ;;
+        --no-gpu-nvidia-smi) RUN_GPU_NVIDIA_SMI=false ;;
+        --no-disk-perf) RUN_DISK_PERF=false ;;
+        --no-disk-read) RUN_DISK_READ=false ;;
+        --no-network) RUN_NETWORK=false ;;
+        --help) show_help ;;
+        *) echo "❌ Unknown option: $arg"; show_help ;;
     esac
 done
 
@@ -30,7 +61,9 @@ GPU_PLOT_FILE="gpu_usage_plot.png"
 source /tmp/tf_gpu_env/bin/activate
 
 # Ensure pip and required packages are installed
-python -m pip install --upgrade pip
+echo "🔧 Upgrading pip..." | tee -a "$LOG_FILE"
+python -m pip install --upgrade pip >> "$LOG_FILE" 2>&1
+
 
 REQUIRED_PIP_PACKAGES=(
     "tensorflow==2.18.0"
@@ -53,10 +86,14 @@ done
 # Check if libcudnn8 (system-wide) is installed
 if ! dpkg -s libcudnn8 &>/dev/null; then
     echo "🔧 Installing libcudnn8..."
-    sudo apt-get update && sudo apt-get install -y libcudnn8
+    echo "🔧 Installing libcudnn8..." >> "$LOG_FILE"
+    {
+        sudo apt-get update && sudo apt-get install -y libcudnn8
+    } >> "$LOG_FILE" 2>&1
 else
-    echo "✅ libcudnn8 already installed."
+    echo "✅ libcudnn8 already installed." >> "$LOG_FILE"
 fi
+
 
 # Create JSON file with initial structure
 echo "{}" > "$JSON_FILE"
@@ -334,6 +371,17 @@ fi
     RESNET_TIME=$(echo "$RESNET_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "error")
     TF_GPU_TIME=$(echo "$TF_GPU_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "error")
 
+    # Fallback GPU values if skipped
+    TF_GPU_TIME=$(echo "$TF_GPU_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    RESNET_TIME=$(echo "$RESNET_TIME" | head -n1 | grep -Eo '^[0-9]+(\.[0-9]+)?$' || echo "0")
+    TF_GPU_ITER=${TF_GPU_ITER:-0}
+    TF_GPU_MATRIX=${TF_GPU_MATRIX:-"error"}
+
+    # Ensure RESNET_LOSS is set even if skipped
+    if [ ! -f "$LOSS_FILE" ]; then
+        echo "[]" > "$LOSS_FILE"
+    fi
+
 
     jq --slurpfile loss_list "$LOSS_FILE" -n \
         --arg hostname "$HOSTNAME" \
@@ -497,16 +545,25 @@ echo "Machine Info: $(hostnamectl)" | tee -a $LOG_FILE
 echo "==========================================" | tee -a $LOG_FILE
 
 # Run CPU benchmarks
-sysbench_cpu
-run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
+if [ "$RUN_CPU_STRESS" = true ]; then
+    sysbench_cpu
+    run_benchmark "CPU Stress Test" "stress-ng --cpu $(nproc) --cpu-method all --timeout 60" "cpu_stress"
+else
+    echo "⚠️ Skipping CPU Stress Test as per configuration." | tee -a "$LOG_FILE"
+fi
 
 # Run Memory benchmarks
-run_benchmark "Memory Speed Test (Sysbench)" "sysbench memory --memory-block-size=1M --memory-total-size=200g run"
+if [ "$RUN_MEM_SPEED" = true ]; then
+    run_benchmark "Memory Speed Test (Sysbench)" "sysbench memory --memory-block-size=1M --memory-total-size=200g run"
+else
+    echo "⚠️ Skipping Memory Speed Test (Sysbench) as per configuration." | tee -a "$LOG_FILE"
+fi
 
-# Run GPU benchmarks if GPU is detected
-if lspci | grep -i nvidia; then
+# Run GPU benchmarks if NVIDIA GPU is detected
+if [ "$RUN_GPU_NVIDIA_SMI" = true ] && lspci | grep -i nvidia; then
+    GPU_MONITOR_ENABLED=true
+
     run_benchmark "GPU NVIDIA-SMI" "nvidia-smi" "gpu_nvidia_smi"
-
     # start monitoring
     nvidia-smi --query-gpu=timestamp,utilization.gpu,utilization.memory,memory.used,memory.total,temperature.gpu \
     --format=csv,noheader,nounits -l 1 > "$GPU_MONITOR_LOG" &
@@ -605,6 +662,7 @@ EOF
 
     # Stop monitoring
     kill $GPU_MONITOR_PID
+    GPU_MONITOR_EXECUTED=true
 
     if [[ -s "$GPU_MONITOR_LOG" && $(grep -c ':' "$GPU_MONITOR_LOG") -gt 1 ]]; then
 python3 - <<EOF
@@ -662,38 +720,116 @@ plt.savefig("$GPU_PLOT_FILE", bbox_inches='tight', facecolor='white')
 print("❌ Generated error image instead of GPU usage plot.")
 EOF
     fi
-
+else
+    echo "⚠️ Skipping GPU NVIDIA-SMI benchmark as per configuration or no GPU found." | tee -a "$LOG_FILE"
 
 fi
 
+# Always try to generate GPU plot if monitor log exists
+if [ "$GPU_MONITOR_ENABLED" = true ] && [ "$GPU_MONITOR_EXECUTED" = true ]; then
+    if [[ -s "$GPU_MONITOR_LOG" && $(grep -c ',' "$GPU_MONITOR_LOG") -gt 1 ]]; then
+        echo "📈 Generating GPU monitoring plot..." | tee -a "$LOG_FILE"
+       python3 - <<EOF
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+plt.style.use("seaborn-v0_8-whitegrid")
+
+log_file = "$GPU_MONITOR_LOG"
+plot_file = "$GPU_PLOT_FILE"
+
+try:
+    df = pd.read_csv(log_file, names=[
+        "timestamp", "util_gpu", "util_mem", "mem_used", "mem_total", "temp"
+    ])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    df.dropna(subset=["timestamp"], inplace=True)
+    df["mem_percent"] = df["mem_used"] / df["mem_total"] * 100
+
+    fig, ax = plt.subplots(figsize=(14, 6), dpi=300)
+    ax.plot(df["timestamp"], df["util_gpu"], label="GPU Utilization (%)", linewidth=2.5)
+    ax.plot(df["timestamp"], df["mem_percent"], label="Memory Usage (%)", linewidth=2.5)
+    ax.plot(df["timestamp"], df["temp"], label="GPU Temp (°C)", linewidth=2.5)
+
+    ax.set_xlabel("Time", fontsize=12)
+    ax.set_ylabel("Percentage / Temperature", fontsize=12)
+    ax.set_title("GPU Monitoring During TensorFlow Tests", fontsize=14)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+    plt.xticks(rotation=45)
+    plt.yticks(fontsize=10)
+    plt.xticks(fontsize=10)
+    ax.legend(loc="upper left", fontsize=10, frameon=True, edgecolor="gray")
+    ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+    plt.tight_layout()
+    plt.savefig(plot_file, bbox_inches="tight", facecolor="white")
+    print(f"✅ GPU plot saved to: {plot_file}")
+except Exception as e:
+    print(f"❌ Error generating GPU plot: {e}")
+EOF
+    else
+        echo "❌ Error: GPU monitoring ran, but no usable data was captured." | tee -a "$LOG_FILE"
+        python3 - <<EOF
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8, 4))
+plt.text(0.5, 0.5, "GPU Monitoring Failed\nNo usable data captured", fontsize=14,
+         ha='center', va='center', color='red')
+plt.axis('off')
+plt.savefig("$GPU_PLOT_FILE", bbox_inches='tight', facecolor='white')
+print("❌ Generated error image: GPU monitor log was empty or invalid.")
+EOF
+    fi
+else
+    echo "⚠️ GPU monitoring was not executed (disabled or no NVIDIA GPU found)." | tee -a "$LOG_FILE"
+    python3 - <<EOF
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8, 4))
+plt.text(0.5, 0.5, "GPU Benchmark Skipped (--no-gpu-nvidia-smi)", fontsize=14,
+         ha='center', va='center', color='gray')
+plt.axis('off')
+plt.savefig("$GPU_PLOT_FILE", bbox_inches='tight', facecolor='white')
+print("🟡 Generated placeholder image indicating GPU benchmark was skipped.")
+EOF
+fi
 
 # Run storage benchmarks
-run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
-
-# Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
-ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
-BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
-
-# Fallback if lsblk fails (e.g., on LVM/loop)
-if [ -z "$BLOCK_DEV" ]; then
-    BLOCK_DEV=$(basename "$ROOT_DEV")
-fi
-
-# Prepend /dev/ if needed
-if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
-    BLOCK_DEV="/dev/$BLOCK_DEV"
-fi
-
-# Check if the device exists
-if [ -b "$BLOCK_DEV" ]; then
-    run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
+if [ "$RUN_DISK_PERF" = true ]; then
+    run_benchmark "Disk Read/Write Performance (FIO)" "fio --name=randwrite --ioengine=libaio --rw=randwrite --bs=4k --numjobs=4 --size=1G --runtime=60 --time_based --group_reporting --unlink=1" "fio_randwrite"
 else
-    echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
-    jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+    echo "⚠️ Skipping Disk Read/Write Performance (FIO) as per configuration." | tee -a "$LOG_FILE"
 fi
 
-# Clean up leftover files from FIO or others
-rm -f randwrite* *.fio
+
+if [ "$RUN_DISK_READ" = true ]; then
+    # Dynamically detect root device (e.g., /dev/sda, /dev/vda, /dev/nvme0n1)
+    ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
+    BLOCK_DEV=$(lsblk -no pkname "$ROOT_DEV" 2>/dev/null | head -n 1)
+
+    # Fallback if lsblk fails (e.g., on LVM/loop)
+    if [ -z "$BLOCK_DEV" ]; then
+        BLOCK_DEV=$(basename "$ROOT_DEV")
+    fi
+
+    # Prepend /dev/ if needed
+    if [[ ! "$BLOCK_DEV" =~ ^/dev/ ]]; then
+        BLOCK_DEV="/dev/$BLOCK_DEV"
+    fi
+
+    # Check if the device exists
+    if [ -b "$BLOCK_DEV" ]; then
+        run_benchmark "Disk Read Speed (Hdparm)" "hdparm -Tt $BLOCK_DEV" "hdparm_read_speed"
+    else
+        echo "⚠️  Warning: Could not determine root block device for hdparm test." | tee -a $LOG_FILE
+        jq --arg key "hdparm_read_speed" --arg value "Device detection failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+    fi
+
+    # Clean up leftover files from FIO or others
+    rm -f randwrite* *.fio
+    
+    else
+        echo "⚠️ Skipping Disk Read Speed (Hdparm) as per configuration." | tee -a "$LOG_FILE"
+    fi
+
 
 # Run RAM benchmark
 if [ "$RUN_MEMTEST" = true ]; then
@@ -703,18 +839,22 @@ else
 fi
 
 # Network - Download
-echo "�� Running Network Performance (Iperf3 - Download) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 >> "$LOG_FILE" 2>&1
-echo "✅ Completed Network Performance (Iperf3 - Download) benchmark." | tee -a $LOG_FILE
-echo "------------------------------------------------" | tee -a $LOG_FILE
+if [ "$RUN_NETWORK" = true ]; then
+    echo "�� Running Network Performance (Iperf3 - Download) benchmark..." | tee -a $LOG_FILE
+    iperf3 -c "$IPERF3_SERVER" -t 10 >> "$LOG_FILE" 2>&1
+    echo "✅ Completed Network Performance (Iperf3 - Download) benchmark." | tee -a $LOG_FILE
+    echo "------------------------------------------------" | tee -a $LOG_FILE
 
-# Network - Upload
-echo "�� Running Network Performance (Iperf3 - Upload) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 -R >> "$LOG_FILE" 2>&1
-echo "✅ Completed Network Performance (Iperf3 - Upload) benchmark." | tee -a $LOG_FILE
-echo "------------------------------------------------" | tee -a $LOG_FILE
+    # Network - Upload
+    echo "�� Running Network Performance (Iperf3 - Upload) benchmark..." | tee -a $LOG_FILE
+    iperf3 -c "$IPERF3_SERVER" -t 10 -R >> "$LOG_FILE" 2>&1
+    echo "✅ Completed Network Performance (Iperf3 - Upload) benchmark." | tee -a $LOG_FILE
+    echo "------------------------------------------------" | tee -a $LOG_FILE
 
-# Completion message
-echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
+    # Completion message
+    echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
+else
+    echo "⚠️ Skipping Network Performance (iperf3) as per configuration." | tee -a "$LOG_FILE"
+fi
 
 generate_json_from_log
