@@ -203,10 +203,22 @@ fi
     FIO_LATENCY=${FIO_LATENCY:-0}
     FIO_CPU_USR="${FIO_CPU_USR:-0}%"
     FIO_CPU_SYS="${FIO_CPU_SYS:-0}%"
+
     # Memory
     MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
     MEM_STATUS="ok"
     if [ "$MEM_OK" -lt 18 ]; then MEM_STATUS="partial"; fi
+    # Memory test details
+    MEMTEST_BLOCK=$(awk '/Running Memory Test \(Memtester\) benchmark/,/Completed Memory Test \(Memtester\) benchmark/' "$LOG_FILE")
+    # Extract each test line and status
+    MEMTEST_RESULTS=$(echo "$MEMTEST_BLOCK" | grep -E '^\s{2,}[A-Za-z].*:\s+(ok|FAIL)' | awk -F ':' '{gsub(/^[ \t]+/, "", $1); gsub(/^[ \t]+/, "", $2); print "\"" $1 "\": \"" $2 "\"" }' | paste -sd "," -)
+    # Wrap in JSON or fallback
+    if [[ -n "$MEMTEST_RESULTS" ]]; then
+        MEMTEST_JSON="{ $MEMTEST_RESULTS }"
+    else
+        MEMTEST_JSON="{}"
+    fi
+
 
 
     # Download block (receiver + sender)
@@ -328,6 +340,7 @@ fi
         --argjson stress_failed "$STRESS_FAILED" \
         --argjson stress_untrust "$STRESS_UNTRUST" \
         --argjson stress_duration "$STRESS_DURATION" \
+        --argjson memtester_tests "$MEMTEST_JSON" \
         '{
             machine_info: {
                 hostname: $hostname,
@@ -387,7 +400,8 @@ fi
                 }
             },
             memory: {
-                memtester_512mb: $mem_status
+                memtester_512mb: $mem_status,
+                memtester_tests: $memtester_tests
             },
             network: {
                 iperf3_download: $net_down,
