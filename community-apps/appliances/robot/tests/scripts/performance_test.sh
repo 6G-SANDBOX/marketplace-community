@@ -529,6 +529,7 @@ EOF
     # Stop monitoring
     kill $GPU_MONITOR_PID
 
+    if [[ -s "$GPU_MONITOR_LOG" && $(grep -c ':' "$GPU_MONITOR_LOG") -gt 1 ]]; then
 python3 - <<EOF
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -571,7 +572,19 @@ try:
 except Exception as e:
     print(f"❌ Error generating GPU plot: {e}")
 EOF
+    else
+        echo "⚠️ Skipping GPU plot generation: insufficient or invalid monitoring data. Generating error image..." | tee -a $LOG_FILE
+        python3 - <<EOF
+import matplotlib.pyplot as plt
 
+plt.figure(figsize=(8, 4))
+plt.text(0.5, 0.5, "TensorFlow GPU Benchmark Failed", fontsize=14,
+         ha='center', va='center', color='red')
+plt.axis('off')
+plt.savefig("$GPU_PLOT_FILE", bbox_inches='tight', facecolor='white')
+print("❌ Generated error image instead of GPU usage plot.")
+EOF
+    fi
 
 
 fi
