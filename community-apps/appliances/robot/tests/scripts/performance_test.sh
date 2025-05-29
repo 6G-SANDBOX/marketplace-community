@@ -180,6 +180,13 @@ generate_json_from_log() {
 fi
 
 
+    # Disk
+    IOPS=$(grep "IOPS=" "$LOG_FILE" | awk -F'IOPS=' '{print $2}' | awk -F',' '{print $1}' | head -n1)
+    FIO_BW=$(grep "BW=" "$LOG_FILE" | awk -F'BW=' '{print $2}' | awk '{print $1}' | head -n1)
+    FIO_LAT=$(grep "avg=" "$LOG_FILE" | grep "lat" | head -n1 | awk '{print $3}')
+    CACHED_READ=$(grep "Timing cached reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    BUFFERED_READ=$(grep "Timing buffered disk reads" "$LOG_FILE" | awk -F '=' '{print $2}' | awk '{print $1}')
+    HDPARM_DEV=$(grep '^/dev/' "$LOG_FILE" | head -n 1 | awk -F: '{print $1}')
     # Disk - Enhanced FIO parsing
     FIO_BLOCK=$(awk '/Running Disk Read\/Write Performance \(FIO\) benchmark/,/Completed Disk Read\/Write Performance \(FIO\) benchmark/' "$LOG_FILE")
     FIO_IOPS=$(echo "$FIO_BLOCK" | grep -oP 'iops\s+:.*avg=\K[0-9.]+' | head -1)
@@ -188,7 +195,7 @@ fi
     FIO_P99=$(echo "$FIO_BLOCK" | grep -A15 'clat percentiles' | grep '99.00th' | grep -oP '\[\K[0-9.]+' | head -1)
     FIO_CPU_USR=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+: usr=\K[0-9.]+' | head -1)
     FIO_CPU_SYS=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+:.*sys=\K[0-9.]+' | head -1)
-
+ 
     # Fallback defaults
     FIO_IOPS=${FIO_IOPS:-0}
     FIO_BW=${FIO_BW:-0}
@@ -196,9 +203,6 @@ fi
     FIO_P99=$(awk "BEGIN {print (${FIO_P99:-0} / 1000)}")  # convert nsec to usec
     FIO_CPU_USR="${FIO_CPU_USR:-0}%"
     FIO_CPU_SYS="${FIO_CPU_SYS:-0}%"
-
-
-
     # Memory
     MEM_OK=$(grep -A20 "Memory Test" "$LOG_FILE" | grep -c "ok")
     MEM_STATUS="ok"
@@ -289,8 +293,8 @@ fi
         --argjson fio_bw "$FIO_BW" \
         --argjson fio_lat "$FIO_LATENCY" \
         --argjson fio_p99 "$FIO_P99" \
-        --argjson fio_cpu_usr "$FIO_CPU_USR" \
-        --argjson fio_cpu_sys "$FIO_CPU_SYS" \
+        --arg fio_cpu_usr "$FIO_CPU_USR" \
+        --arg fio_cpu_sys "$FIO_CPU_SYS" \
         --argjson cached_read "$CACHED_READ" \
         --argjson buffered_read "$BUFFERED_READ" \
         --arg tf_gpu_matrix "$TF_GPU_MATRIX" \
@@ -363,7 +367,7 @@ fi
                     cpu_usage_percent: {
                         user: $fio_cpu_usr,
                         system: $fio_cpu_sys
-                    }
+                    }                    
                 },
                 hdparm: {
                     cached_read_mb_s: $cached_read,
