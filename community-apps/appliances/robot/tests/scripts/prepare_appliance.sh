@@ -30,7 +30,7 @@ JSON_FILE="$FILE_PATH/$FILENAME"
 
 # Create log file if it doesn't exist
 if [ ! -f "$JSON_FILE" ]; then
-    echo "{}" > "$JSON_FILE"
+    echo '{"preparation": {}}' > "$JSON_FILE"
 fi
 
 # Create log and JSON files
@@ -52,21 +52,31 @@ install_package() {
         echo "🔹 Installing $PKG_NAME..."
         if eval $INSTALL_CMD; then
             echo "✅ $PKG_NAME installed successfully."
-            jq --arg key "$PKG_NAME" --arg value "Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+            jq --arg key "$PKG_NAME" --arg value "Installed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         else
             echo "❌ ERROR: Failed to install $PKG_NAME." | tee -a $LOG_FILE
-            jq --arg key "$PKG_NAME" --arg value "Failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+            jq --arg key "$PKG_NAME" --arg value "Failed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         fi
     else
         echo "✅ $PKG_NAME is already installed."
-        jq --arg key "$PKG_NAME" --arg value "Already Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        jq --arg key "$PKG_NAME" --arg value "Already Installed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
     fi
 }
 
 # System update and install essential tools
 echo "🔹 Updating system and installing necessary tools..."
 apt update -y && apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-apt install -y --no-install-recommends curl wget software-properties-common pciutils jq python3 python3-pip python3-venv
+install_package "curl" "curl" "apt install -y --no-install-recommends curl"
+install_package "wget" "wget" "apt install -y --no-install-recommends wget"
+install_package "software-properties-common" "software-properties-common" "apt install -y --no-install-recommends software-properties-common"
+install_package "pciutils" "pciutils" "apt install -y --no-install-recommends pciutils"
+install_package "jq" "jq" "apt install -y --no-install-recommends jq"
+install_package "python3" "python3" "apt install -y --no-install-recommends python3"
+install_package "python3-pip" "python3-pip" "apt install -y --no-install-recommends python3-pip"
+install_package "python3-venv" "python3-venv" "apt install -y --no-install-recommends python3-venv"
+
+# install drivers
+install_package "libcudnn8" "libcudnn8" "apt install -y --no-install-recommends libcudnn8"
 
 # Install benchmarking tools
 install_package "Sysstat" "iostat" "apt install -y --no-install-recommends sysstat"
@@ -89,7 +99,27 @@ if lspci | grep -i nvidia; then
     python3 -m venv /tmp/tf_gpu_env
     source /tmp/tf_gpu_env/bin/activate
     pip install --upgrade pip
-    pip install tensorflow
+    # pip install tensorflow
+
+    REQUIRED_PIP_PACKAGES=(
+    "tensorflow==2.18.0"
+    "nvidia-cuda-runtime-cu12"
+    "nvidia-cudnn-cu12"
+    "nvidia-cublas-cu12"
+    "matplotlib"
+    "pandas"
+    )
+
+    for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
+        if ! pip show $(echo "$pkg" | cut -d= -f1) &>/dev/null; then
+            echo "🔧 Installing $pkg..."
+            pip install "$pkg"
+            jq --arg key "$pkg" --arg value "Installed" '.preparation.pip[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        else
+            echo "✅ $pkg already installed."
+            jq --arg key "$pkg" --arg value "Already Installed" '.preparation.pip[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        fi
+    done
 fi
 
 echo "✅ Installation complete. Exiting without running benchmarks."

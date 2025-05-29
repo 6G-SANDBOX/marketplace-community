@@ -1,4 +1,4 @@
-# Performance Appliance Information (CPU)
+# Performance Appliance Information (**CPU**)
 ***
 This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
 
@@ -37,7 +37,7 @@ This test runs a CPU performance test using the sysbench benchmarking tool. Spec
 * **Threads Fairness Exec Time Stddev**: The standard deviation of execution time per thread, indicating variability in execution time.
 
 <div class="page-break"></div>
-# Performance Appliance Information (CPU)
+# Performance Appliance Information (**CPU**)
 ***
 This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
 
@@ -56,7 +56,7 @@ This section runs a CPU stress test using the stress-ng tool. It's designed to a
 * **Duration (sec)**: The total duration of the stress test in seconds.
 
 <div class="page-break"></div>
-# Performance Appliance Information (GPU)
+# Performance Appliance Information (**GPU**)
 ***
 This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
 
@@ -83,32 +83,57 @@ This section evaluates the performance of training a ResNet50 model on the GPU, 
 
 * **Total Time (sec)**: The total time taken to train the ResNet50 model on the GPU in seconds.
 
+&nbsp;
+### **GPU Usage Plot**
+
 <div align="center">
-  <img src="/opt/robot-tests/tests/libraries/report/opennebula.png" alt="Descripción" width="300">
+  <img src="/opt/robot-tests/results/gpu_usage_plot.png" alt="Descripción" width="800">
 </div>
 
 
 <div class="page-break"></div>
-# Performance Appliance Information (Memory, Disk, Network)
+# Performance Appliance Information (**Memory**)
 ***
 This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
 
-## **Memory**
+## **Memory Check**
+
+| Memory Test | Status |
+|-------------|--------|
+{%- for key, value in memory.items() %}
+{%- if not key.endswith('_tests') %}
+| {{ key }} | {{ value }} |
+{%- endif %}
+{%- endfor %}
 
 &nbsp;
+| Integrity Test | Result |
+|-------------|--------|
+{%- for key, value in memory.memtester_tests.items() %}
+| {{ key }} | {{ value }} |
+{%- endfor %}
+
+<div class="page-break"></div>
+# Performance Appliance Information (**Disk**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
 ## **Disk**
 For this tests FIO and HDPARM are used to measure the disk performance.
 
 &nbsp;
 ### ***FIO Random Write Test***
 This section runs a FIO random write test to measure the disk's IOPS, bandwidth, and latency.
-| IOPS | Bandwidth (MiB/s) | Latency Avg (usec) |
-|------|-------------------|---------------------|
-| {{ disk.fio_randwrite.iops }} | {{ disk.fio_randwrite.bandwidth_mib_s }} | {{ disk.fio_randwrite.latency_avg_usec }} |
+| IOPS | Bandwidth (MiB/s) | Latency Avg (usec) | Completion Latency (usec) | CPU usage by User (%) | CPU usage by System (%) |
+|------|-------------------|---------------------| -------------------------|------------------------|--------------------------|
+| {{ disk.fio_randwrite.iops }} | {{ disk.fio_randwrite.bandwidth_mib_s }} | {{ disk.fio_randwrite.latency_avg_usec }} | {{ disk.fio_randwrite.clat_99th_percentile_usec }} | {{ disk.fio_randwrite.cpu_usage_percent.user }} | {{ disk.fio_randwrite.cpu_usage_percent.system }} |
 
 * **IOPS**: Input/Output Operations Per Second, indicating the number of read/write operations the disk can handle per second.
 * **Bandwidth (MiB/s)**: The data transfer rate in mebibytes per second during the test.
 * **Latency Avg (usec)**: The average latency in microseconds for the read/write operations.
+* **Completion Latency (usec)**: The 99th percentile latency in microseconds, indicating the time taken for the slowest 1% of operations.
+* **CPU usage by User (%)**: The percentage of CPU time spent in user space during the test.
+* **CPU usage by System (%)**: The percentage of CPU time spent in kernel space during the test.
 
 &nbsp;
 ### ***HDPARM Disk Test***
@@ -117,7 +142,16 @@ This section runs a HDPARM test to measure the disk's cached read speed and buff
 |--------------------------|----------------------------------|----------------|
 | {{ disk.hdparm.cached_read_mb_s }} | {{ disk.hdparm.buffered_disk_read_mb_s }} | {{ disk.hdparm.device_tested }} |
 
-&nbsp;
+* **Cached Read Speed (MB/s)**: The speed of reading data from the disk cache in megabytes per second.
+* **Buffered Disk Read Speed (MB/s)**: The speed of reading data from the disk in megabytes per second, using buffered I/O.
+* **Device Tested**: The specific disk device that was tested.
+
+
+<div class="page-break"></div>
+# Performance Appliance Information (**Network**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
 ## **Network**
 For this tests Iperf3 is used to measure the network performance.
 

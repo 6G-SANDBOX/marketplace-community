@@ -1,0 +1,19 @@
+
+# Prepare Appliance 
+***
+This section will show the libraries and tools status inside the appliance, before running the tests.
+## **System Tools and Libraries**
+
+| Package | Status |
+|---|---|
+{%- for key, value in preparation.apt.items() %}
+| {{ key }} | {{ value }} |
+{%- endfor %}
+
+&nbsp;
+## **Python Pip libraries**
+| Library | Status |
+|---|---|
+{%- for key, value in preparation.pip.items() %}
+| {{ key }} | {{ value }} |
+{%- endfor %}
