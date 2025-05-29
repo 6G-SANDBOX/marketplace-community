@@ -61,7 +61,7 @@ Performance Tests
     ...    ${SUT_IP}
     ...    ${PERFORMANCE_TEST_SCRIPT}
     ...    ${PERFORMANCE_TEST_FILE}
-    ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
+    ...    args=${ROBOT_IPERF_SERVER}
 
 Generate Report
     [Documentation]    Generate General Report
@@ -74,15 +74,15 @@ Generate Report
 
     # Generate Functional report pages
     Generate Report Page Pdf
-    ...    010-functional_info.md.j2
-    ...    ${SUT_INFO_FILE}
-    ...    ${OUTPUT_DIR}/010-functional_info.pdf
-
-    # Generate Functional report pages
-    Generate Report Page Pdf
     ...    000-prepare_info.md.j2
     ...    ${PREPARE_APPLIANCE_FILE}
     ...    ${OUTPUT_DIR}/000-prepare_info.pdf
+
+    # Generate Functional report pages
+    Generate Report Page Pdf
+    ...    010-functional_info.md.j2
+    ...    ${SUT_INFO_FILE}
+    ...    ${OUTPUT_DIR}/010-functional_info.pdf
 
     # Generate perfomance report pages
     Generate Report Page Pdf
