@@ -192,7 +192,8 @@ fi
     FIO_IOPS=$(echo "$FIO_BLOCK" | grep -oP 'iops\s+:.*avg=\K[0-9.]+' | head -1)
     FIO_BW=$(echo "$FIO_BLOCK" | grep -oP 'write: IOPS=.*BW=\K[0-9.]+' | head -1)
     FIO_LATENCY=$(echo "$FIO_BLOCK" | grep -oP 'lat \(usec\):.*avg=\K[0-9.]+' | head -1)
-    FIO_P99=$(echo "$FIO_BLOCK" | grep -A15 'clat percentiles' | grep '99.00th' | grep -oP '\[\K[0-9.]+' | head -1)
+    FIO_P99=$(echo "$FIO_BLOCK" | grep '99.00th' | sed -n 's/.*99\.00th=\[\s*\([0-9.]\+\)\].*/\1/p' | head -1)
+    FIO_P99=$(awk "BEGIN {print (${FIO_P99:-0} / 1000)}")  # convert to usec
     FIO_CPU_USR=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+: usr=\K[0-9.]+' | head -1)
     FIO_CPU_SYS=$(echo "$FIO_BLOCK" | grep -oP 'cpu\s+:.*sys=\K[0-9.]+' | head -1)
  
@@ -200,7 +201,6 @@ fi
     FIO_IOPS=${FIO_IOPS:-0}
     FIO_BW=${FIO_BW:-0}
     FIO_LATENCY=${FIO_LATENCY:-0}
-    FIO_P99=$(awk "BEGIN {print (${FIO_P99:-0} / 1000)}")  # convert nsec to usec
     FIO_CPU_USR="${FIO_CPU_USR:-0}%"
     FIO_CPU_SYS="${FIO_CPU_SYS:-0}%"
     # Memory
