@@ -698,19 +698,15 @@ fi
 
 # Network - Download
 echo "�� Running Network Performance (Iperf3 - Download) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 2>&1 | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 >> "$LOG_FILE" 2>&1
 echo "✅ Completed Network Performance (Iperf3 - Download) benchmark." | tee -a $LOG_FILE
 echo "------------------------------------------------" | tee -a $LOG_FILE
 
 # Network - Upload
 echo "�� Running Network Performance (Iperf3 - Upload) benchmark..." | tee -a $LOG_FILE
-iperf3 -c "$IPERF3_SERVER" -t 10 -R 2>&1 | tee -a $LOG_FILE
+iperf3 -c "$IPERF3_SERVER" -t 10 -R >> "$LOG_FILE" 2>&1
 echo "✅ Completed Network Performance (Iperf3 - Upload) benchmark." | tee -a $LOG_FILE
 echo "------------------------------------------------" | tee -a $LOG_FILE
-
-
-# Completion message
-echo "✅ All benchmarks completed. Results saved in $LOG_FILE"
 
 # Completion message
 echo "✅ All benchmarks completed. Results saved in $LOG_FILE and $JSON_FILE"
