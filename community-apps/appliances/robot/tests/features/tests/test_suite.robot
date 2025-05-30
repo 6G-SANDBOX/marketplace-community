@@ -12,7 +12,7 @@ Test Teardown       Reset Testing Environment
 
 *** Variables ***
 # Test variables
-${SUT_IP}
+${SUT_IP}                       ${EMPTY}
 ${PUBLIC_ENDPOINT}              8.8.8.8
 
 # output folder
@@ -22,8 +22,8 @@ ${OUTPUT_DIR}                   /opt/robot-tests/results
 ${PREPARE_APPLIANCE_SCRIPT}     /opt/robot-tests/tests/scripts/prepare_appliance.sh
 ${PREPARE_APPLIANCE_FILE}       /opt/robot-tests/results/prepare_appliance.json
 # Basic details scripts
-${SUT_INFO_SCRIPT}       /opt/robot-tests/tests/scripts/sut_info.sh
-${SUT_INFO_FILE}         /opt/robot-tests/results/sut_info.json
+${SUT_INFO_SCRIPT}              /opt/robot-tests/tests/scripts/sut_info.sh
+${SUT_INFO_FILE}                /opt/robot-tests/results/sut_info.json
 # Performance Tests scripts
 ${PERFORMANCE_TEST_SCRIPT}      /opt/robot-tests/tests/scripts/performance_test.sh
 ${PERFORMANCE_TEST_FILE}        /opt/robot-tests/results/performance_test.json
@@ -70,7 +70,7 @@ Generate Report
     # Generate Cover
     ${current_date}=    Get Current Date    result_format=%d/%m/%Y %H:%M:%S
     Generate Cover    Tests over ONE Appliance    ${current_date}    ${OUTPUT_DIR}/000-cover.pdf
-    Create Watermark   ${OUTPUT_DIR}/watermark.pdf
+    Create Watermark    ${OUTPUT_DIR}/watermark.pdf
 
     # Generate Functional report pages
     Generate Report Page Pdf
@@ -96,7 +96,7 @@ Generate Report
     ...    ${OUTPUT_DIR}/010-functional_info.pdf
     ...    ${OUTPUT_DIR}/020-performance_info.pdf
 
-    Apply Watermark     ${PDFS_TO_JOIN}  ${OUTPUT_DIR}/watermark.pdf
+    Apply Watermark    ${PDFS_TO_JOIN}    ${OUTPUT_DIR}/watermark.pdf
 
     # Join all PDFs
     ${PDFS_TO_JOIN}=    Create List

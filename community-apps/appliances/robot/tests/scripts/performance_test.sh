@@ -1,4 +1,5 @@
 #!/bin/bash
+export BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Set non-interactive mode
 export DEBIAN_FRONTEND=noninteractive
@@ -25,6 +26,7 @@ show_help() {
 # Default values
 IPERF3_SERVER="10.95.82.70"  # Default Iperf3 server IP
 JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
+OUTPUT_FOLDER="$BASE_DIR"  # Default output folder for JSON and log files
 RUN_MEMTEST=true
 RUN_CPU_STRESS=true
 RUN_MEM_SPEED=true
@@ -76,6 +78,7 @@ LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
 # Display configuration
 echo "Iperf3 server IP: $IPERF3_SERVER"
 echo "JSON output file: $JSON_FILE"
+echo "Output folder: $OUTPUT_FOLDER"
 echo "Run Memory Test: $RUN_MEMTEST"
 echo "Run CPU Stress Test: $RUN_CPU_STRESS"
 echo "Run Memory Speed Test: $RUN_MEM_SPEED"
@@ -88,8 +91,8 @@ echo "Run Network Performance Test: $RUN_NETWORK"
 echo "{}" > "$JSON_FILE"
 
 # plot files
-GPU_MONITOR_LOG="/tmp/gpu_monitor.csv"
-GPU_PLOT_FILE="gpu_usage_plot.png"
+GPU_MONITOR_LOG="$OUTPUT_FOLDER/gpu_monitor.csv"
+GPU_PLOT_FILE="$OUTPUT_FOLDER/gpu_usage_plot.png"
 
 source /tmp/tf_gpu_env/bin/activate
 
@@ -219,7 +222,7 @@ generate_json_from_log() {
 
     # GPU Info
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 || echo "unknown")
-    GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
+    GPU_MEM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n1 || echo "unknown")
     GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
     GPU_UTIL=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits)
     TF_GPU_ITER=$(grep "Running GPU stress test with" "$LOG_FILE" | awk '{for(i=1;i<=NF;i++) if ($i=="with") print $(i+1)}' | head -n1)

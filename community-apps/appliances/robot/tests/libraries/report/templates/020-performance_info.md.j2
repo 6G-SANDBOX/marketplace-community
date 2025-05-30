@@ -61,6 +61,13 @@ This section runs a CPU stress test using the stress-ng tool. It's designed to a
 This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
 
 ## **GPU**
+First initial status of GPU is shown:
+| GPU Name | {{ gpu.name }} |
+| --- | --- |
+| GPU Memory (MiB) | {{ gpu.memory_total_mib }} |
+| Memory Usage (%) | {{ gpu.utilization_gpu_percent }} |
+| Temperature (C) | {{ gpu.temperature_c }} |
+
 For this tests TensorFlow and ResNet50 are used to measure the GPU performance.
 
 &nbsp;
@@ -98,10 +105,16 @@ This section provides detailed performance metrics for the appliance, including 
 
 ## **Memory Check**
 
+For this tests Memtester and Sysbench are used to measure the memory performance.
+&nbsp;
+
+### **Memtester Memory Test**
+This section runs a memory test using Memtester to check for memory errors and performance.
+
 | Memory Test | Status |
 |-------------|--------|
 {%- for key, value in memory.items() %}
-{%- if not key.endswith('_tests') %}
+{%- if not key.endswith('_tests') and key != 'sysbench_memory' %}
 | {{ key }} | {{ value }} |
 {%- endif %}
 {%- endfor %}
@@ -112,6 +125,42 @@ This section provides detailed performance metrics for the appliance, including 
 {%- for key, value in memory.memtester_tests.items() %}
 | {{ key }} | {{ value }} |
 {%- endfor %}
+
+### **Performance Metrics**
+
+&nbsp;
+**Sysbench Memory Test**
+| Block Size (KiB) | Total Size (MiB) | Total Operations | Operations per Second | Transfered (MiB) | Transfer Rate (MiB/s) |
+|------------------|-------------------|------------------|-----------------------|-------------------|-----------------------|
+| {{ memory.sysbench_memory.block_size_kib }} | {{ memory.sysbench_memory.total_size_mib }} | {{ memory.sysbench_memory.total_ops }} | {{ memory.sysbench_memory.ops_per_sec }} | {{ memory.sysbench_memory.transferred_mib }} | {{ memory.sysbench_memory.transfer_speed }} | 
+
+* **Block Size (KiB)**: The size of each memory block used in the test, measured in kibibytes.
+* **Total Size (MiB)**: The total size of memory tested, measured in mebibytes.
+* **Total Operations**: The total number of memory operations performed during the test.
+* **Operations per Second**: The rate at which memory operations were performed, measured in operations per second.
+* **Transferred (MiB)**: The total amount of data transferred during the test, measured in mebibytes.
+* **Transfer Rate (MiB/s)**: The average rate of data transfer during the test, measured in mebibytes per second.
+
+**Latency Metrics**
+| Latency (ms) Min | Latency (ms) Avg | Latency (ms) Max | Latency (ms) 95th Percentile | Latency (ms) Sum |
+| --------------------- | ----------------- | ----------------- | ---------------------------- | ----------------- |
+| {{ memory.sysbench_memory.latency_ms.min }} | {{ memory.sysbench_memory.latency_ms.avg }} | {{ memory.sysbench_memory.latency_ms.max }} | {{ memory.sysbench_memory.latency_ms.percentile_95 }} | {{ memory.sysbench_memory.latency_ms.sum }} |
+
+* **Latency (ms) Min**: The minimum latency recorded during the memory operations.
+* **Latency (ms) Avg**: The average latency across all memory operations.
+* **Latency (ms) Max**: The maximum latency recorded during the memory operations.
+* **Latency (ms) 95th Percentile**: The latency at the 95th percentile, indicating that 95% of the operations had a latency less than this value.
+* **Latency (ms) Sum**: The total latency across all memory operations.
+
+**Threads Fairness Metrics**
+| Threads Fairness Events Avg | Threads Fairness Events Stddev | Threads Fairness Exec Time Avg | Threads Fairness Exec Time Stddev |
+| -------------------------- | ----------------------------- | ------------------------------- | -------------------------------- |
+| {{ memory.sysbench_memory.threads_fairness.events_avg }} | {{ memory.sysbench_memory.threads_fairness.events_stddev }} | {{ memory.sysbench_memory.threads_fairness.exec_time_avg }} | {{ memory.sysbench_memory.threads_fairness.exec_time_stddev }} |
+
+* **Threads Fairness Events Avg**: The average number of memory operations processed per thread.
+* **Threads Fairness Events Stddev**: The standard deviation of memory operations processed per thread, indicating variability.
+* **Threads Fairness Exec Time Avg**: The average execution time per thread for memory operations.
+* **Threads Fairness Exec Time Stddev**: The standard deviation of execution time per thread for memory operations, indicating variability in execution time.
 
 <div class="page-break"></div>
 # Performance Appliance Information (**Disk**)
