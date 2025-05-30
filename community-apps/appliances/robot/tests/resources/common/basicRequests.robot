@@ -74,7 +74,7 @@ Execute Remote Script
     IF    "${local_output_file}" != "${NONE}"
         ${local_output_directory}    ${output_filename}=    Split Path    ${local_output_file}
         ${stdout}    ${rc}=    Execute Command
-        ...    /tmp/${script_filename} /tmp/${output_filename} ${args}
+        ...    /tmp/${script_filename} --json /tmp/${output_filename} ${args}
         ...    return_stdout=True
         ...    return_rc=True
         Log    ${stdout}

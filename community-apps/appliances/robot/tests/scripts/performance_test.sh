@@ -8,23 +8,23 @@ show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --no-memtest           Skip memory test (memtester)"
-    echo "  --no-cpu-stress        Skip CPU stress test (stress-ng)"
-    echo "  --no-mem-speed         Skip memory speed test (sysbench memory)"
-    echo "  --no-gpu-nvidia-smi    Skip GPU test using nvidia-smi"
-    echo "  --no-disk-perf         Skip disk performance test (FIO)"
-    echo "  --no-disk-read         Skip disk read speed test (hdparm)"
-    echo "  --no-network           Skip network performance tests (iperf3)"
-    echo "  --help                 Show this help message and exit"
+    echo "  --iperf-ip <ip>         Specify the IP address for the Iperf3 server."
+    echo "  --json <filename>       Specify the JSON output file."
+    echo "  --no-memtest            Skip memory test (memtester)."
+    echo "  --no-cpu-stress         Skip CPU stress test (stress-ng)."
+    echo "  --no-mem-speed          Skip memory speed test (sysbench memory)."
+    echo "  --no-gpu-nvidia-smi     Skip GPU test using nvidia-smi."
+    echo "  --no-disk-perf          Skip disk performance test (FIO)."
+    echo "  --no-disk-read          Skip disk read speed test (hdparm)."
+    echo "  --no-network            Skip network performance tests (iperf3)."
+    echo "  --help                  Show this help message and exit."
     echo ""
     exit 0
 }
 
-
-# Iperf3 server configuration
-IPERF3_SERVER="10.95.82.70"  # You can change this to your desired server IP or hostname
-
-# Defaults
+# Default values
+IPERF3_SERVER="10.95.82.70"  # Default Iperf3 server IP
+JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
 RUN_MEMTEST=true
 RUN_CPU_STRESS=true
 RUN_MEM_SPEED=true
@@ -32,12 +32,28 @@ RUN_GPU_NVIDIA_SMI=true
 RUN_DISK_PERF=true
 RUN_DISK_READ=true
 RUN_NETWORK=true
-GPU_MONITOR_ENABLED=false
-GPU_MONITOR_EXECUTED=false
 
 # Parse CLI arguments
-for arg in "$@"; do
-    case $arg in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --iperf-ip)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                IPERF3_SERVER="$2"
+                shift
+            else
+                echo "❌ ERROR: --iperf-ip requires an IP address argument."
+                show_help
+            fi
+            ;;
+        --json)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                JSON_FILE="$2"
+                shift
+            else
+                echo "❌ ERROR: --json requires a filename argument."
+                show_help
+            fi
+            ;;
         --no-memtest) RUN_MEMTEST=false ;;
         --no-cpu-stress) RUN_CPU_STRESS=false ;;
         --no-mem-speed) RUN_MEM_SPEED=false ;;
@@ -46,13 +62,30 @@ for arg in "$@"; do
         --no-disk-read) RUN_DISK_READ=false ;;
         --no-network) RUN_NETWORK=false ;;
         --help) show_help ;;
-        *) echo "❌ Unknown option: $arg"; show_help ;;
+        *)
+            echo "❌ Unknown option: $1"
+            show_help
+            ;;
     esac
+    shift
 done
 
 # Log files
 LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
-JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
+
+# Display configuration
+echo "Iperf3 server IP: $IPERF3_SERVER"
+echo "JSON output file: $JSON_FILE"
+echo "Run Memory Test: $RUN_MEMTEST"
+echo "Run CPU Stress Test: $RUN_CPU_STRESS"
+echo "Run Memory Speed Test: $RUN_MEM_SPEED"
+echo "Run GPU NVIDIA-SMI Test: $RUN_GPU_NVIDIA_SMI"
+echo "Run Disk Performance Test: $RUN_DISK_PERF"
+echo "Run Disk Read Speed Test: $RUN_DISK_READ"
+echo "Run Network Performance Test: $RUN_NETWORK"
+
+# Create JSON file with initial structure
+echo "{}" > "$JSON_FILE"
 
 # plot files
 GPU_MONITOR_LOG="/tmp/gpu_monitor.csv"
@@ -93,10 +126,6 @@ if ! dpkg -s libcudnn8 &>/dev/null; then
 else
     echo "✅ libcudnn8 already installed." >> "$LOG_FILE"
 fi
-
-
-# Create JSON file with initial structure
-echo "{}" > "$JSON_FILE"
 
 # Function to execute benchmarks and store structured data
 run_benchmark() {

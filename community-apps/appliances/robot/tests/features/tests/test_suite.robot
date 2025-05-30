@@ -49,7 +49,7 @@ Retrieve basic details from SUT
     ...    ${SUT_IP}
     ...    ${SUT_INFO_SCRIPT}
     ...    ${SUT_INFO_FILE}
-    ...    args=${ROBOT_IPERF_SERVER} ${PUBLIC_ENDPOINT}
+    ...    args=--iperf-ip ${ROBOT_IPERF_SERVER} --public-endpoint ${PUBLIC_ENDPOINT}
 
 Performance Tests
     [Documentation]    Run performance tests
@@ -61,7 +61,7 @@ Performance Tests
     ...    ${SUT_IP}
     ...    ${PERFORMANCE_TEST_SCRIPT}
     ...    ${PERFORMANCE_TEST_FILE}
-    ...    args=${ROBOT_IPERF_SERVER}
+    ...    args=--iperf-ip ${ROBOT_IPERF_SERVER}
 
 Generate Report
     [Documentation]    Generate General Report

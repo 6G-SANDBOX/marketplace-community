@@ -7,14 +7,61 @@
 #   $0 <output_file.json> <iperf_server> <public_endpoint>
 # ----------------------------------------
 
-if [ $# -ne 3 ]; then
-    echo "Usage: $0 <output_file.json> <iperf_server> <public_endpoint>"
-    exit 1
-fi
+OUTPUT_FILE="sut_info_$(date +%Y%m%d_%H%M%S).json"
+IPERF3_SERVER=""
+PUBLIC_ENDPOINT="8.8.8.8"  # Default public endpoint for DNS reachability
 
-OUTPUT_FILE="$1"
-IPERF_SERVER="$2"
-PUBLIC_ENDPOINT="$3"
+# Help message
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --iperf-ip <ip>         Specify the IP address for the Iperf3 server."
+    echo "  --json <filename>       Specify the JSON output file."
+    echo "  --public-endpoint       Specify the public IP to check connectivity."
+    echo "  --help                  Show this help message and exit."
+    echo ""
+    exit 0
+}
+
+# Parse CLI arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --iperf-ip)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                IPERF3_SERVER="$2"
+                shift
+            else
+                echo "❌ ERROR: --iperf-ip requires an IP address argument."
+                show_help
+            fi
+            ;;
+        --json)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                OUTPUT_FILE="$2"
+                shift
+            else
+                echo "❌ ERROR: --json requires a filename argument."
+                show_help
+            fi
+            ;;
+        --public-endpoint)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                PUBLIC_ENDPOINT="$2"
+                shift
+            else
+                echo "❌ ERROR: --public-endpoint requires a public ip argument."
+                show_help
+            fi
+            ;;
+        --help) show_help ;;
+        *)
+            echo "❌ Unknown option: $1"
+            show_help
+            ;;
+    esac
+    shift
+done
 
 # Get current timestamp in ISO 8601
 get_timestamp() {
@@ -90,7 +137,7 @@ get_ram_info() {
 }
 
 get_iperf_interface() {
-    ip route get $IPERF_SERVER | awk '{print $5; exit}' || echo "Unknown"
+    ip route get $IPERF3_SERVER | awk '{print $5; exit}' || echo "Unknown"
 }
 
 validate_dns_reachability() {
@@ -101,7 +148,7 @@ validate_dns_reachability() {
 }
 
 validate_iperf_reachability() {
-    ping -c 2 "$IPERF_SERVER" >/dev/null 2>&1 && echo "\"OK\"" || echo "\"FAIL\""
+    ping -c 2 "$IPERF3_SERVER" >/dev/null 2>&1 && echo "\"OK\"" || echo "\"FAIL\""
 }
 
 get_disk_info() {

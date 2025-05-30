@@ -4,15 +4,41 @@
 # Script to gather SUT system information
 # Generates a structured JSON report.
 # Usage:
-#   $0 <output_file.json> <iperf_server> <public_endpoint>
+#   $0 <output_file.json>
 # ----------------------------------------
 
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <output_file.json>"
-    exit 1
-fi
+# Help message
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --json <filename>       Specify the JSON output file."
+    echo "  --help                  Show this help message and exit."
+    echo ""
+    exit 0
+}
 
-OUTPUT_FILE="$1"
+OUTPUT_FILE="prepare_appliance_$(date +%Y%m%d_%H%M%S).json"
+
+# Parse CLI arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                OUTPUT_FILE="$2"
+                shift
+            else
+                echo "❌ ERROR: --json requires a filename argument."
+                show_help
+            fi
+            ;;
+        *)
+            echo "❌ Unknown option: $1"
+            show_help
+            ;;
+    esac
+    shift
+done
 
 # Obtener el nombre del archivo
 FILENAME=$(basename "$OUTPUT_FILE")
