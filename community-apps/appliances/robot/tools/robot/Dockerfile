@@ -29,7 +29,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 # Install dependencies
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y --no-install-recommends  \
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing  \
     software-properties-common \
     build-essential \
     bash \
