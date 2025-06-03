@@ -1,0 +1,215 @@
+# Performance Appliance Information (**CPU**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+## **CPU**
+For this tests Sysbench and stress-ng are used to measure the CPU performance.
+&nbsp;
+### **Sysbench CPU Test**
+This test runs a CPU performance test using the sysbench benchmarking tool. Specifically, it measures how quickly the system's CPU can calculate prime numbers up to a given limit, under full load.
+| CPU Speed (events/sec) | Total Time (sec) | Total Events | 
+| ------------------------|------------------|--------------|
+| {{ machine_info.cpu_info.sysbench_metrics.cpu_speed }} | {{ machine_info.cpu_info.sysbench_metrics.total_time }} | {{ machine_info.cpu_info.sysbench_metrics.total_events }} |
+
+* **CPU Speed**: The number of events (prime numbers calculated) per second.
+* **Total Time**: The total duration of the test in seconds.
+* **Total Events**: The total number of events processed during the test.
+
+&nbsp;
+| Latency (ms) Min | Latency (ms) Avg | Latency (ms) Max | Latency (ms) 95th Percentile | Latency (ms) Sum |
+| --------------------- | ----------------- | ----------------- | ---------------------------- | ----------------- |
+| {{ machine_info.cpu_info.sysbench_metrics.latency_ms.min }} | {{ machine_info.cpu_info.sysbench_metrics.latency_ms.avg }} | {{ machine_info.cpu_info.sysbench_metrics.latency_ms.max }} | {{ machine_info.cpu_info.sysbench_metrics.latency_ms.percentile_95 }} | {{ machine_info.cpu_info.sysbench_metrics.latency_ms.sum }} |
+
+* **Latency (ms) Min**: The minimum latency recorded during the test.
+* **Latency (ms) Avg**: The average latency across all events.
+* **Latency (ms) Max**: The maximum latency recorded during the test.
+* **Latency (ms) 95th Percentile**: The latency at the 95th percentile, indicating that 95% of the events had a latency less than this value.
+* **Latency (ms) Sum**: The total latency across all events.
+
+&nbsp;
+| Threads Fairness Events Avg | Threads Fairness Events Stddev | Threads Fairness Exec Time Avg | Threads Fairness Exec Time Stddev |
+| -------------------------- | ----------------------------- | ------------------------------- | -------------------------------- |
+| {{ machine_info.cpu_info.sysbench_metrics.threads_fairness.events_avg }} | {{ machine_info.cpu_info.sysbench_metrics.threads_fairness.events_stddev }} | {{ machine_info.cpu_info.sysbench_metrics.threads_fairness.exec_time_avg }} | {{ machine_info.cpu_info.sysbench_metrics.threads_fairness.exec_time_stddev }} |
+
+* **Threads Fairness Events Avg**: The average number of events processed per thread.
+* **Threads Fairness Events Stddev**: The standard deviation of events processed per thread, indicating variability.
+* **Threads Fairness Exec Time Avg**: The average execution time per thread.
+* **Threads Fairness Exec Time Stddev**: The standard deviation of execution time per thread, indicating variability in execution time.
+
+<div class="page-break"></div>
+# Performance Appliance Information (**CPU**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+### **Stress-ng CPU Test**
+This section runs a CPU stress test using the stress-ng tool. It's designed to apply a heavy, configurable computational load to the CPU cores by exercising various algorithms.
+
+| CPU Workers | Skipped | Passed | Failed | Metrics Untrustworthy | Duration (sec) |
+|-------------|---------|--------|--------|-----------------------|----------------|
+| {{ machine_info.cpu_info.stress_ng.cpu_workers }} | {{ machine_info.cpu_info.stress_ng.skipped }} | {{ machine_info.cpu_info.stress_ng.passed }} | {{ machine_info.cpu_info.stress_ng.failed }} | {{ machine_info.cpu_info.stress_ng.metrics_untrustworthy }} | {{ machine_info.cpu_info.stress_ng.duration_sec }} |
+
+* **CPU Workers**: The number of CPU workers used in the stress test.
+* **Skipped**: The number of tests that were skipped.
+* **Passed**: The number of tests that passed successfully.
+* **Failed**: The number of tests that failed.
+* **Metrics Untrustworthy**: Indicates whether the metrics collected during the test are considered trustworthy.
+* **Duration (sec)**: The total duration of the stress test in seconds.
+
+<div class="page-break"></div>
+# Performance Appliance Information (**GPU**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+## **GPU**
+First initial status of GPU is shown:
+| GPU Name | {{ gpu.name }} |
+| --- | --- |
+| GPU Memory (MiB) | {{ gpu.memory_total_mib }} |
+| Memory Usage (%) | {{ gpu.utilization_gpu_percent }} |
+| Temperature (C) | {{ gpu.temperature_c }} |
+
+For this tests TensorFlow and ResNet50 are used to measure the GPU performance.
+
+&nbsp;
+### ***TensorFlow GPU Stress Test***
+This section runs a TensorFlow GPU stress test, which performs matrix multiplications to evaluate the GPU's computational capabilities.
+| Matrix Size | Iterations | Time (sec) |
+|-------------|------------|------------|
+| {{ gpu.tensorflow_gpu_stress.matrix_size }} | {{ gpu.tensorflow_gpu_stress.iterations }} | {{ gpu.tensorflow_gpu_stress.time_sec }} |
+
+* **Matrix Size**: The size of the matrices used in the multiplication.
+* **Iterations**: The number of iterations performed in the stress test.
+* **Time (sec)**: The total time taken to complete the stress test in seconds.
+
+&nbsp;
+### ***ResNet50 Training Performance***
+This section evaluates the performance of training a ResNet50 model on the GPU, measuring the loss per epoch. In this case we only want to see the performance of the GPU, so we are not using a real dataset, and loss per epoch is not meaningful, but it is useful to see how the GPU performs with a real training task.
+| Total Time (sec) |
+|------------------|
+| {{ gpu.resnet50_training.total_time_sec }} |
+
+* **Total Time (sec)**: The total time taken to train the ResNet50 model on the GPU in seconds.
+
+&nbsp;
+### **GPU Usage Plot**
+
+<div align="center">
+  <img src="/opt/robot-tests/results/gpu_usage_plot.png" alt="Descripción" width="800">
+</div>
+
+
+<div class="page-break"></div>
+# Performance Appliance Information (**Memory**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+## **Memory Check**
+
+For this tests Memtester and Sysbench are used to measure the memory performance.
+&nbsp;
+
+### **Memtester Memory Test**
+This section runs a memory test using Memtester to check for memory errors and performance.
+
+| Memory Test | Status |
+|-------------|--------|
+{%- for key, value in memory.items() %}
+{%- if not key.endswith('_tests') and key != 'sysbench_memory' %}
+| {{ key }} | {{ value }} |
+{%- endif %}
+{%- endfor %}
+
+&nbsp;
+| Integrity Test | Result |
+|-------------|--------|
+{%- for key, value in memory.memtester_tests.items() %}
+| {{ key }} | {{ value }} |
+{%- endfor %}
+
+### **Performance Metrics**
+
+&nbsp;
+**Sysbench Memory Test**
+| Block Size (KiB) | Total Size (MiB) | Total Operations | Operations per Second | Transfered (MiB) | Transfer Rate (MiB/s) |
+|------------------|-------------------|------------------|-----------------------|-------------------|-----------------------|
+| {{ memory.sysbench_memory.block_size_kib }} | {{ memory.sysbench_memory.total_size_mib }} | {{ memory.sysbench_memory.total_ops }} | {{ memory.sysbench_memory.ops_per_sec }} | {{ memory.sysbench_memory.transferred_mib }} | {{ memory.sysbench_memory.transfer_speed }} | 
+
+* **Block Size (KiB)**: The size of each memory block used in the test, measured in kibibytes.
+* **Total Size (MiB)**: The total size of memory tested, measured in mebibytes.
+* **Total Operations**: The total number of memory operations performed during the test.
+* **Operations per Second**: The rate at which memory operations were performed, measured in operations per second.
+* **Transferred (MiB)**: The total amount of data transferred during the test, measured in mebibytes.
+* **Transfer Rate (MiB/s)**: The average rate of data transfer during the test, measured in mebibytes per second.
+
+**Latency Metrics**
+| Latency (ms) Min | Latency (ms) Avg | Latency (ms) Max | Latency (ms) 95th Percentile | Latency (ms) Sum |
+| --------------------- | ----------------- | ----------------- | ---------------------------- | ----------------- |
+| {{ memory.sysbench_memory.latency_ms.min }} | {{ memory.sysbench_memory.latency_ms.avg }} | {{ memory.sysbench_memory.latency_ms.max }} | {{ memory.sysbench_memory.latency_ms.percentile_95 }} | {{ memory.sysbench_memory.latency_ms.sum }} |
+
+* **Latency (ms) Min**: The minimum latency recorded during the memory operations.
+* **Latency (ms) Avg**: The average latency across all memory operations.
+* **Latency (ms) Max**: The maximum latency recorded during the memory operations.
+* **Latency (ms) 95th Percentile**: The latency at the 95th percentile, indicating that 95% of the operations had a latency less than this value.
+* **Latency (ms) Sum**: The total latency across all memory operations.
+
+**Threads Fairness Metrics**
+| Threads Fairness Events Avg | Threads Fairness Events Stddev | Threads Fairness Exec Time Avg | Threads Fairness Exec Time Stddev |
+| -------------------------- | ----------------------------- | ------------------------------- | -------------------------------- |
+| {{ memory.sysbench_memory.threads_fairness.events_avg }} | {{ memory.sysbench_memory.threads_fairness.events_stddev }} | {{ memory.sysbench_memory.threads_fairness.exec_time_avg }} | {{ memory.sysbench_memory.threads_fairness.exec_time_stddev }} |
+
+* **Threads Fairness Events Avg**: The average number of memory operations processed per thread.
+* **Threads Fairness Events Stddev**: The standard deviation of memory operations processed per thread, indicating variability.
+* **Threads Fairness Exec Time Avg**: The average execution time per thread for memory operations.
+* **Threads Fairness Exec Time Stddev**: The standard deviation of execution time per thread for memory operations, indicating variability in execution time.
+
+<div class="page-break"></div>
+# Performance Appliance Information (**Disk**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+## **Disk**
+For this tests FIO and HDPARM are used to measure the disk performance.
+
+&nbsp;
+### ***FIO Random Write Test***
+This section runs a FIO random write test to measure the disk's IOPS, bandwidth, and latency.
+| IOPS | Bandwidth (MiB/s) | Latency Avg (usec) | Completion Latency (usec) | CPU usage by User (%) | CPU usage by System (%) |
+|------|-------------------|---------------------| -------------------------|------------------------|--------------------------|
+| {{ disk.fio_randwrite.iops }} | {{ disk.fio_randwrite.bandwidth_mib_s }} | {{ disk.fio_randwrite.latency_avg_usec }} | {{ disk.fio_randwrite.clat_99th_percentile_usec }} | {{ disk.fio_randwrite.cpu_usage_percent.user }} | {{ disk.fio_randwrite.cpu_usage_percent.system }} |
+
+* **IOPS**: Input/Output Operations Per Second, indicating the number of read/write operations the disk can handle per second.
+* **Bandwidth (MiB/s)**: The data transfer rate in mebibytes per second during the test.
+* **Latency Avg (usec)**: The average latency in microseconds for the read/write operations.
+* **Completion Latency (usec)**: The 99th percentile latency in microseconds, indicating the time taken for the slowest 1% of operations.
+* **CPU usage by User (%)**: The percentage of CPU time spent in user space during the test.
+* **CPU usage by System (%)**: The percentage of CPU time spent in kernel space during the test.
+
+&nbsp;
+### ***HDPARM Disk Test***
+This section runs a HDPARM test to measure the disk's cached read speed and buffered disk read speed.
+| Cached Read Speed (MB/s) | Buffered Disk Read Speed (MB/s) | Device Tested |
+|--------------------------|----------------------------------|----------------|
+| {{ disk.hdparm.cached_read_mb_s }} | {{ disk.hdparm.buffered_disk_read_mb_s }} | {{ disk.hdparm.device_tested }} |
+
+* **Cached Read Speed (MB/s)**: The speed of reading data from the disk cache in megabytes per second.
+* **Buffered Disk Read Speed (MB/s)**: The speed of reading data from the disk in megabytes per second, using buffered I/O.
+* **Device Tested**: The specific disk device that was tested.
+
+
+<div class="page-break"></div>
+# Performance Appliance Information (**Network**)
+***
+This section provides detailed performance metrics for the appliance, including CPU, GPU, memory, disk, and network performance. The data is collected using various benchmarking tools and is presented in a structured format.
+
+## **Network**
+For this tests Iperf3 is used to measure the network performance.
+
+| Iperf3 Test | Retransmissions | Result |
+|--------------|-----------------|--------|
+| Download | {{ network.retransmissions.download }} | {{ network.iperf3_download }} |
+| Upload | {{ network.retransmissions.upload }} | {{ network.iperf3_upload }} |
+
+
+
+
+
