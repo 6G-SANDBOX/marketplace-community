@@ -102,8 +102,7 @@ install_package "python3-pip" "python3-pip" "apt install -y --no-install-recomme
 install_package "python3-venv" "python3-venv" "apt install -y --no-install-recommends python3-venv"
 
 # install drivers
-install_package "libcudnn8" "libcudnn8" "apt install -y --no-install-recommends libcudnn8"
-
+install_package "libcudnn9-cuda-12" "libcudnn9-cuda-12" "apt install -y --no-install-recommends libcudnn9-cuda-12"
 
 # Install benchmarking tools
 install_package "Sysstat" "iostat" "apt install -y --no-install-recommends sysstat"

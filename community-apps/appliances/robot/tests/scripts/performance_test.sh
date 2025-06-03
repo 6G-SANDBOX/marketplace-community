@@ -119,12 +119,12 @@ for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
     fi
 done
 
-# Check if libcudnn8 (system-wide) is installed
-if ! dpkg -s libcudnn8 &>/dev/null; then
-    echo "🔧 Installing libcudnn8..."
-    echo "🔧 Installing libcudnn8..." >> "$LOG_FILE"
+# Check if libcudnn9 (system-wide) is installed
+if ! dpkg -s libcudnn9-cuda-12 &>/dev/null; then
+    echo "🔧 Installing libcudnn9-cuda-12..."
+    echo "🔧 Installing libcudnn9-cuda-12..." >> "$LOG_FILE"
     {
-        sudo apt-get update && sudo apt-get install -y libcudnn8
+        sudo apt-get update && sudo apt-get install -y libcudnn9-dev-cuda-12
     } >> "$LOG_FILE" 2>&1
 else
     echo "✅ libcudnn8 already installed." >> "$LOG_FILE"
