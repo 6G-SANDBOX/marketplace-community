@@ -104,6 +104,7 @@ install_package "python3-venv" "python3-venv" "apt install -y --no-install-recom
 # install drivers
 install_package "libcudnn8" "libcudnn8" "apt install -y --no-install-recommends libcudnn8"
 
+
 # Install benchmarking tools
 install_package "Sysstat" "iostat" "apt install -y --no-install-recommends sysstat"
 install_package "Sysbench" "sysbench" "apt install -y --no-install-recommends sysbench"
@@ -119,6 +120,11 @@ if lspci | grep -i nvidia; then
     add-apt-repository -y ppa:graphics-drivers/ppa
     apt update
     install_package "NVIDIA Driver" "nvidia-smi" "apt install -y --no-install-recommends nvidia-driver-535"
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+    sudo apt-get update
+    sudo apt-get -y install cuda-toolkit-12-9
+    sudo apt-get install -y cuda-drivers
         
     # Set up TensorFlow GPU
     # install_package "Python Virtual Env" "virtualenv" "pip install virtualenv"
