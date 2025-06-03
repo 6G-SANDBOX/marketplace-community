@@ -29,33 +29,39 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 # Install dependencies
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing  \
-    software-properties-common \
-    build-essential \
-    bash \
-    bash-completion \
-    libxml2 \
-    libxslt-dev \
-    curl \
-    yarn \
-    less \
-    dpkg \
-    wget \
-    python3 \
-    python3-dev \
-    libxslt-dev \
-    libffi-dev \
-    python3-pip \
-    python3-venv \
-    python2.7-dev \
-    libssl-dev \
-    libldap2-dev libsasl2-dev ldap-utils slapd tox lcov valgrind \
-    tshark \
-    nodejs \
-    npm \
-    gnupg2 \
-    gpg-agent \
-    wkhtmltopdf
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing software-properties-common
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing build-essential
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing bash 
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing bash-completion
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libxml2
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libxslt-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing curl
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing yarn
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing less
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing dpkg
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing wget
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing python3
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing python3-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libxslt-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libffi-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing python3-venv
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing python2.7-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libssl-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libldap2-dev
+
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing libsasl2-dev
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing ldap-utils
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing slapd
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing tox
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing lcov
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing valgrind
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing tshark
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing nodejs
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing npm
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing gnupg2
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing gpg-agent
+RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing wkhtmltopdf
 
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update
