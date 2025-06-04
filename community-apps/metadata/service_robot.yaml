@@ -1,0 +1,65 @@
+---
+name: "Robot Framework Test Appliance"
+version: "autofill"
+software_version: "v1.0.0"
+publisher: Telefonica Innovación Digital
+description: |-
+  This appliance contains a Robot Framework docker image ready to launch functional and performance tests over selected VMs deployed inside OpenNebula and generates a report.
+
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+
+  Remember to include in your local DNS the entry to resolve the hostname set for capif and register components of the appliance. Both services are available in the same IP address and same port (443).
+  
+  The appliance configuration can be customized via parameters:
+
+short_description: Robot Framework Test Appliance
+tags:
+  - TID
+  - Robot
+  - Robot Framework
+  - iperf3 server
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    token: 'YES'
+    oneapp_robot_cert: "$ONEAPP_ROBOT_CERT"
+    oneapp_robot_key: "$ONEAPP_ROBOT_KEY"
+  cpu: '2'
+  vcpu: '2'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '4096'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs:
+    oneapp_robot_cert:       "O|text|ONEAPP_ROBOT_CERT: public key generated to be loaded on SUT vms."
+    oneapp_robot_key:     "O|password|ONEAPP_ROBOT_KEY: private key to be used by Robot to connect SUT vms."
+logo: robot.png
+images:
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"

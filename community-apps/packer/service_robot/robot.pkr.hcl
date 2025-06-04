@@ -12,10 +12,9 @@ build {
   }
 }
 
-
-source "qemu" "TNLCM" {
+source "qemu" "robot" {
   cpus        = 2 
-  memory      = 4096
+  memory      = 2048
   accelerator = "kvm"
 
   iso_url      = "../one-apps/export/ubuntu2204.qcow2"
@@ -30,7 +29,7 @@ source "qemu" "TNLCM" {
   format           = "qcow2"
   disk_compression = false
   #skip_resize_disk = true
-  disk_size        = "15360"        # default size increased to 15G
+  disk_size        = "20360"
 
   output_directory = var.output_dir
 
@@ -51,7 +50,7 @@ source "qemu" "TNLCM" {
 
 
 build {
-  sources = ["source.qemu.TNLCM"]
+  sources = ["source.qemu.robot"]
 
   provisioner "shell" {
     scripts = ["${var.input_dir}/81-configure-ssh.sh"]
@@ -89,10 +88,22 @@ build {
     source      = "../one-apps/appliances/service.sh"
     destination = "/etc/one-appliance/service"
   }
+  
+  provisioner "file" {
+    sources     = [
+      "appliances/robot/appliance.sh"
+      ]
+    destination = "/etc/one-appliance/service.d/"
+  }
 
   provisioner "file" {
-    source      = "appliances/TNLCM/"
-    destination = "/etc/one-appliance/service.d"
+    sources     = [
+      "appliances/robot/tests",
+      "appliances/robot/tools",
+      "appliances/robot/run_robot_tests.sh",
+      "appliances/robot/variables.sh"
+      ]
+    destination = "/etc/one-appliance/service.d/"
   }
 
   #######################################################################
