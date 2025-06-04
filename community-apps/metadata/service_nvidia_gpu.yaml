@@ -1,0 +1,65 @@
+---
+name: "Ubuntu 24.04 + NVIDIA drivers"
+version: "autofill"
+software_version: "v1.0.0"
+publisher: "Telefonica Innovacion Digital"
+description: |-
+  An Ubuntu 24.04 image with NVIDIA Open Source drivers for ubuntu-server, and a prometheus metric exporter
+
+  The image is based on the Ubuntu 24.04 cloud image with the OpenNebula [contextualization package](https://docs.opennebula.io/7.0/product/virtual_machines_operation/guest_operating_systems/kvm_contextualization/).
+  
+  This appliance is targeted to environments with available NVIDIA GPUs, usable by VMs via passthrough (e.g., KVM/QEMU) or vGPU technologies (e.g., NVIDIA GRID, SR-IOV),
+  Furthermore, the appliance includes an [unofficial prometheus exporter](https://github.com/utkuozdemir/nvidia_gpu_exporter), to monitor NVIDIA GPU-related metrics.
+  The exporter endpoint is exposed at http://0.0.0.0:9835
+
+  There is no password for the root account. To access the Virtual Machine, add an SSH public key to your user or the template and ssh to the root account.
+  
+  After deploying the appliance, you can check the status of the deployment in `/etc/one-appliance/status`, or deployment logs in `/var/log/one-appliance/`.
+ 
+
+  **Note**: Remember to update the template to configure the GPU passthrough/vGPU after importing it
+  **Note**: Remember to update the template in order to add a network after importing it.
+  Deploying the appliance without a network with valid Gateway + DNS will result on failure when attempting to download the drivers for your GPU.
+short_description: Ubuntu 24.04 image for KVM with auto-detected NVIDIA drivers and a prometheus exporter
+tags:
+  - TID
+  - NVIDIA
+  - Prometheus
+  - drivers
+  - ubuntu
+format: qcow2
+creation_time: "autofill"
+os-id: Ubuntu
+os-release: 24.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    # netcfg_type: "interfaces"
+  cpu: '2'
+  vcpu: '2'
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '2048'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+logo: nvidia.png
+images:
+  - name: "autofill"
+    url: "autofill"
+    type: OS
+    dev_prefix: vd
+    driver: qcow2
+    size: "autofill"
+    checksum:
+      md5: "autofill"
+      sha256: "autofill"
