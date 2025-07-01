@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_RECONFIGURABLE=false
+#ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_PROMETHEUS_VERSION="${ONEAPP_PROMETHEUS_VERSION:-2.53.4}"
 

@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_RECONFIGURABLE=false
+#ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_MONGODB_VERSION="${ONEAPP_MONGODB_VERSION:-8.0}"
 ONEAPP_MONGO_EXPRESS_VERSION="v1.1.0-rc-3"

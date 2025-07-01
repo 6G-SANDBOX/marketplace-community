@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_RECONFIGURABLE=false
+#ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_INFLUXDB_VERSION="${ONEAPP_INFLUXDB_VERSION:-2.7.11}"
 ONEAPP_INFLUXDB_CLIENT_VERSION="2.7.5"

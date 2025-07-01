@@ -1,5 +1,5 @@
 #!/bin/bash
-source $(dirname "$(readlink -f "$0")")/variables.sh
+source "$(dirname "$(readlink -f "$0")")/variables.sh"
 
 TEST_FOLDER=$BASE_DIR/tests
 RESULT_FOLDER=$BASE_DIR/results

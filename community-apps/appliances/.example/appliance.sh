@@ -11,8 +11,8 @@ set -o errexit -o pipefail
 
 # Whether steps in service_configure() should run at every reboot instead of only on the first one
 # Virtually, service_configure() will run at the same cases that service_bootstrap() so just put the repeatable code there instead
-# Default value is empty=false 
-#ONE_SERVICE_RECONFIGURABLE=true
+# Default value is "" which later equals to "false" 
+#ONE_SERVICE_RECONFIGURABLE=false
 
 # Default values for when a variable isn't defined on the VM Template
 ONEAPP_LITHOPS_BACKEND="${ONEAPP_LITHOPS_BACKEND:-localhost}"
@@ -145,19 +145,17 @@ install_docker()
 {
     msg info "Add Docker official GPG key"
     install -m 0755 -d /etc/apt/keyrings
-
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-
     chmod a+r /etc/apt/keyrings/docker.asc
 
     msg info "Add Docker repository to apt sources"
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
         tee /etc/apt/sources.list.d/docker.list > /dev/null
-    apt update
+    apt-get update
 
     msg info "Install Docker Engine"
-    if ! apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin ; then
+    if ! apt-get install -y docker-ce=${DOCKER_VERSION} docker-ce-cli=${DOCKER_VERSION} containerd.io docker-buildx-plugin docker-compose-plugin ; then
         msg error "Docker installation failed"
         exit 1
     fi

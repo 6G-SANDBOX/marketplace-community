@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-ONE_SERVICE_RECONFIGURABLE=false
+#ONE_SERVICE_RECONFIGURABLE=false
 
 ONEAPP_GRAFANA_VERSION="${ONEAPP_GRAFANA_VERSION:-11.6.0}"
 
