@@ -13,9 +13,9 @@ set -o errexit -o pipefail
 
 DEP_PKGS="iperf3 net-tools"
 DOCKER_VERSION="5:26.1.3-1~ubuntu.22.04~jammy"
+REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 DOCKER_ROBOT_IMAGE="${REGISTRY_BASE_URL}/robot-tests-image"
 DOCKER_ROBOT_IMAGE_VERSION="1.0"
-REGISTRY_BASE_URL="example.com:5050/one/robot-tests"
 VARIABLES_FILE="${BASE_DIR}/variables.sh"
 BASE_DIR=/etc/one-appliance/service.d
 CERTS_FOLDER="${BASE_DIR}/tests/certs"

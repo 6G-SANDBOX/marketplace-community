@@ -1,32 +1,35 @@
 FROM ubuntu:22.04
+
 LABEL maintainer="Jorge Moratinos Salcines <jorge.moratinossalcines@telefonica.com>"
 LABEL version="2.0"
 LABEL description="Docker to run Robot Framework"
 
-ENV ROBOT_DIRECTORY=/opt/robot-tests
-ENV ROBOT_COMMON_DIRECTORY=$ROBOT_DIRECTORY/common
-ENV ROBOT_TESTS_DIRECTORY=$ROBOT_DIRECTORY/tests
-ENV ROBOT_RESULTS_DIRECTORY=$ROBOT_DIRECTORY/results
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    ROBOT_DIRECTORY=/opt/robot-tests \
+    ROBOT_COMMON_DIRECTORY=/opt/robot-tests/common \
+    ROBOT_TESTS_DIRECTORY=/opt/robot-tests/tests \
+    ROBOT_RESULTS_DIRECTORY=/opt/robot-tests/results
 
-# Create directories structure
-RUN mkdir -p $ROBOT_COMMON_DIRECTORY $ROBOT_TESTS_DIRECTORY $ROBOT_RESULTS_DIRECTORY
+# Create directories
+RUN mkdir -p \
+    $ROBOT_DIRECTORY \
+    $ROBOT_COMMON_DIRECTORY \
+    $ROBOT_TESTS_DIRECTORY \
+    $ROBOT_RESULTS_DIRECTORY
 
-# Create Volumes for docker
-# VOLUME $ROBOT_DIRECTORY
-VOLUME $ROBOT_COMMON_DIRECTORY
-VOLUME $ROBOT_TESTS_DIRECTORY
-VOLUME $ROBOT_RESULTS_DIRECTORY
+# Create docker volumes
+VOLUME $ROBOT_COMMON_DIRECTORY $ROBOT_TESTS_DIRECTORY $ROBOT_RESULTS_DIRECTORY
 
+# Set the working directory
 WORKDIR $ROBOT_DIRECTORY
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
 # Install dependencies
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends --fix-missing \
-        software-properties-common \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
         build-essential \
         bash \
         bash-completion \
@@ -39,7 +42,6 @@ RUN apt-get update && \
         wget \
         python3 \
         python3-dev \
-        libffi-dev \
         python3-pip \
         python3-venv \
         python2.7-dev \
@@ -56,29 +58,32 @@ RUN apt-get update && \
         npm \
         gnupg2 \
         gpg-agent \
-        wkhtmltopdf && \
-    add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y --fix-missing python3.10 python3.10-venv python3.10-dev && \
-    mkdir /opt/venv && \
-    python3.10 -m venv /opt/venv && \
+        wkhtmltopdf \
+        python3.10 \
+        python3.10-venv \
+        python3.10-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create a virtual environment
+RUN python3.10 -m venv /opt/venv
 
-ADD basicRequirements.txt /root/
-ADD basicRobotInstall.sh /root/
-ADD entrypoint.sh /root/
-ADD linter_entrypoint.sh /root/
-ADD featdoc_entrypoint.sh /root/
-ADD libdoc_entrypoint.sh /root/
+# Copy requirements files and scripts
+COPY basicRequirements.txt /root/
+COPY basicRobotInstall.sh /root/
+COPY entrypoint.sh linter_entrypoint.sh featdoc_entrypoint.sh libdoc_entrypoint.sh /root/
 
-
-RUN chmod a+x /root/basicRobotInstall.sh /root/entrypoint.sh /root/linter_entrypoint.sh /root/featdoc_entrypoint.sh /root/libdoc_entrypoint.sh && \
+# Install Python packages
+RUN chmod +x /root/basicRobotInstall.sh && \
     /root/basicRobotInstall.sh /root/basicRequirements.txt && \
-    sed -i 's|/bin/ash|/bin/bash|g' /etc/passwd && \
-    sed  -i 's|ROBOT_DIRECTORY|'$ROBOT_DIRECTORY'|g' /root/entrypoint.sh /root/linter_entrypoint.sh /root/featdoc_entrypoint.sh /root/libdoc_entrypoint.sh && \
-    sed  -i 's|ROBOT_TESTS_DIRECTORY|'$ROBOT_TESTS_DIRECTORY'|g' /root/entrypoint.sh /root/linter_entrypoint.sh /root/featdoc_entrypoint.sh /root/libdoc_entrypoint.sh && \
-    sed  -i 's|ROBOT_COMMON_DIRECTORY|'$ROBOT_COMMON_DIRECTORY'|g' /root/entrypoint.sh /root/linter_entrypoint.sh /root/featdoc_entrypoint.sh /root/libdoc_entrypoint.sh && \
-    sed  -i 's|ROBOT_RESULTS_DIRECTORY|'$ROBOT_RESULTS_DIRECTORY'|g' /root/entrypoint.sh
+    sed -i 's|/bin/ash|/bin/bash|g' /etc/passwd
+
+# Replace placeholders in entrypoint scripts
+RUN for script in entrypoint.sh linter_entrypoint.sh featdoc_entrypoint.sh libdoc_entrypoint.sh; do \
+        sed -i "s|ROBOT_DIRECTORY|$ROBOT_DIRECTORY|g" /root/$script && \
+        sed -i "s|ROBOT_TESTS_DIRECTORY|$ROBOT_TESTS_DIRECTORY|g" /root/$script && \
+        sed -i "s|ROBOT_COMMON_DIRECTORY|$ROBOT_COMMON_DIRECTORY|g" /root/$script && \
+        sed -i "s|ROBOT_RESULTS_DIRECTORY|$ROBOT_RESULTS_DIRECTORY|g" /root/$script && \
+        chmod +x /root/$script; \
+    done
 
 ENTRYPOINT [ "/root/entrypoint.sh" ]
