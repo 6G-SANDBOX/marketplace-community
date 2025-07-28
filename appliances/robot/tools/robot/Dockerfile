@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM python:3.10-slim
 
 LABEL maintainer="Jorge Moratinos Salcines <jorge.moratinossalcines@telefonica.com>"
 LABEL version="2.0"
@@ -27,7 +27,6 @@ WORKDIR $ROBOT_DIRECTORY
 # Install dependencies
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
@@ -40,11 +39,6 @@ RUN apt-get update && apt-get upgrade -y && \
         less \
         dpkg \
         wget \
-        python3 \
-        python3-dev \
-        python3-pip \
-        python3-venv \
-        python2.7-dev \
         libssl-dev \
         libldap2-dev \
         libsasl2-dev \
@@ -58,10 +52,7 @@ RUN apt-get update && apt-get upgrade -y && \
         npm \
         gnupg2 \
         gpg-agent \
-        wkhtmltopdf \
-        python3.10 \
-        python3.10-venv \
-        python3.10-dev && \
+        wkhtmltopdf && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment
