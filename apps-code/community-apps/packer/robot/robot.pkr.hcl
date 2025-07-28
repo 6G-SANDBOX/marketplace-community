@@ -95,7 +95,7 @@ build {
 
   provisioner "file" {
     sources     = [
-      "../../appliances/robot/appliance.sh,"
+      "../../appliances/robot/appliance.sh",
       "../../appliances/robot/tests",
       "../../appliances/robot/tools",
       "../../appliances/robot/run_robot_tests.sh",
