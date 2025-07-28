@@ -40,7 +40,7 @@ service_install()
     # Install Grafana
     install_grafana
 
-    # Service metadata. Function defined at one-apps/appliances/lib/common.sh
+    # Service metadata
     create_one_service_metadata
 
     # Cleanup
