@@ -1,0 +1,12 @@
+
+Appliance Certification
+[32m  mysql is installed[0m
+[32m  mysql service is running[0m
+[32m  check oneapps motd[0m
+[32m  can connect as root with defined password[0m
+[32m  database exists[0m
+[32m  can connect as user with defined password[0m
+
+Finished in 1 minute 39 seconds (files took 0.42284 seconds to load)
+[32m6 examples, 0 failures[0m
+

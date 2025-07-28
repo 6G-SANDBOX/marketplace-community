@@ -1,7 +1,9 @@
-community-apps/Makefile.config
-community-apps/build
-community-apps/export
-community-apps/version
+apps-code/community-apps/build
+apps-code/community-apps/export
+apps-code/community-apps/version
+apps-code/community-apps/Makefile.local
+
+
 community-apps/packer/update_metadata.log
 community-apps/packer/*/*-context.iso
 community-apps/appliances/*/.*/*
