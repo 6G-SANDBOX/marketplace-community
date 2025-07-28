@@ -21,7 +21,6 @@ fi
 
 
 
-
 echo "------------------New build--------------------------" >> ${LOGFILE}
 
 ### Ensure yq is installed
@@ -46,7 +45,7 @@ fi
 
 ### Define second set of execution variables
 FULL_NAME="${APPLIANCE_PREFIX:+$APPLIANCE_PREFIX }$(cat "${METADATA_ORG}" | yq '.name')"  # e.g. 6G-Sandbox bastion
-SW_VERSION=$(cat "metadata/${APP_NAME}.yaml" | yq '.software_version')                    # e.g. v0.4.0  
+SW_VERSION=$(cat "${METADATA_ORG}" | yq '.software_version')            # e.g. v0.4.0  
 
 
 {
@@ -78,7 +77,7 @@ else
     BUILD_VERSION=${IMAGE_READABLE_TIMESTAMP}                # e.g. 20250506-1120
 fi
 IMAGE_NAME="${FULL_NAME} ${BUILD_VERSION}"
-IMAGE_URL="${URL_APPLIANCES}/${APP}.qcow2"
+IMAGE_URL="${URL_APPLIANCES}/${APP_NAME}.qcow2"
 IMAGE_SIZE="$(qemu-img info "${APPLIANCE_DST}" | awk '/virtual size:/ {print $5}' | sed 's/[^0-9]*//g')"
 IMAGE_CHK_MD5="$(md5sum "${APPLIANCE_DST}" | cut -d' ' -f1)"
 IMAGE_CHK_SHA256="$(sha256sum "${APPLIANCE_DST}" | cut -d' ' -f1)"
