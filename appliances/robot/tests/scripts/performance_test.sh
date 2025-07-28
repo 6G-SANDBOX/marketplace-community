@@ -1,5 +1,4 @@
 #!/bin/bash
-export BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Set non-interactive mode
 export DEBIAN_FRONTEND=noninteractive
@@ -9,24 +8,23 @@ show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --iperf-ip <ip>         Specify the IP address for the Iperf3 server."
-    echo "  --json <filename>       Specify the JSON output file."
-    echo "  --no-memtest            Skip memory test (memtester)."
-    echo "  --no-cpu-stress         Skip CPU stress test (stress-ng)."
-    echo "  --no-mem-speed          Skip memory speed test (sysbench memory)."
-    echo "  --no-gpu-nvidia-smi     Skip GPU test using nvidia-smi."
-    echo "  --no-disk-perf          Skip disk performance test (FIO)."
-    echo "  --no-disk-read          Skip disk read speed test (hdparm)."
-    echo "  --no-network            Skip network performance tests (iperf3)."
-    echo "  --help                  Show this help message and exit."
+    echo "  --no-memtest           Skip memory test (memtester)"
+    echo "  --no-cpu-stress        Skip CPU stress test (stress-ng)"
+    echo "  --no-mem-speed         Skip memory speed test (sysbench memory)"
+    echo "  --no-gpu-nvidia-smi    Skip GPU test using nvidia-smi"
+    echo "  --no-disk-perf         Skip disk performance test (FIO)"
+    echo "  --no-disk-read         Skip disk read speed test (hdparm)"
+    echo "  --no-network           Skip network performance tests (iperf3)"
+    echo "  --help                 Show this help message and exit"
     echo ""
     exit 0
 }
 
-# Default values
-IPERF3_SERVER="10.95.82.70"  # Default Iperf3 server IP
-JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
-OUTPUT_FOLDER="$BASE_DIR"  # Default output folder for JSON and log files
+
+# Iperf3 server configuration
+IPERF3_SERVER="10.95.82.70"  # You can change this to your desired server IP or hostname
+
+# Defaults
 RUN_MEMTEST=true
 RUN_CPU_STRESS=true
 RUN_MEM_SPEED=true
@@ -34,28 +32,12 @@ RUN_GPU_NVIDIA_SMI=true
 RUN_DISK_PERF=true
 RUN_DISK_READ=true
 RUN_NETWORK=true
+GPU_MONITOR_ENABLED=false
+GPU_MONITOR_EXECUTED=false
 
 # Parse CLI arguments
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --iperf-ip)
-            if [[ -n "$2" && "$2" != --* ]]; then
-                IPERF3_SERVER="$2"
-                shift
-            else
-                echo "❌ ERROR: --iperf-ip requires an IP address argument."
-                show_help
-            fi
-            ;;
-        --json)
-            if [[ -n "$2" && "$2" != --* ]]; then
-                JSON_FILE="$2"
-                shift
-            else
-                echo "❌ ERROR: --json requires a filename argument."
-                show_help
-            fi
-            ;;
+for arg in "$@"; do
+    case $arg in
         --no-memtest) RUN_MEMTEST=false ;;
         --no-cpu-stress) RUN_CPU_STRESS=false ;;
         --no-mem-speed) RUN_MEM_SPEED=false ;;
@@ -64,35 +46,17 @@ while [[ $# -gt 0 ]]; do
         --no-disk-read) RUN_DISK_READ=false ;;
         --no-network) RUN_NETWORK=false ;;
         --help) show_help ;;
-        *)
-            echo "❌ Unknown option: $1"
-            show_help
-            ;;
+        *) echo "❌ Unknown option: $arg"; show_help ;;
     esac
-    shift
 done
 
 # Log files
 LOG_FILE="benchmark_results_$(date +%Y%m%d_%H%M%S).log"
-
-# Display configuration
-echo "Iperf3 server IP: $IPERF3_SERVER"
-echo "JSON output file: $JSON_FILE"
-echo "Output folder: $OUTPUT_FOLDER"
-echo "Run Memory Test: $RUN_MEMTEST"
-echo "Run CPU Stress Test: $RUN_CPU_STRESS"
-echo "Run Memory Speed Test: $RUN_MEM_SPEED"
-echo "Run GPU NVIDIA-SMI Test: $RUN_GPU_NVIDIA_SMI"
-echo "Run Disk Performance Test: $RUN_DISK_PERF"
-echo "Run Disk Read Speed Test: $RUN_DISK_READ"
-echo "Run Network Performance Test: $RUN_NETWORK"
-
-# Create JSON file with initial structure
-echo "{}" > "$JSON_FILE"
+JSON_FILE="benchmark_data_$(date +%Y%m%d_%H%M%S).json"
 
 # plot files
-GPU_MONITOR_LOG="$OUTPUT_FOLDER/gpu_monitor.csv"
-GPU_PLOT_FILE="$OUTPUT_FOLDER/gpu_usage_plot.png"
+GPU_MONITOR_LOG="/tmp/gpu_monitor.csv"
+GPU_PLOT_FILE="gpu_usage_plot.png"
 
 source /tmp/tf_gpu_env/bin/activate
 
@@ -119,16 +83,20 @@ for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
     fi
 done
 
-# Check if libcudnn9 (system-wide) is installed
-if ! dpkg -s libcudnn9-cuda-12 &>/dev/null; then
-    echo "🔧 Installing libcudnn9-cuda-12..."
-    echo "🔧 Installing libcudnn9-cuda-12..." >> "$LOG_FILE"
+# Check if libcudnn8 (system-wide) is installed
+if ! dpkg -s libcudnn8 &>/dev/null; then
+    echo "🔧 Installing libcudnn8..."
+    echo "🔧 Installing libcudnn8..." >> "$LOG_FILE"
     {
-        sudo apt-get update && sudo apt-get install -y libcudnn9-dev-cuda-12
+        sudo apt-get update && sudo apt-get install -y libcudnn8
     } >> "$LOG_FILE" 2>&1
 else
     echo "✅ libcudnn8 already installed." >> "$LOG_FILE"
 fi
+
+
+# Create JSON file with initial structure
+echo "{}" > "$JSON_FILE"
 
 # Function to execute benchmarks and store structured data
 run_benchmark() {
@@ -222,7 +190,7 @@ generate_json_from_log() {
 
     # GPU Info
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1 || echo "unknown")
-    GPU_MEM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n1 || echo "unknown")
+    GPU_MEM=$(grep "MiB /" "$LOG_FILE" | awk '{print $9}' | cut -d'/' -f2 | tr -d 'MiB')
     GPU_TEMP=$(grep -m1 'C    P' "$LOG_FILE" | awk '{print $3}' | tr -d 'C')
     GPU_UTIL=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits)
     TF_GPU_ITER=$(grep "Running GPU stress test with" "$LOG_FILE" | awk '{for(i=1;i<=NF;i++) if ($i=="with") print $(i+1)}' | head -n1)

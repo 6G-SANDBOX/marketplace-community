@@ -2,7 +2,6 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.units import cm
 import jinja2
 import json
 import markdown2
@@ -18,8 +17,6 @@ COVER_IMAGE = "/opt/robot-tests/tests/libraries/report/opennebula.png"
 # The font file for Georgia
 FONT_FILENAME = "/opt/robot-tests/tests/libraries/report/fonts/georgia/georgia.ttf"
 FONT_NAME = "Georgia"
-# The watermark image for the report
-WATERMARK_IMAGE = "/opt/robot-tests/tests/libraries/report/opennebula-25.png"
 
 
 class ReportGenerator:
@@ -49,43 +46,6 @@ class ReportGenerator:
                         160, 350, 0.5*PAGE_WIDTH, preserveAspectRatio=True)
         cover.save()
 
-    def create_watermark(self, output_file, image_path=WATERMARK_IMAGE):
-        print("Creating watermark at:", output_file)
-        c = canvas.Canvas(output_file, pagesize=A4)
-        width, height = A4
-        print("Page size:", width, height)
-        # Position and opacity settings
-        c.saveState()
-        c.translate(width / 2.0, height / 2.0)
-        c.rotate(0)
-        c.drawImage(image_path, -3*cm, -1*cm, width=6*cm, height=3*cm, mask='auto')
-        c.restoreState()
-        c.save()
-
-    def apply_watermark(self, input_pdf, watermark_pdf):
-        watermark = PdfReader(watermark_pdf).pages[0]
-
-        files = []
-        if isinstance(input_pdf, str):
-            print("processing single input file:", input_pdf)
-            files.append(input_pdf)
-        if isinstance(input_pdf, list):
-            print("processing multiple input files:", input_pdf)
-            files = input_pdf
-
-        for file in files:
-            print("Processing file:", file)
-            output_pdf = file
-            reader = PdfReader(file)
-            writer = PdfWriter()
-
-            for page in reader.pages:
-                page.merge_page(watermark)
-                writer.add_page(page)
-
-            with open(output_pdf, 'wb') as f:
-                writer.write(f)
-
     def render(self, template, json_data):
         return jinja2.Environment(
             loader=jinja2.FileSystemLoader(TEMPLATES_DIR)
@@ -113,16 +73,12 @@ class ReportGenerator:
 
         # Generate the PDF file
         self.markdown_to_pdf(output_filename_md, output_filename_pdf,
-                             css_file=CSS_FILENAME, image_file=None)
+                             css_file=CSS_FILENAME)
 
     def generate_report_page(self, template,
                              json_filename,
                              output_filename,
                              optional_arguments={}):
-        print("Generating report page with template:", template)
-        print("JSON filename:", json_filename)
-        print("Output filename:", output_filename)
-        print("Optional arguments:", optional_arguments)
         # load json from file
         with open(json_filename) as json_file:
             json_data = json.load(json_file)
@@ -137,7 +93,7 @@ class ReportGenerator:
         outFile.write(result)
         outFile.close()
 
-    def markdown_to_pdf(self, input_file, output_file, css_file=None, image_file=None):
+    def markdown_to_pdf(self, input_file, output_file, css_file=None):
         with open(input_file, 'r') as f:
             markdown_text = f.read()
         extras = ["tables", "fenced-code-blocks",
@@ -145,27 +101,10 @@ class ReportGenerator:
 
         html = markdown2.markdown(markdown_text, extras=extras)
 
-        watermark_div = ''
-        if image_file:
-            abs_img_path = os.path.abspath(image_file).replace('\\', '/')
-            watermark_div = f'<div class="watermark"><img src="file://{abs_img_path}"/></div>'
-
-        css_content = ''
         if css_file:
             with open(css_file, 'r') as f:
                 css_content = f.read()
-
-        html = f"""
-        <html>
-        <head>
-            <style>{css_content}</style>
-        </head>
-        <body>
-            {watermark_div}
-            {html}
-        </body>
-        </html>
-        """
+            html = f"<style>{css_content}</style>\n" + html
 
         options = {
             "page-size": "A4",
@@ -177,8 +116,7 @@ class ReportGenerator:
             "quiet": "",
             "print-media-type": "",
             "zoom": "4",
-            "dpi": "300",
-            "enable-local-file-access": None
+            "dpi": "300"
         }
 
         pdfkit.from_string(html, output_file, options=options)
