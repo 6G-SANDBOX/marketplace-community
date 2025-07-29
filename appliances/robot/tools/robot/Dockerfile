@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
 LABEL maintainer="Jorge Moratinos Salcines <jorge.moratinossalcines@telefonica.com>"
-LABEL version="2.0"
+LABEL version="3.0"
 LABEL description="Docker to run Robot Framework"
 
 # Set environment variables

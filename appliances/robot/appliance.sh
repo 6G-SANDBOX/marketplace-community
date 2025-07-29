@@ -163,7 +163,7 @@ create_certificates()
 
     if [[ -z "${ONEAPP_ROBOT_CERT}" ]] || [[ -z "${ONEAPP_ROBOT_KEY}" ]]; then
         msg info "Autogenerating certificates..."
-        ssh-keygen -t ed25519 -C "jorgemoratinos" -f ${CERTS_FOLDER}/id_rsa -b 4096 -N ""
+        ssh-keygen -t ed25519 -C "$(hostname)" -f ${CERTS_FOLDER}/id_rsa -b 4096 -N ""
         public_key=$(cat ${CERTS_FOLDER}/id_rsa.pub)
         onegate vm update --data ONEAPP_ROBOT_CERT="${public_key}"
     else

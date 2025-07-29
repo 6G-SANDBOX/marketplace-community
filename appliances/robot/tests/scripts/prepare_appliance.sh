@@ -4,15 +4,41 @@
 # Script to gather SUT system information
 # Generates a structured JSON report.
 # Usage:
-#   $0 <output_file.json> <iperf_server> <public_endpoint>
+#   $0 <output_file.json>
 # ----------------------------------------
 
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <output_file.json>"
-    exit 1
-fi
+# Help message
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --json <filename>       Specify the JSON output file."
+    echo "  --help                  Show this help message and exit."
+    echo ""
+    exit 0
+}
 
-OUTPUT_FILE="$1"
+OUTPUT_FILE="prepare_appliance_$(date +%Y%m%d_%H%M%S).json"
+
+# Parse CLI arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json)
+            if [[ -n "$2" && "$2" != --* ]]; then
+                OUTPUT_FILE="$2"
+                shift
+            else
+                echo "❌ ERROR: --json requires a filename argument."
+                show_help
+            fi
+            ;;
+        *)
+            echo "❌ Unknown option: $1"
+            show_help
+            ;;
+    esac
+    shift
+done
 
 # Obtener el nombre del archivo
 FILENAME=$(basename "$OUTPUT_FILE")
@@ -30,7 +56,7 @@ JSON_FILE="$FILE_PATH/$FILENAME"
 
 # Create log file if it doesn't exist
 if [ ! -f "$JSON_FILE" ]; then
-    echo "{}" > "$JSON_FILE"
+    echo '{"preparation": {}}' > "$JSON_FILE"
 fi
 
 # Create log and JSON files
@@ -52,21 +78,31 @@ install_package() {
         echo "🔹 Installing $PKG_NAME..."
         if eval $INSTALL_CMD; then
             echo "✅ $PKG_NAME installed successfully."
-            jq --arg key "$PKG_NAME" --arg value "Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+            jq --arg key "$PKG_NAME" --arg value "Installed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         else
             echo "❌ ERROR: Failed to install $PKG_NAME." | tee -a $LOG_FILE
-            jq --arg key "$PKG_NAME" --arg value "Failed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+            jq --arg key "$PKG_NAME" --arg value "Failed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
         fi
     else
         echo "✅ $PKG_NAME is already installed."
-        jq --arg key "$PKG_NAME" --arg value "Already Installed" '.[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        jq --arg key "$PKG_NAME" --arg value "Already Installed" '.preparation.apt[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
     fi
 }
 
 # System update and install essential tools
 echo "🔹 Updating system and installing necessary tools..."
 apt update -y && apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-apt install -y --no-install-recommends curl wget software-properties-common pciutils jq python3 python3-pip python3-venv
+install_package "curl" "curl" "apt install -y --no-install-recommends curl"
+install_package "wget" "wget" "apt install -y --no-install-recommends wget"
+install_package "software-properties-common" "software-properties-common" "apt install -y --no-install-recommends software-properties-common"
+install_package "pciutils" "pciutils" "apt install -y --no-install-recommends pciutils"
+install_package "jq" "jq" "apt install -y --no-install-recommends jq"
+install_package "python3" "python3" "apt install -y --no-install-recommends python3"
+install_package "python3-pip" "python3-pip" "apt install -y --no-install-recommends python3-pip"
+install_package "python3-venv" "python3-venv" "apt install -y --no-install-recommends python3-venv"
+
+# install drivers
+install_package "libcudnn9-cuda-12" "libcudnn9-cuda-12" "apt install -y --no-install-recommends libcudnn9-cuda-12"
 
 # Install benchmarking tools
 install_package "Sysstat" "iostat" "apt install -y --no-install-recommends sysstat"
@@ -83,13 +119,38 @@ if lspci | grep -i nvidia; then
     add-apt-repository -y ppa:graphics-drivers/ppa
     apt update
     install_package "NVIDIA Driver" "nvidia-smi" "apt install -y --no-install-recommends nvidia-driver-535"
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+    sudo apt-get update
+    sudo apt-get -y install cuda-toolkit-12-9
+    sudo apt-get install -y cuda-drivers
         
     # Set up TensorFlow GPU
     # install_package "Python Virtual Env" "virtualenv" "pip install virtualenv"
     python3 -m venv /tmp/tf_gpu_env
     source /tmp/tf_gpu_env/bin/activate
     pip install --upgrade pip
-    pip install tensorflow
+    # pip install tensorflow
+
+    REQUIRED_PIP_PACKAGES=(
+    "tensorflow==2.18.0"
+    "nvidia-cuda-runtime-cu12"
+    "nvidia-cudnn-cu12"
+    "nvidia-cublas-cu12"
+    "matplotlib"
+    "pandas"
+    )
+
+    for pkg in "${REQUIRED_PIP_PACKAGES[@]}"; do
+        if ! pip show $(echo "$pkg" | cut -d= -f1) &>/dev/null; then
+            echo "🔧 Installing $pkg..."
+            pip install "$pkg"
+            jq --arg key "$pkg" --arg value "Installed" '.preparation.pip[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        else
+            echo "✅ $pkg already installed."
+            jq --arg key "$pkg" --arg value "Already Installed" '.preparation.pip[$key] = $value' "$JSON_FILE" > temp.json && mv temp.json "$JSON_FILE"
+        fi
+    done
 fi
 
 echo "✅ Installation complete. Exiting without running benchmarks."

@@ -14,6 +14,8 @@ ${HOST}             localhost
 ${USERNAME}         root
 ${PASSWORD}         test
 ${PRIVATE_KEY_FILE}       /opt/robot-tests/tests/certs/id_rsa
+${GPU_PLOT_FILENAME}            gpu_usage_plot.png
+${REMOTE_TMP_FOLDER}   /tmp/script_robot_tests
 
 
 *** Keywords ***
@@ -64,9 +66,11 @@ Execute Remote Script
         Open Connection With Public Key And Log In    ${ip}    ${USERNAME}    ${PRIVATE_KEY_FILE}
     END
 
+    Execute Command    mkdir -p ${REMOTE_TMP_FOLDER}
+
     ${local_directory}    ${script_filename}=    Split Path    ${local_script_path}
 
-    Put File    ${local_script_path}    /tmp/${script_filename}    mode=755    scp=ON
+    Put File    ${local_script_path}    ${REMOTE_TMP_FOLDER}/${script_filename}    mode=755    scp=ON
 
     ${rc}=    Set Variable
     ${stdout}=    Set Variable
@@ -74,14 +78,14 @@ Execute Remote Script
     IF    "${local_output_file}" != "${NONE}"
         ${local_output_directory}    ${output_filename}=    Split Path    ${local_output_file}
         ${stdout}    ${rc}=    Execute Command
-        ...    /tmp/${script_filename} /tmp/${output_filename} ${args}
+        ...    ${REMOTE_TMP_FOLDER}/${script_filename} --json ${REMOTE_TMP_FOLDER}/${output_filename} ${args}
         ...    return_stdout=True
         ...    return_rc=True
         Log    ${stdout}
-        Run Keyword And Ignore Error  SSHLibrary.Get File    /tmp/${output_filename}    ${local_output_file}
+        Run Keyword And Ignore Error  SSHLibrary.Get File    ${REMOTE_TMP_FOLDER}/*   ${local_output_directory}/
+        # Run Keyword And Ignore Error  SSHLibrary.Get File    /tmp/${GPU_PLOT_FILENAME}    /opt/robot-tests/results/${GPU_PLOT_FILENAME}
         Log    ${local_output_file}
-        Execute Command    sudo ls -l /tmp/
-        Execute Command    sudo rm -f /tmp/${output_filename}
+        # Execute Command    sudo rm -f ${REMOTE_TMP_FOLDER}//${output_filename}
     ELSE
         ${stdout}    ${rc}=    Execute Command
         ...    /tmp/${script_filename} ${args}
@@ -89,7 +93,8 @@ Execute Remote Script
         ...    return_rc=True
         Log    ${stdout}
     END
-    Execute Command    sudo rm -f /tmp/${script_filename}
+    Execute Command    sudo ls -l ${REMOTE_TMP_FOLDER}/
+    Execute Command    sudo rm -rf ${REMOTE_TMP_FOLDER}/
     Close Connection
 
     Should Be Equal As Integers    ${rc}    0    # succeeded
