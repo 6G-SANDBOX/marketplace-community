@@ -137,6 +137,7 @@ install_jenkins()
     wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
     chmod 644 /usr/share/keyrings/jenkins-keyring.asc
     echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian-stable binary/ | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+    wait_for_dpkg_lock_release
     apt-get update
 
     msg info "Install latest Jenkins LTS release"
@@ -180,6 +181,7 @@ install_ansible_terraform()
     echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
     tee /etc/apt/sources.list.d/hashicorp.list
     add-apt-repository --yes --update ppa:ansible/ansible
+    wait_for_dpkg_lock_release
     apt-get update
 
     msg info "Install terraform and ansible"
@@ -377,6 +379,7 @@ Host *
   UserKnownHostsFile /dev/null
 EOF"
 }
+
 
 wait_for_dpkg_lock_release()
 {

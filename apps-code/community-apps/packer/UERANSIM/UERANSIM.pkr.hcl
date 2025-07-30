@@ -15,7 +15,7 @@ build {
   # Compile the latest UERANSIM binaries if not present, or their source code changed.t
   provisioner "shell-local" {
     inline = [
-      "appliances/UERANSIM/build.sh",
+      "../../appliances/UERANSIM/build.sh",
     ]
   }
 }
