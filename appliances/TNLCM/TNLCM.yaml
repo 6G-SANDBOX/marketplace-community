@@ -12,7 +12,7 @@ description: |-
 
   The appliance configuration can be customized via parameters:
 
-  * `ONEAPP_TNLCM_JENKINS_HOST` - IP address of the Jenkins server used to deploy the Trial Networks. Default `127.0.0.1`
+  * `ONEAPP_TNLCM_JENKINS_HOST` - IP address of the Jenkins server used to deploy the Trial Networks. Default: `127.0.0.1`
   * `ONEAPP_TNLCM_JENKINS_USERNAME` - Username used to login into the Jenkins server to access and retrieve pipeline info. Default: `admin`
   * `ONEAPP_TNLCM_JENKINS_PASSWORD` - Password used to login into the Jenkins server to access and retrieve pipeline info.
   * `ONEAPP_TNLCM_JENKINS_TOKEN` - Token to authenticate while sending POST requests to the Jenkins Server API.
@@ -21,13 +21,19 @@ description: |-
   * `ONEAPP_TNLCM_SITES_BRANCH` - Name of the branch IN 6G-Sandbox-Sites repository to deploy the trial networks.
   * `ONEAPP_TNLCM_DEPLOYMENT_SITE` - Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks.
   * `ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN` - Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault.
+  * `ONEAPP_TNLCM_INFLUXDB_HOST` - InfluxDB host for InfluxDB server. Default: `127.0.0.1`
+  * `ONEAPP_TNLCM_INFLUXDB_ORG` - InfluxDB organization for InfluxDB server.
+  * `ONEAPP_TNLCM_INFLUXDB_BUCKET` - InfluxDB bucket for InfluxDB server.
+  * `ONEAPP_TNLCM_INFLUXDB_TOKEN` - InfluxDB token for InfluxDB server.
 
   **Note**: This appliance does not permit recontextualization. Modifying the context variables will not have any real efects on the running instance.
   
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 
-  **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
+  **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions.
+  The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
   change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+
 short_description: 6G-Sandbox TNLCM appliance for KVM
 tags:
   - 6G-Sandbox
@@ -57,8 +63,10 @@ opennebula_template:
     oneapp_tnlcm_sites_branch:                "$ONEAPP_TNLCM_SITES_BRANCH"
     oneapp_tnlcm_deployment_site:             "$ONEAPP_TNLCM_DEPLOYMENT_SITE"
     oneapp_tnlcm_deployment_site_token:       "$ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN"
-  inputs_order: >-
-    ONEAPP_TNLCM_JENKINS_HOST,ONEAPP_TNLCM_JENKINS_USERNAME,ONEAPP_TNLCM_JENKINS_PASSWORD,ONEAPP_TNLCM_JENKINS_TOKEN,ONEAPP_TNLCM_ADMIN_USER,ONEAPP_TNLCM_ADMIN_PASSWORD,ONEAPP_TNLCM_SITES_BRANCH,ONEAPP_TNLCM_DEPLOYMENT_SITE,ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN
+    oneapp_tnlcm_influxdb_host:               "$ONEAPP_TNLCM_INFLUXDB_HOST"
+    oneapp_tnlcm_influxdb_org:                "$ONEAPP_TNLCM_INFLUXDB_ORG"
+    oneapp_tnlcm_influxdb_bucket:             "$ONEAPP_TNLCM_INFLUXDB_BUCKET"
+    oneapp_tnlcm_influxdb_token:              "$ONEAPP_TNLCM_INFLUXDB_TOKEN"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -82,6 +90,10 @@ opennebula_template:
     oneapp_tnlcm_sites_branch:                "M|text|ONEAPP_TNLCM_SITES_BRANCH: Name of the branch IN 6G-Sandbox-Sites repository to deploy the trial networks"
     oneapp_tnlcm_deployment_site:             "M|text|ONEAPP_TNLCM_DEPLOYMENT_SITE: Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
     oneapp_tnlcm_deployment_site_token:       "M|password|ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN: Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    oneapp_tnlcm_influxdb_host:                     "M|text|ONEAPP_TNLCM_INFLUXDB_HOST: InfluxDB host for InfluxDB server||127.0.0.1"
+    oneapp_tnlcm_influxdb_org:                      "M|text|ONEAPP_TNLCM_INFLUXDB_ORG: InfluxDB organization for InfluxDB server"
+    oneapp_tnlcm_influxdb_bucket:                   "M|text|ONEAPP_TNLCM_INFLUXDB_BUCKET: InfluxDB bucket for InfluxDB server"
+    oneapp_tnlcm_influxdb_token:                    "M|password|ONEAPP_TNLCM_INFLUXDB_TOKEN: InfluxDB token for InfluxDB server"
 logo: ubuntu.png
 images:
   - name: "autofill"

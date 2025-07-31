@@ -1,16 +1,19 @@
 ---
 name: "[6G-Sandbox toolkit] TNLCM"
-version: "v0.5.1-20250411-1309"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
-software_version: "v0.5.1"
+version: "v1.0.0-20250731-1344"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
-  Custom template of the [6G-Sandbox TNLCM appliance](https://marketplace.mobilesandbox.cloud:9443/appliance/service_TNLCM) for the 6G-Sandbox toolkit.
+  Custom template of the [6G-Sandbox TNLCM](https://marketplace.mobilesandbox.cloud:9443/appliance/TNLCM) appliance
+  intended to be used along the [6G-Sandbox toolkit](https://marketplace.mobilesandbox.cloud:9443/appliance/toolkit_service).
 
   After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
   For appliance deployment logs, check /var/log/one-appliance/.
 
-  **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions. The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
-   change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+  **Note**: The TNLCM backend uses a MONGO database, so the VM needs to be virtualized with a CPU model that supports AVX instructions.
+  The default CPU model in the template is host_passthrough, but if you are interested in VM live migration,
+  change it to a CPU model similar to your host's CPU that supports [x86-64v2 or higher](https://www.qemu.org/docs/master/system/qemu-cpu-models.html).
+
 short_description: 6G-Sandbox toolkit VM template for the TNLCM appliance
 tags:
   - service
@@ -24,7 +27,7 @@ tags:
   - TNLCM
 type: VMTEMPLATE
 format: qcow2
-creation_time: "1744369762"   # date +%s
+creation_time: "1753962253"   # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -48,8 +51,10 @@ opennebula_template:
     oneapp_tnlcm_sites_branch:                "$ONEAPP_TNLCM_SITES_BRANCH"
     oneapp_tnlcm_deployment_site:             "$ONEAPP_TNLCM_DEPLOYMENT_SITE"
     oneapp_tnlcm_deployment_site_token:       "$ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN"
-  inputs_order: >-
-    ONEAPP_TNLCM_JENKINS_HOST,ONEAPP_TNLCM_JENKINS_USERNAME,ONEAPP_TNLCM_JENKINS_PASSWORD,ONEAPP_TNLCM_ADMIN_USER,ONEAPP_TNLCM_ADMIN_PASSWORD,ONEAPP_TNLCM_SITES_BRANCH,ONEAPP_TNLCM_DEPLOYMENT_SITE,ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN
+    oneapp_tnlcm_influxdb_host:               "$ONEAPP_TNLCM_INFLUXDB_HOST"
+    oneapp_tnlcm_influxdb_org:                "$ONEAPP_TNLCM_INFLUXDB_ORG"
+    oneapp_tnlcm_influxdb_bucket:             "$ONEAPP_TNLCM_INFLUXDB_BUCKET"
+    oneapp_tnlcm_influxdb_token:              "$ONEAPP_TNLCM_INFLUXDB_TOKEN"
   cpu: '4'
   vcpu: '4'
   cpu_model:

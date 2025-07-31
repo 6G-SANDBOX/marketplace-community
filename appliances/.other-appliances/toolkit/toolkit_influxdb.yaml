@@ -1,0 +1,61 @@
+---
+name: "[6G-Sandbox toolkit] InfluxDB"
+version: "v1.0.0-20250731-1344"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+software_version: "v1.0.0"
+publisher: "University of Malaga"
+description: |-
+  Custom template of the [6G-Sandbox InfluxDB](https://marketplace.mobilesandbox.cloud:9443/appliance/influxdb) appliance
+  intended to be used along the [6G-Sandbox toolkit](https://marketplace.mobilesandbox.cloud:9443/appliance/toolkit_service).
+  
+  After deploying the appliance, check the status of the deployment in /etc/one-appliance/status. You chan check the appliance logs in /var/log/one-appliance/.
+  For appliance deployment logs, check /var/log/one-appliance/.
+short_description: 6G-Sandbox toolkit VM template for the InfluxDB appliance
+tags:
+  - service
+  - oneflow
+  - onegate
+  - VMTEMPLATE
+  - 6G-Sandbox
+  - 6G-Library
+  - toolkit
+  - ubuntu
+  - InfluxDB
+type: VMTEMPLATE
+format: qcow2
+creation_time: "1753962253"   # date +%s
+os-id: Ubuntu
+os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: >-
+  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+opennebula_template:
+  context:
+    network: 'YES'
+    set_hostname: "$NAME"
+    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
+    netcfg_type: "interfaces"
+    token: "YES"
+    report_ready: "YES"
+    oneapp_influxdb_user:      "$ONEAPP_INFLUXDB_USER"
+    oneapp_influxdb_password:  "$ONEAPP_INFLUXDB_PASSWORD"
+    oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
+    oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
+    oneapp_influxdb_token:     "$ONEAPP_INFLUXDB_TOKEN"
+  cpu: '4'
+  vcpu: '4'
+  cpu_model:
+    model: "host-passthrough"
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  hypervisor: kvm
+  memory: '6144'
+  memory_unit_cost: 'MB'
+  os:
+    arch: x86_64
+  logo: images/logos/ubuntu.png
+  user_inputs: {}
+logo: influxdb.png
+disks:
+- "6G-Sandbox InfluxDB"
