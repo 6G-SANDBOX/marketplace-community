@@ -5,24 +5,40 @@ export DEBIAN_FRONTEND=noninteractive
 
 REPO_URL="https://github.com/aligungr/UERANSIM"
 REQUIRED_PACKAGES=("make" "gcc" "g++" "cmake" "curl" "libsctp-dev" "lksctp-tools" "iproute2")
-REPOSITORY_PATH="$(dirname "$0").repository"
-FILES_PATH="$(dirname "$0").files"
+REPOSITORY_PATH="$(dirname "$0")/.repository"
+FILES_PATH="$(dirname "$0")/.files"
 LOCK_FILE="/tmp/ueransim_build.lock"
+
+# Handler functions
+cleanup() {
+    echo "Cleaning up..."
+    rm -f "${LOCK_FILE}"
+}
+on_error() {
+    echo "❌ ERROR: An unexpected error occurred during the binary build process."
+    cleanup
+    exit 1
+}
+
+trap on_error ERR
+trap cleanup EXIT
+trap 'echo "Interrupted"; exit 1' INT TERM
+
 
 # Avoid parallel executions of the script
 if [ -f "$LOCK_FILE" ]; then
-    echo "Another UERANSIM build process is already running. Exiting."
-    exit 1
+    LOCK_PID=$(cat "${LOCK_FILE}" 2>/dev/null || true)
+    if [ -n "$LOCK_PID" ] && kill -0 "$LOCK_PID" 2>/dev/null; then
+        echo "Another UERANSIM build process is already running with PID ${LOCK_PID}. Exiting."
+        exit 1
+    else
+        echo "Stale lock file found. Removing it."
+        rm -f "${LOCK_FILE}"
+    fi
 fi
-touch "${LOCK_FILE}"
 
-cleanup(){
-  echo ""
-  echo "ERROR: Something unexpected happened during the binary build script."
-  rm -f "${LOCK_FILE}"
-  exit 1
-}
-trap cleanup ERR
+# Create lock file with current PID
+echo "$$" > "${LOCK_FILE}"
 
 
 echo "Clone or update the UERANSIM repository"
