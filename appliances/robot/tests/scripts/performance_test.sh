@@ -246,7 +246,7 @@ generate_json_from_log() {
         printf '%s\n' "${RESNET_LOSS[@]}" | jq -R 'select(test("^[0-9.eE+-]+$")) | tonumber' | jq -s . > "$LOSS_FILE"
     else
         echo "[]" > "$LOSS_FILE"
-fi
+    fi
 
 
     # Disk

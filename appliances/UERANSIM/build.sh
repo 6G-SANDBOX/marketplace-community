@@ -5,8 +5,8 @@ export DEBIAN_FRONTEND=noninteractive
 
 REPO_URL="https://github.com/aligungr/UERANSIM"
 REQUIRED_PACKAGES=("make" "gcc" "g++" "cmake" "curl" "libsctp-dev" "lksctp-tools" "iproute2")
-REPOSITORY_PATH="appliances/UERANSIM/.repository"
-FILES_PATH="appliances/UERANSIM/.files"
+REPOSITORY_PATH="$(dirname "$0").repository"
+FILES_PATH="$(dirname "$0").files"
 LOCK_FILE="/tmp/ueransim_build.lock"
 
 # Avoid parallel executions of the script
