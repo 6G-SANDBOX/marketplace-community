@@ -11,14 +11,6 @@ APPLIANCE_DST=${DIR_APPLIANCES}/${APP_NAME}.qcow2   # e.g. /var/lib/one/6gsandb
 METADATA_ORG=../../appliances/${APP_NAME}/${APP_NAME}.yaml  # e.g. ../appliances/jenkins/jenkins.yaml
 METADATA_DST=${DIR_METADATA}/${APP_NAME}.yaml               # e.g. /opt/marketplace-community/marketplace/appliances/jenkins.yaml
 
-if [ -f "${APPLIANCE_DST}" ]; then
-    test -d "${DIR_APPLIANCES}/backup/" || mkdir -p "${DIR_APPLIANCES}/backup/"
-    BACKUP=${DIR_APPLIANCES}/backup/${APP_NAME}-$(stat -c %y "${APPLIANCE_DST}" | awk '{print $1}' | sed 's/-//g').qcow2   # e.g. /var/lib/one/6gsandbox-marketplace/backup/jenkins-20240723.qcow2
-else
-    # If there is no previous image, there is nothing to backup
-    BACKUP=None
-fi
-
 
 
 echo "------------------New build--------------------------" >> ${LOGFILE}
@@ -47,6 +39,13 @@ fi
 FULL_NAME="${APPLIANCE_PREFIX:+$APPLIANCE_PREFIX }$(cat "${METADATA_ORG}" | yq '.name')"  # e.g. 6G-Sandbox bastion
 SW_VERSION=$(cat "${METADATA_ORG}" | yq '.software_version')            # e.g. v0.4.0  
 
+if [ -f "${APPLIANCE_DST}" ]; then
+    test -d "${DIR_APPLIANCES}/backup/" || mkdir -p "${DIR_APPLIANCES}/backup/"
+    BACKUP=${DIR_APPLIANCES}/backup/${APP_NAME}-$(stat -c %y "${APPLIANCE_DST}" | awk '{print $1}' | sed 's/-//g').qcow2   # e.g. /var/lib/one/6gsandbox-marketplace/backup/jenkins-20240723.qcow2
+else
+    # If there is no previous image, there is nothing to backup
+    BACKUP=None
+fi
 
 {
   echo "APP_NAME=\"${APP_NAME}\""
@@ -64,7 +63,9 @@ SW_VERSION=$(cat "${METADATA_ORG}" | yq '.software_version')            # e.g. 
 if [ -f "${APPLIANCE_DST}" ]; then
     mv "${APPLIANCE_DST}" "${BACKUP}"
 fi
+
 ### Move actual appliance to destination
+test -d "${DIR_APPLIANCES}/" || mkdir -p "${DIR_APPLIANCES}/"
 mv "${APPLIANCE_ORG}" "${APPLIANCE_DST}"
 
 

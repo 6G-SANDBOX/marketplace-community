@@ -47,8 +47,6 @@ opennebula_template:
     oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
     oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
     oneapp_influxdb_token:     "$ONEAPP_INFLUXDB_TOKEN"
-  inputs_order: >-
-    ONEAPP_INFLUXDB_VERSION,ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET,ONEAPP_INFLUXDB_TOKEN
   cpu: '2'
   vcpu: '2'
   cpu_model:

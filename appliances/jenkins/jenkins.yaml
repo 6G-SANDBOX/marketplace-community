@@ -1,7 +1,7 @@
 ---
 name: "6G-Sandbox Jenkins"
 version: "autofill"
-software_version: "v0.5.0"
+software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of Jenkins LTS from the official download and configures it to be ready to serve a 6G-SANDBOX site.
@@ -58,8 +58,6 @@ opennebula_template:
     oneapp_jenkins_opennebula_insecure:      "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
     oneapp_jenkins_aws_access_key_id:        "$ONEAPP_JENKINS_AWS_ACCESS_KEY_ID"
     oneapp_jenkins_aws_secret_access_key:    "$ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY"
-  inputs_order: >-
-    ONEAPP_JENKINS_USERNAME,ONEAPP_JENKINS_PASSWORD,ONEAPP_JENKINS_SITES_TOKEN,ONEAPP_JENKINS_OPENNEBULA_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT,ONEAPP_JENKINS_OPENNEBULA_INSECURE,ONEAPP_JENKINS_OPENNEBULA_USERNAME,ONEAPP_JENKINS_OPENNEBULA_PASSWORD,ONEAPP_JENKINS_AWS_ACCESS_KEY_ID,ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY
   cpu: '2'
   vcpu: '2'
   graphics:
