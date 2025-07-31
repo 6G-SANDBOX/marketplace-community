@@ -46,6 +46,7 @@ if [ ! -d "${REPOSITORY_PATH}/.git" ]; then
     echo "Cloning UERANSIM at ${REPOSITORY_PATH}/ ..."
     rm -f "${REPOSITORY_PATH}/.placeholder"
     git clone "${REPO_URL}" "${REPOSITORY_PATH}/"
+    touch "${REPOSITORY_PATH}/.placeholder"
 else
     echo "Pulling latest changes from origin to local..."
     cd "${REPOSITORY_PATH}/"
@@ -70,9 +71,7 @@ cd - > /dev/null
 
 
 echo "Copy files into previously existing directories"
-# rm -f "${FILES_PATH}/build/.placeholder"
 cp -r "${REPOSITORY_PATH}/build/." "${FILES_PATH}/build/"
-# rm -f "${FILES_PATH}/config/.placeholder"
 cp -r "${REPOSITORY_PATH}/config/." "${FILES_PATH}/config/"
 
 # Remove the lock file
