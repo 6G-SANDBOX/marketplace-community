@@ -1,0 +1,11 @@
+# Where the generated appliance will be moved
+DIR_APPLIANCES := /srv/6gsandbox/appliances
+
+# Where the metadata files will be created/updated
+DIR_METADATA := /srv/6gsandbox/metadata
+
+# URL of the appliance repository
+URL_APPLIANCES := https://rawimages.mobilesandbox.cloud:9443/
+
+# Prefix added to the appliance name
+APPLIANCE_PREFIX :=
