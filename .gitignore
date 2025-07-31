@@ -4,9 +4,9 @@ apps-code/community-apps/version
 apps-code/community-apps/Makefile.local
 apps-code/community-apps/packer/update_metadata.log
 
-apps-code/community-apps/appliances/*/.*/*
-!apps-code/community-apps/appliances/*/.*/.placeholder
-!apps-code/community-apps/appliances/*/.*/*/.placeholder
+appliances/*/.*/*
+!appliances/*/.*/.placeholder
+!appliances/*/.*/*/.placeholder
 
 .vscode
 *.DS_Store
