@@ -20,7 +20,7 @@ set -o errexit -o pipefail
 # Global variables
 # ------------------------------------------------------------------------------
 
-OPEN5GS_VERSION="2.7.2" 
+OPEN5GS_VERSION="2.7.6" 
 
 
 # ------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ install_open5gs()
     fi
 
     msg info "Installing open5gs ${OPEN5GS_VERSION}~*..."
-    if ! apt install -y open5gs=${OPEN5GS_VERSION}~* ; then
+    if ! apt-get install -y open5gs=${OPEN5GS_VERSION}~* ; then
         msg error "open5gs installation failed"
         exit 1
     fi
