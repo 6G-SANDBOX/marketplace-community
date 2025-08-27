@@ -110,7 +110,7 @@ install_docker()
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
         tee /etc/apt/sources.list.d/docker.list > /dev/null
-    apt update
+    apt-get update
 
     msg info "Install Docker Engine"
     if ! apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin ; then
@@ -123,22 +123,22 @@ install_yq()
 {
     msg info "Install yq"
     add-apt-repository ppa:rmescandon/yq
-    apt update
-    apt install yq -y
+    apt-get update
+    apt-get install yq -y
 }
 
 install_iperf()
 {
     msg info "Install iperf3"
-    apt update
-    apt install -y --no-install-recommends iperf3
+    apt-get update
+    apt-get install -y --no-install-recommends iperf3
 }
 
 install_netstat()
 {
     msg info "Install net-tools"
-    apt update
-    apt install -y --no-install-recommends net-tools
+    apt-get update
+    apt-get install -y --no-install-recommends net-tools
 }
 
 create_robot_docker_image()

@@ -1,43 +1,45 @@
-FROM python:3.10-slim
+FROM ubuntu:22.04
 
 LABEL maintainer="Jorge Moratinos Salcines <jorge.moratinossalcines@telefonica.com>"
 LABEL version="3.0"
 LABEL description="Docker to run Robot Framework"
 
-# Set environment variables
+# Evitar prompts interactivos
 ENV DEBIAN_FRONTEND=noninteractive \
     ROBOT_DIRECTORY=/opt/robot-tests \
     ROBOT_COMMON_DIRECTORY=/opt/robot-tests/common \
     ROBOT_TESTS_DIRECTORY=/opt/robot-tests/tests \
     ROBOT_RESULTS_DIRECTORY=/opt/robot-tests/results
 
-# Create directories
+# Crear estructura de directorios y volúmenes
 RUN mkdir -p \
     $ROBOT_DIRECTORY \
     $ROBOT_COMMON_DIRECTORY \
     $ROBOT_TESTS_DIRECTORY \
     $ROBOT_RESULTS_DIRECTORY
-
-# Create docker volumes
 VOLUME $ROBOT_COMMON_DIRECTORY $ROBOT_TESTS_DIRECTORY $ROBOT_RESULTS_DIRECTORY
 
-# Set the working directory
 WORKDIR $ROBOT_DIRECTORY
 
-# Install dependencies
-RUN apt-get update && apt-get upgrade -y && \
+# Habilitar 'universe' y paquetes base (incluye Python + venv + pip)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository -y universe && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
-        software-properties-common && \
+        ca-certificates \
+        curl \
+        wget \
+        gnupg \
+        gpg-agent \
+        dirmngr \
         build-essential \
         bash \
         bash-completion \
-        libxml2 \
-        libxslt-dev \
-        curl \
-        yarn \
         less \
         dpkg \
-        wget \
+        libxml2 \
+        libxslt1-dev \
         libssl-dev \
         libldap2-dev \
         libsasl2-dev \
@@ -49,25 +51,33 @@ RUN apt-get update && apt-get upgrade -y && \
         tshark \
         nodejs \
         npm \
-        gnupg2 \
-        gpg-agent \
-        wkhtmltopdf && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+        wkhtmltopdf \
+        fonts-dejavu \
+        python3 \
+        python3-venv \
+        python3-pip \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create a virtual environment
-RUN python3.10 -m venv /opt/venv
+# Yarn (vía npm). El symlink asegura /usr/bin/yarn
+RUN npm install -g yarn && ln -sf /usr/local/bin/yarn /usr/bin/yarn
 
-# Copy requirements files and scripts
+# Crear y activar el venv. Añadimos el venv al PATH para el resto de RUNs.
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/python -m pip install --upgrade pip setuptools wheel
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copiar requirements y scripts
 COPY basicRequirements.txt /root/
 COPY basicRobotInstall.sh /root/
 COPY entrypoint.sh linter_entrypoint.sh featdoc_entrypoint.sh libdoc_entrypoint.sh /root/
 
-# Install Python packages
+# Instalar dependencias Python (dentro del venv)
 RUN chmod +x /root/basicRobotInstall.sh && \
     /root/basicRobotInstall.sh /root/basicRequirements.txt && \
     sed -i 's|/bin/ash|/bin/bash|g' /etc/passwd
 
-# Replace placeholders in entrypoint scripts
+# Sustituir placeholders en los entrypoints
 RUN for script in entrypoint.sh linter_entrypoint.sh featdoc_entrypoint.sh libdoc_entrypoint.sh; do \
         sed -i "s|ROBOT_DIRECTORY|$ROBOT_DIRECTORY|g" /root/$script && \
         sed -i "s|ROBOT_TESTS_DIRECTORY|$ROBOT_TESTS_DIRECTORY|g" /root/$script && \
