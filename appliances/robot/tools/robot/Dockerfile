@@ -26,9 +26,8 @@ WORKDIR $ROBOT_DIRECTORY
 
 # Install dependencies
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    apt-get update && \
     apt-get install -y --no-install-recommends \
+        software-properties-common && \
         build-essential \
         bash \
         bash-completion \
