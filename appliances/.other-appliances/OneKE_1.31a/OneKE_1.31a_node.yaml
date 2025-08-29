@@ -1,6 +1,6 @@
 ---
-name: "[6G-Sandbox OneKE 1.31a] node"
-version: 1.31.3-6.10.0-2-20250220-0051  # date +"%Y%m%d-%H%M" -d @<creation_time>
+name: "[6G-Sandbox] OneKE 1.31 Airgapped Node"
+version: 1.31.3-7.0.0-0-20250528
 publisher: OpenNebula Systems
 description: |-
   OneKE 1.31 Airgapped VM template for Master and Worker VMs.
@@ -19,7 +19,7 @@ tags:
   - control_plane
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1740012707               # date +%s
+creation_time: 1756484477               # date +%s
 os-id: Ubuntu
 os-release: "22.04 LTS"
 os-arch: x86_64
