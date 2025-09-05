@@ -1,7 +1,7 @@
 ---
 name: Example
-version: "v0.4.0-20250206-1009"    # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>). If your appliance is generated with packer, update_metadata.sh script will overwrite this value
-software_version: "v0.4.0"         # Custom parameter for the 6GL marketplace
+version: "v1.0.0-20250206-1009"    # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>). If your appliance is generated with packer, update_metadata.sh script will overwrite this value
+software_version: "v1.0.0"         # Custom parameter for the 6GL marketplace
 publisher: "Your institution"
 description: |-
   Sample Appliance for KVM hosts.
@@ -24,7 +24,7 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+  6.6, 6.8, 6.10
 # This is how you interact with the appliance using OpenNebula.
 # These variables are defined in the CONTEXT section of the VM Template as custom variables
 # https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section

@@ -1,7 +1,7 @@
 ---
 name: "Technitium DNS"
 version: "autofill"
-software_version: "v0.4.0"
+software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs Technitium DNS, an open source authoritative as well as recursive DNS server that can be used for self hosting a DNS server for privacy & security.
@@ -30,7 +30,7 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+  6.6, 6.8, 6.10
 opennebula_template:
   context:
     network: 'YES'

@@ -31,7 +31,7 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+  6.6, 6.8, 6.10
 opennebula_template:
   context:
     network: 'YES'
@@ -40,8 +40,6 @@ opennebula_template:
     netcfg_type: "interfaces"
     oneapp_ntp_servers: "$ONEAPP_NTP_SERVERS"
     oneapp_ntp_tz: "$ONEAPP_NTP_TZ"
-  inputs_order: >-
-    ONEAPP_NTP_TZ,ONEAPP_NTP_SERVERS
   cpu: '1'
   vcpu: '1'
   graphics:

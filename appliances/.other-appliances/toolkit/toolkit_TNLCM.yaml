@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] TNLCM"
-version: "v1.0.0-20250731-1344"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250905-1140"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
@@ -27,13 +27,13 @@ tags:
   - TNLCM
 type: VMTEMPLATE
 format: qcow2
-creation_time: "1753962253"   # date +%s
+creation_time: 1757065237     # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+  6.6, 6.8, 6.10
 opennebula_template:
   context:
     network: 'YES'

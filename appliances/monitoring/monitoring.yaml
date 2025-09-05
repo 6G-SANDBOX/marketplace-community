@@ -1,7 +1,7 @@
 ---
 name: "6G-Sandbox Monitoring Stack (influxdb-grafana-prometheus)"
 version: "autofill"
-software_version: "v0.5.0"
+software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of InfluxDB, Grafana and Prometheus from the official repositories and configures them according to the input variables. Configuration of the InfluxDB, Grafana and Prometheus can be made when instanciating the VM.
@@ -37,7 +37,7 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.2, 6.3, 6.4, 6.6, 6.8, 6.10
+  6.6, 6.8, 6.10
 opennebula_template:
   context:
     network: 'YES'
@@ -53,8 +53,6 @@ opennebula_template:
     oneapp_grafana_version:          "$ONEAPP_GRAFANA_VERSION"
     oneapp_grafana_admin_password:   "$ONEAPP_GRAFANA_ADMIN_PASSWORD"
     oneapp_prometheus_version:       "$ONEAPP_PROMETHEUS_VERSION"
-  inputs_order: >-
-    ONEAPP_INFLUXDB_VERSION,ONEAPP_INFLUXDB_USER,ONEAPP_INFLUXDB_PASSWORD,ONEAPP_INFLUXDB_ORG,ONEAPP_INFLUXDB_BUCKET,ONEAPP_INFLUXDB_TOKEN,ONEAPP_GRAFANA_VERSION,ONEAPP_GRAFANA_ADMIN_PASSWORD,ONEAPP_PROMETHEUS_VERSION
   cpu: '2'
   vcpu: '2'
   cpu_model:
