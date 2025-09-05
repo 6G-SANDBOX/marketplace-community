@@ -1,7 +1,7 @@
 ---
 name: "6G-Sandbox TNLCM"
 version: "autofill"
-software_version: "v0.5.2"
+software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
   This appliance installs the latest version of [TNLCM](https://github.com/6G-SANDBOX/TNLCM) and [TNLCM_FRONTEND](https://github.com/6G-SANDBOX/TNLCM_FRONTEND) from the official repositories and configures them according to the input variables. Configuration of the TNLCM can be made when instanciating the VM.
