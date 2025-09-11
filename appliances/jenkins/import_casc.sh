@@ -141,7 +141,7 @@ export OPENNEBULA_USERNAME=${ONEAPP_JENKINS_OPENNEBULA_USERNAME}
 export OPENNEBULA_PASSWORD=${ONEAPP_JENKINS_OPENNEBULA_PASSWORD}
 export OPENNEBULA_ENDPOINT=${ONEAPP_JENKINS_OPENNEBULA_ENDPOINT}
 export OPENNEBULA_FLOW_ENDPOINT=${ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT}
-export OPENNEBULA_INSECURE=${ONEAPP_JENKINS_OPENNEBULA_INSECURE}
+export OPENNEBULA_INSECURE=$(if [ \"${ONEAPP_JENKINS_OPENNEBULA_INSECURE}\" = \"YES\" ]; then echo true; else echo false; fi)
 export AWS_ACCESS_KEY_ID=${ONEAPP_JENKINS_AWS_ACCESS_KEY_ID}
 export AWS_SECRET_ACCESS_KEY=${ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY}
 
@@ -152,6 +152,8 @@ export AWS_SECRET_ACCESS_KEY=${ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY}
     # Avoid duplicate entries
     if ! grep -q "OPENNEBULA_USERNAME" "/var/lib/jenkins/.bashrc"; then
         echo "${ENV_VARS}" >> "/var/lib/jenkins/.bashrc"
+        chown jenkins:jenkins /var/lib/jenkins/.bashrc
         echo "${ONEAPP_JENKINS_SITES_TOKEN}" > "/var/lib/jenkins/superisecurevaultpassword"
+        chown jenkins:jenkins /var/lib/jenkins/superisecurevaultpassword
     fi
 }
