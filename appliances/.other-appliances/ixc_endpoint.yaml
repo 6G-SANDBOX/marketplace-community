@@ -23,7 +23,7 @@ creation_time: "1737149773"
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.6, 6.8, 6.10
+  6.6, 6.8, 6.10, 7.0
 opennebula_template:
   context:
     network: 'YES'

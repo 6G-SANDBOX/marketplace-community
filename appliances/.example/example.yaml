@@ -24,7 +24,7 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.6, 6.8, 6.10
+  6.6, 6.8, 6.10, 7.0
 # This is how you interact with the appliance using OpenNebula.
 # These variables are defined in the CONTEXT section of the VM Template as custom variables
 # https://docs.opennebula.io/6.8/management_and_operations/references/template.html#context-section
