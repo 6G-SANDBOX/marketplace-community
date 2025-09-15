@@ -136,7 +136,7 @@ opennebula_template:
     ONEAPP_MINIO_OPTS:           "O|text|Additional commandline options for MinIO server||--console-address :9001"
     ONEAPP_MINIO_ROOT_USER:      "O|text|MinIO root user for MinIO server. At least 5 characters||myminioadmin"
     ONEAPP_MINIO_ROOT_PASSWORD:  "M|password|MinIO root user password for MinIO server. At least 8 characters"
-    ONEAPP_MINIO_TLS_ENABLED:    'M|boolean|Enable TLS configuration| |NO'
+    ONEAPP_MINIO_TLS_ENABLED:    'M|boolean|Enable TLS configuration||YES'
     ONEAPP_MINIO_TLS_CERT:       "O|text64|MinIO TLS certificate (.crt)||"
     ONEAPP_MINIO_TLS_KEY:        "O|text64|MinIO TLS key (.key)||"    
     ONEAPP_JENKINS_USERNAME:                  "O|text|The username for the Jenkins admin user. At least 5 characters||admin"
