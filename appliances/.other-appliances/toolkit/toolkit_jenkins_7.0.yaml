@@ -1,5 +1,5 @@
 ---
-name: "[6G-Sandbox toolkit] Jenkins"
+name: "[6G-Sandbox toolkit] Jenkins for OpenNebula 7.0"
 version: "v1.0.0-20250915-1622"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
@@ -27,8 +27,7 @@ os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
-opennebula_version: >-
-  6.6, 6.8, 6.10
+opennebula_version: 7.0
 opennebula_template:
   context:
     SERVICE_ID: "$SERVICE_ID"
@@ -47,8 +46,8 @@ opennebula_template:
     ONEAPP_JENKINS_OPENNEBULA_USERNAME:      "$ONEAPP_JENKINS_OPENNEBULA_USERNAME"
     ONEAPP_JENKINS_OPENNEBULA_PASSWORD:      "$ONEAPP_JENKINS_OPENNEBULA_PASSWORD"
     ONEAPP_JENKINS_OPENNEBULA_INSECURE:      "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
-    ONEAPP_JENKINS_AWS_ACCESS_KEY_ID:        "$ONEAPP_JENKINS_AWS_ACCESS_KEY_ID"
-    ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY:    "$ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY"
+    ONEAPP_JENKINS_AWS_ACCESS_KEY_ID:        "$ONEAPP_MINIO_ROOT_USER"
+    ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY:    "$ONEAPP_MINIO_ROOT_PASSWORD"
   cpu: '2'
   vcpu: '2'
   graphics:

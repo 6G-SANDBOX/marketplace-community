@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] InfluxDB"
-version: "v1.0.0-20250915-1649"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250915-1622"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
@@ -22,7 +22,7 @@ tags:
   - InfluxDB
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1757947796     # date +%s
+creation_time: 1757953367     # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64

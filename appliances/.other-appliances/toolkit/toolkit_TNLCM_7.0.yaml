@@ -1,5 +1,5 @@
 ---
-name: "[6G-Sandbox toolkit] TNLCM"
+name: "[6G-Sandbox toolkit] TNLCM for OpenNebula 7.0"
 version: "v1.0.0-20250915-1622"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "University of Malaga"
@@ -32,8 +32,7 @@ os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
-opennebula_version: >-
-  6.6, 6.8, 6.10
+opennebula_version: 7.0
 opennebula_template:
   context:
     SERVICE_ID: "$SERVICE_ID"
@@ -45,17 +44,17 @@ opennebula_template:
     NETCFG_TYPE: "interfaces"
     START_SCRIPT_BASE64: "IyEvYmluL2Jhc2gKCnNvdXJjZSAvZXRjL29uZS1hcHBsaWFuY2Uvc2VydmljZS5kL3Rvb2xraXRfc2NyaXB0LnNoID4gL3Zhci9sb2cvb25lLWFwcGxpYW5jZS9zdGFydF9zY3JpcHQubG9nIDI+JjE="
     ONEAPP_TNLCM_JENKINS_HOST:                "$ONEAPP_TNLCM_JENKINS_HOST"
-    ONEAPP_TNLCM_JENKINS_USERNAME:            "$ONEAPP_TNLCM_JENKINS_USERNAME"
-    ONEAPP_TNLCM_JENKINS_PASSWORD:            "$ONEAPP_TNLCM_JENKINS_PASSWORD"
+    ONEAPP_TNLCM_JENKINS_USERNAME:            "$ONEAPP_JENKINS_USERNAME"
+    ONEAPP_TNLCM_JENKINS_PASSWORD:            "$ONEAPP_JENKINS_PASSWORD"
     ONEAPP_TNLCM_ADMIN_USER:                  "$ONEAPP_TNLCM_ADMIN_USER"
     ONEAPP_TNLCM_ADMIN_PASSWORD:              "$ONEAPP_TNLCM_ADMIN_PASSWORD"
     ONEAPP_TNLCM_SITES_BRANCH:                "$ONEAPP_TNLCM_SITES_BRANCH"
     ONEAPP_TNLCM_DEPLOYMENT_SITE:             "$ONEAPP_TNLCM_DEPLOYMENT_SITE"
-    ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN:       "$ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN"
+    ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN:       "$ONEAPP_JENKINS_SITES_TOKEN"
     ONEAPP_TNLCM_INFLUXDB_HOST:               "$ONEAPP_TNLCM_INFLUXDB_HOST"
-    ONEAPP_TNLCM_INFLUXDB_ORG:                "$ONEAPP_TNLCM_INFLUXDB_ORG"
-    ONEAPP_TNLCM_INFLUXDB_BUCKET:             "$ONEAPP_TNLCM_INFLUXDB_BUCKET"
-    ONEAPP_TNLCM_INFLUXDB_TOKEN:              "$ONEAPP_TNLCM_INFLUXDB_TOKEN"
+    ONEAPP_TNLCM_INFLUXDB_ORG:                "$ONEAPP_INFLUXDB_ORG"
+    ONEAPP_TNLCM_INFLUXDB_BUCKET:             "$ONEAPP_INFLUXDB_BUCKET"
+    ONEAPP_TNLCM_INFLUXDB_TOKEN:              "$ONEAPP_INFLUXDB_TOKEN"
   cpu: '4'
   vcpu: '4'
   cpu_model:

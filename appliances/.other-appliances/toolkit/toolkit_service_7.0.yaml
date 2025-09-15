@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox Toolkit for OpenNebula 7.0"
-version: "v1.0.0-20250915-1649"   # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250915-1622"   # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -30,7 +30,7 @@ tags:
   - 6G-Library
 type: SERVICE_TEMPLATE        # Choices are <none> (default), SERVICE_TEMPLATE and VMTEMPLATE (shown in Sunstone as IMAGE, SERVICE and VM respectively)
 # format: qcow2
-creation_time: 1757947796     # date +%s
+creation_time: 1757953367     # date +%s
 # os-id: Ubuntu
 # os-release: 22.04 LTS
 os-arch: x86_64
@@ -39,8 +39,8 @@ opennebula_version: 6.6, 6.8, 6.10, 7.0
 roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
   influxdb: "[6G-Sandbox toolkit] InfluxDB"
   minio: "[6G-Sandbox toolkit] MinIO"
-  jenkins: "[6G-Sandbox toolkit] Jenkins"
-  tnlcm: "[6G-Sandbox toolkit] TNLCM"
+  jenkins: "[6G-Sandbox toolkit] Jenkins for OpenNebula 7.0"
+  tnlcm: "[6G-Sandbox toolkit] TNLCM for OpenNebula 7.0"
 opennebula_template:
   name: 6G-Sandbox toolkit installer
   description: Multi-VM Service that deploys and configures the necessary appliances for a 6G-Sandbox site.
@@ -55,11 +55,6 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_INFLUXDB_USER         = "$ONEAPP_INFLUXDB_USER"
-        ONEAPP_INFLUXDB_PASSWORD     = "$ONEAPP_INFLUXDB_PASSWORD"
-        ONEAPP_INFLUXDB_ORG          = "$ONEAPP_INFLUXDB_ORG"
-        ONEAPP_INFLUXDB_BUCKET       = "$ONEAPP_INFLUXDB_BUCKET"
-        ONEAPP_INFLUXDB_TOKEN        = "$ONEAPP_INFLUXDB_TOKEN"
       cooldown: 120
       elasticity_policies: []
       scheduled_policies: []
@@ -70,13 +65,6 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_MINIO_HOSTNAME      = "$ONEAPP_MINIO_HOSTNAME"
-        ONEAPP_MINIO_OPTS          = "$ONEAPP_MINIO_OPTS"
-        ONEAPP_MINIO_ROOT_USER     = "$ONEAPP_MINIO_ROOT_USER"
-        ONEAPP_MINIO_ROOT_PASSWORD = "$ONEAPP_MINIO_ROOT_PASSWORD"
-        ONEAPP_MINIO_TLS_ENABLED   = "$ONEAPP_MINIO_TLS_ENABLED"
-        ONEAPP_MINIO_TLS_CERT      = "$ONEAPP_MINIO_TLS_CERT"
-        ONEAPP_MINIO_TLS_KEY       = "$ONEAPP_MINIO_TLS_KEY"
       cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
       elasticity_policies: []
       scheduled_policies: []
@@ -88,16 +76,6 @@ opennebula_template:
         NIC = [
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
-        ONEAPP_JENKINS_USERNAME                 = "$ONEAPP_JENKINS_USERNAME"
-        ONEAPP_JENKINS_PASSWORD                 = "$ONEAPP_JENKINS_PASSWORD"
-        ONEAPP_JENKINS_SITES_TOKEN              = "$ONEAPP_JENKINS_SITES_TOKEN"
-        ONEAPP_JENKINS_OPENNEBULA_ENDPOINT      = "$ONEAPP_JENKINS_OPENNEBULA_ENDPOINT"
-        ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT = "$ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT"
-        ONEAPP_JENKINS_OPENNEBULA_USERNAME      = "$ONEAPP_JENKINS_OPENNEBULA_USERNAME"
-        ONEAPP_JENKINS_OPENNEBULA_PASSWORD      = "$ONEAPP_JENKINS_OPENNEBULA_PASSWORD"
-        ONEAPP_JENKINS_OPENNEBULA_INSECURE      = "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
-        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID        = "$ONEAPP_MINIO_ROOT_USER"
-        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY    = "$ONEAPP_MINIO_ROOT_PASSWORD"
       cooldown: 120
       elasticity_policies: []
       scheduled_policies: []
@@ -110,17 +88,7 @@ opennebula_template:
           NAME = "NIC0",
           NETWORK_ID = "$Public" ]
         ONEAPP_TNLCM_JENKINS_HOST           = "${jenkins.TEMPLATE.CONTEXT.ETH0_IP}"
-        ONEAPP_TNLCM_JENKINS_USERNAME       = "$ONEAPP_JENKINS_USERNAME"
-        ONEAPP_TNLCM_JENKINS_PASSWORD       = "$ONEAPP_JENKINS_PASSWORD"
-        ONEAPP_TNLCM_ADMIN_USER             = "$ONEAPP_TNLCM_ADMIN_USER"
-        ONEAPP_TNLCM_ADMIN_PASSWORD         = "$ONEAPP_TNLCM_ADMIN_PASSWORD"
-        ONEAPP_TNLCM_SITES_BRANCH           = "$ONEAPP_TNLCM_SITES_BRANCH"
-        ONEAPP_TNLCM_DEPLOYMENT_SITE        = "$ONEAPP_TNLCM_DEPLOYMENT_SITE"
-        ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN  = "$ONEAPP_JENKINS_SITES_TOKEN"
         ONEAPP_TNLCM_INFLUXDB_HOST          = "${influxdb.TEMPLATE.CONTEXT.ETH0_IP}"
-        ONEAPP_TNLCM_INFLUXDB_ORG           = "$ONEAPP_INFLUXDB_ORG"
-        ONEAPP_TNLCM_INFLUXDB_BUCKET        = "$ONEAPP_INFLUXDB_BUCKET"
-        ONEAPP_TNLCM_INFLUXDB_TOKEN         = "$ONEAPP_INFLUXDB_TOKEN"
       cooldown: 120
       elasticity_policies: []
       scheduled_policies: []
