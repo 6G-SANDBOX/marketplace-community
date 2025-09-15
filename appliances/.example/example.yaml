@@ -57,7 +57,7 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png       # path to a file already existing in the frontend, at /usr/lib/one/sunstone/public/
-  user_inputs:    # Documentation at https://docs.opennebula.io/6.8/management_and_operations/references/template.html#template-user-inputs
+  user_inputs:    # Documentation at https://docs.opennebula.io/7.0/product/operation_references/configuration_references/template/#user-inputs
     oneapp_example_jenkins_host:         "M|text|ONEAPP_EXAMPLE_JENKINS_HOST: IP address of the Jenkins server used to deploy the Trial Networks| |127.0.0.1"
     oneapp_example_jenkins_username:     "M|text|ONEAPP_EXAMPLE_JENKINS_USERNAME: Username used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"
     oneapp_example_jenkins_password:     "M|text|ONEAPP_EXAMPLE_JENKINS_PASSWORD: Password used to login into the Jenkins server to access and retrieve pipeline info. | |tnlcm"

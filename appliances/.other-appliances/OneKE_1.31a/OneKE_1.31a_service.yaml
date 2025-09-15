@@ -22,13 +22,13 @@ description: |-
   - [OneKE 1.31 Airgapped Storage](/appliance/d84d44f4-0e30-412a-a6f6-b1721bf7159e)
 short_description: Multi-master Kubernetes 1.31 Airgapped cluster for KVM and vCenter hosts, orchestrated by OneFlow
 tags:
-  - service
+  - kubernetes
   - oneflow
+  - service
+  - ubuntu
   - onegate
-  - SERVICE_TEMPLATE
   - 6G-Sandbox
   - 6G-Library
-  - kubernetes
 creation_time: 1756484477
 os-id: Ubuntu
 os-release: "22.04 LTS"

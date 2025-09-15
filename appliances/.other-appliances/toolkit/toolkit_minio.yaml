@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] MinIO"
-version: "v1.0.0-20250905-1140"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250915-1649"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -11,41 +11,40 @@ description: |-
   For appliance deployment logs, check /var/log/one-appliance/.
 short_description: 6G-Sandbox toolkit VM template for the MinIO appliance
 tags:
-  - service
+  - toolkit
   - oneflow
   - onegate
-  - VMTEMPLATE
+  - service
   - 6G-Sandbox
   - 6G-Library
-  - toolkit
-  - ubuntu
   - minio
+  - ubuntu
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1757065237     # date +%s
+creation_time: 1757947796     # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.6, 6.8, 6.10
+  6.6, 6.8, 6.10, 7.0
 opennebula_template:
   context:
-    network: 'YES'
-    set_hostname: "$NAME"
-    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    netcfg_type: "interfaces"
-    token: "YES"
-    report_ready: "YES"
-    start_script_base64: "IyEvYmluL2Jhc2gKc2V0IC1vIGVycmV4aXQgLW8gcGlwZWZhaWwKc291cmNlIC92YXIvcnVuL29uZS1jb250ZXh0L29uZV9lbnYKCk9ORUFQUF9NSU5JT19ST09UX1VTRVI9IiR7T05FQVBQX01JTklPX1JPT1RfVVNFUjotbXltaW5pb2FkbWlufSIKT05FQVBQX01JTklPX1JPT1RfUEFTU1dPUkQ9IiR7T05FQVBQX01JTklPX1JPT1RfUEFTU1dPUkQ6LW1pbmlvLXNlY3JldC1rZXktY2hhbmdlLW1lfSIKTUlOSU9fRU5EUE9JTlQ9Imh0dHBzOi8vbG9jYWxob3N0OjkwMDAiCkJVQ0tFVF9OQU1FPSJ0cmlhbC1uZXR3b3JrcyIKCmVjaG8gIkRvd25sb2FkaW5nIE1pbmlvIENsaWVudCB0b29sIChtYykiID4+IC92YXIvbG9nL29uZS1hcHBsaWFuY2Uvc3RhcnRfc2NyaXB0LmxvZyAKY3VybCBodHRwczovL2RsLm1pbi5pby9jbGllbnQvbWMvcmVsZWFzZS9saW51eC1hbWQ2NC9tYyBcCiAgLS1jcmVhdGUtZGlycyBcCiAgLW8gJEhPTUUvbWluaW8tYmluYXJpZXMvbWMKY2htb2QgK3ggJEhPTUUvbWluaW8tYmluYXJpZXMvbWMKZXhwb3J0IFBBVEg9JFBBVEg6JEhPTUUvbWluaW8tYmluYXJpZXMvCgplY2hvICJDb25maWd1cmUgY3VzdG9tIGNyZWRlbnRpYWxzIiA+PiAvdmFyL2xvZy9vbmUtYXBwbGlhbmNlL3N0YXJ0X3NjcmlwdC5sb2cgCm1jIGFsaWFzIHNldCBteW1pbmlvICR7TUlOSU9fRU5EUE9JTlR9ICR7T05FQVBQX01JTklPX1JPT1RfVVNFUn0gJHtPTkVBUFBfTUlOSU9fUk9PVF9QQVNTV09SRH0gLS1hcGkgUzN2NCAtLWluc2VjdXJlCmVjaG8gIkNyZWF0ZSBidWNrZXQgZm9yIDZHU2FuZGJveCIgPj4gL3Zhci9sb2cvb25lLWFwcGxpYW5jZS9zdGFydF9zY3JpcHQubG9nIAptYyBtYiBteW1pbmlvLyR7QlVDS0VUX05BTUV9IC0taW5zZWN1cmUgLS1yZWdpb249bWFpbg=="
-    oneapp_minio_hostname:      "$ONEAPP_MINIO_HOSTNAME"
-    oneapp_minio_opts:          "$ONEAPP_MINIO_OPTS"
-    oneapp_minio_root_password: "$ONEAPP_MINIO_ROOT_PASSWORD"
-    oneapp_minio_root_user:     "$ONEAPP_MINIO_ROOT_USER"
-    oneapp_minio_tls_cert:      "$ONEAPP_MINIO_TLS_CERT"
-    oneapp_minio_tls_key:       "$ONEAPP_MINIO_TLS_KEY"
-  inputs_order: >-
-    ONEAPP_MINIO_ROOT_USER,ONEAPP_MINIO_ROOT_PASSWORD,ONEAPP_MINIO_OPTS,ONEAPP_MINIO_HOSTNAME,ONEAPP_MINIO_TLS_CERT,ONEAPP_MINIO_TLS_KEY
+    SERVICE_ID: "$SERVICE_ID"
+    NETWORK: "YES"
+    TOKEN: "YES"
+    REPORT_READY: "YES"
+    SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"
+    SET_HOSTNAME: "$NAME"
+    NETCFG_TYPE: "interfaces"
+    START_SCRIPT_BASE64: "IyEvYmluL2Jhc2gKc2V0IC1vIGVycmV4aXQgLW8gcGlwZWZhaWwKc291cmNlIC92YXIvcnVuL29uZS1jb250ZXh0L29uZV9lbnYKCk9ORUFQUF9NSU5JT19ST09UX1VTRVI9IiR7T05FQVBQX01JTklPX1JPT1RfVVNFUjotbXltaW5pb2FkbWlufSIKT05FQVBQX01JTklPX1JPT1RfUEFTU1dPUkQ9IiR7T05FQVBQX01JTklPX1JPT1RfUEFTU1dPUkQ6LW1pbmlvLXNlY3JldC1rZXktY2hhbmdlLW1lfSIKTUlOSU9fRU5EUE9JTlQ9Imh0dHBzOi8vbG9jYWxob3N0OjkwMDAiCkJVQ0tFVF9OQU1FPSJ0cmlhbC1uZXR3b3JrcyIKCmVjaG8gIkRvd25sb2FkaW5nIE1pbmlvIENsaWVudCB0b29sIChtYykiID4+IC92YXIvbG9nL29uZS1hcHBsaWFuY2Uvc3RhcnRfc2NyaXB0LmxvZyAKY3VybCBodHRwczovL2RsLm1pbi5pby9jbGllbnQvbWMvcmVsZWFzZS9saW51eC1hbWQ2NC9tYyBcCiAgLS1jcmVhdGUtZGlycyBcCiAgLW8gJEhPTUUvbWluaW8tYmluYXJpZXMvbWMKY2htb2QgK3ggJEhPTUUvbWluaW8tYmluYXJpZXMvbWMKZXhwb3J0IFBBVEg9JFBBVEg6JEhPTUUvbWluaW8tYmluYXJpZXMvCgplY2hvICJDb25maWd1cmUgY3VzdG9tIGNyZWRlbnRpYWxzIiA+PiAvdmFyL2xvZy9vbmUtYXBwbGlhbmNlL3N0YXJ0X3NjcmlwdC5sb2cgCm1jIGFsaWFzIHNldCBteW1pbmlvICR7TUlOSU9fRU5EUE9JTlR9ICR7T05FQVBQX01JTklPX1JPT1RfVVNFUn0gJHtPTkVBUFBfTUlOSU9fUk9PVF9QQVNTV09SRH0gLS1hcGkgUzN2NCAtLWluc2VjdXJlCmVjaG8gIkNyZWF0ZSBidWNrZXQgZm9yIDZHU2FuZGJveCIgPj4gL3Zhci9sb2cvb25lLWFwcGxpYW5jZS9zdGFydF9zY3JpcHQubG9nIAptYyBtYiBteW1pbmlvLyR7QlVDS0VUX05BTUV9IC0taW5zZWN1cmUgLS1yZWdpb249bWFpbg=="
+    ONEAPP_MINIO_HOSTNAME:      "$ONEAPP_MINIO_HOSTNAME"
+    ONEAPP_MINIO_OPTS:          "$ONEAPP_MINIO_OPTS"
+    ONEAPP_MINIO_ROOT_PASSWORD: "$ONEAPP_MINIO_ROOT_PASSWORD"
+    ONEAPP_MINIO_ROOT_USER:     "$ONEAPP_MINIO_ROOT_USER"
+    ONEAPP_MINIO_TLS_ENABLED:   "$ONEAPP_MINIO_TLS_ENABLED"
+    ONEAPP_MINIO_TLS_CERT:      "$ONEAPP_MINIO_TLS_CERT"
+    ONEAPP_MINIO_TLS_KEY:       "$ONEAPP_MINIO_TLS_KEY"
   cpu: '2'
   vcpu: '2'
   graphics:

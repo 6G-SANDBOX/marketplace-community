@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox toolkit] InfluxDB"
-version: "v1.0.0-20250905-1140"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250915-1649"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "University of Malaga"
 description: |-
@@ -22,26 +22,27 @@ tags:
   - InfluxDB
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1757065237     # date +%s
+creation_time: 1757947796     # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-
-  6.6, 6.8, 6.10
+  6.6, 6.8, 6.10, 7.0
 opennebula_template:
   context:
-    network: 'YES'
-    set_hostname: "$NAME"
-    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    netcfg_type: "interfaces"
-    token: "YES"
-    report_ready: "YES"
-    oneapp_influxdb_user:      "$ONEAPP_INFLUXDB_USER"
-    oneapp_influxdb_password:  "$ONEAPP_INFLUXDB_PASSWORD"
-    oneapp_influxdb_org:       "$ONEAPP_INFLUXDB_ORG"
-    oneapp_influxdb_bucket:    "$ONEAPP_INFLUXDB_BUCKET"
-    oneapp_influxdb_token:     "$ONEAPP_INFLUXDB_TOKEN"
+    SERVICE_ID: "$SERVICE_ID"
+    NETWORK: "YES"
+    TOKEN: "YES"
+    REPORT_READY: "YES"
+    SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"
+    SET_HOSTNAME: "$NAME"
+    NETCFG_TYPE: "interfaces"
+    ONEAPP_INFLUXDB_USER:      "$ONEAPP_INFLUXDB_USER"
+    ONEAPP_INFLUXDB_PASSWORD:  "$ONEAPP_INFLUXDB_PASSWORD"
+    ONEAPP_INFLUXDB_ORG:       "$ONEAPP_INFLUXDB_ORG"
+    ONEAPP_INFLUXDB_BUCKET:    "$ONEAPP_INFLUXDB_BUCKET"
+    ONEAPP_INFLUXDB_TOKEN:     "$ONEAPP_INFLUXDB_TOKEN"
   cpu: '4'
   vcpu: '4'
   cpu_model:
@@ -49,7 +50,7 @@ opennebula_template:
   graphics:
     listen: 0.0.0.0
     type: vnc
-  hypervisor: kvm
+  inputs_order: ""
   memory: '6144'
   memory_unit_cost: 'MB'
   os:

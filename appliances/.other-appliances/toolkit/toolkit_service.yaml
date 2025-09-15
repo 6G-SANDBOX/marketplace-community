@@ -1,6 +1,6 @@
 ---
 name: "6G-Sandbox Toolkit"
-version: "v1.0.0-20250905-1140"   # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: "v1.0.0-20250915-1649"   # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
@@ -19,16 +19,15 @@ description: |-
 
 short_description: Multi-VM Service that deploys and configures the necessary appliances for a 6G-Sandbox site.
 tags:
-  - service
+  - toolkit
   - oneflow
+  - service
   - onegate
-  - SERVICE_TEMPLATE
   - 6G-Sandbox
   - 6G-Library
-  - toolkit
 type: SERVICE_TEMPLATE        # Choices are <none> (default), SERVICE_TEMPLATE and VMTEMPLATE (shown in Sunstone as IMAGE, SERVICE and VM respectively)
 # format: qcow2
-creation_time: 1757065237     # date +%s
+creation_time: 1757947796     # date +%s
 # os-id: Ubuntu
 # os-release: 22.04 LTS
 os-arch: x86_64
@@ -45,6 +44,8 @@ opennebula_template:
   deployment: straight            # each Role is deployed when all its parent Roles are RUNNING
   ready_status_gate: true         # OneFlow will consider VMs are RUNNING when they have READY=YES in their user template
   automatic_deletion: true        # delete Service if it has no running VMs
+  networks:                        # Hash of virtual networks to use in the service.
+    Public: "M|network|Public||id:"
   custom_attrs:                   # Hash of custom attributes to use in the service. Initially meaningless. Has to also be specified in the role's vm_template_contents. custom_attrs_values serves the same purpose
     oneapp_minio_hostname:       "O|text|MinIO hostname for TLS certificate||localhost,minio-*.example.net"
     oneapp_minio_opts:           "O|text|Additional commandline options for MinIO server||--console-address :9001"
@@ -69,8 +70,6 @@ opennebula_template:
     oneapp_influxdb_org:                      "M|text|The organization for the InfluxDB admin user. At least 5 characters||myorg"
     oneapp_influxdb_bucket:                   "M|text|The bucket for the InfluxDB admin user. At least 5 characters||mybucket"
     oneapp_influxdb_token:                    "M|password|The token for the InfluxDB admin user. At least 8 characters||my-influxdb-token"
-  networks:                        # Hash of virtual networks to use in the service.
-    Public: "M|network|Public||id:"
   roles:
     - name: influxdb
       cardinality: 1

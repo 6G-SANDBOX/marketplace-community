@@ -1,0 +1,172 @@
+---
+name: "6G-Sandbox Toolkit for OpenNebula 7.0"
+version: "v1.0.0-20250915-1649"   # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+software_version: "v1.0.0"
+publisher: "Telefonica Innovacion Digital"
+description: |-
+  The previous toolkit service does not work with OpenNebula 7.0+ due to changes in OneFlow and OneGate.
+  This service template is intended to be used only with OpenNebula 7.0+ installations.
+
+  OpenNebula Service used as part of the [toolkit-installer](https://github.com/6G-SANDBOX/toolkit-installer) to automatically 
+  deploy and configure all the necessary instances for a 6G-Sandbox site:
+  - [6G-Sandbox InfluxDB](/appliance/toolkit_influxdb)
+  - [6G-Sandbox MinIO](/appliance/toolkit_MinIO)
+  - [6G-Sandbox Jenkins](/appliance/toolkit_jenkins)
+  - [6G-Sandbox TNLCM](/appliance/toolkit_TNLCM)
+
+  OpenNebula Services require
+  [OneFlow](https://docs.opennebula.io/7.0/product/virtual_machines_operation/multi-vm_workflows/appflow_use_cli/)
+  and
+  [OneGate](https://docs.opennebula.io/7.0/product/virtual_machines_operation/multi-vm_workflows/onegate_usage/l)
+  to be enabled in your OpenNebula FrontEnd(s).
+
+short_description: Multi-VM Service that deploys and configures the necessary appliances for a 6G-Sandbox site.
+tags:
+  - toolkit
+  - oneflow
+  - onegate
+  - service
+  - 6G-Sandbox
+  - 6G-Library
+type: SERVICE_TEMPLATE        # Choices are <none> (default), SERVICE_TEMPLATE and VMTEMPLATE (shown in Sunstone as IMAGE, SERVICE and VM respectively)
+# format: qcow2
+creation_time: 1757947796     # date +%s
+# os-id: Ubuntu
+# os-release: 22.04 LTS
+os-arch: x86_64
+hypervisor: KVM
+opennebula_version: 6.6, 6.8, 6.10, 7.0
+roles:                        # "roles" is a crutial field and is also anywhere to be found documented. It is WHAT CONNECTS THE DIFFERENT ROLE TEMPLATES
+  influxdb: "[6G-Sandbox toolkit] InfluxDB"
+  minio: "[6G-Sandbox toolkit] MinIO"
+  jenkins: "[6G-Sandbox toolkit] Jenkins"
+  tnlcm: "[6G-Sandbox toolkit] TNLCM"
+opennebula_template:
+  name: 6G-Sandbox toolkit installer
+  description: Multi-VM Service that deploys and configures the necessary appliances for a 6G-Sandbox site.
+  deployment: straight            # each Role is deployed when all its parent Roles are RUNNING
+  ready_status_gate: true         # OneFlow will consider VMs are RUNNING when they have READY=YES in their user template
+  automatic_deletion: true        # delete Service if it has no running VMs
+  roles:
+    - name: influxdb
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_INFLUXDB_USER         = "$ONEAPP_INFLUXDB_USER"
+        ONEAPP_INFLUXDB_PASSWORD     = "$ONEAPP_INFLUXDB_PASSWORD"
+        ONEAPP_INFLUXDB_ORG          = "$ONEAPP_INFLUXDB_ORG"
+        ONEAPP_INFLUXDB_BUCKET       = "$ONEAPP_INFLUXDB_BUCKET"
+        ONEAPP_INFLUXDB_TOKEN        = "$ONEAPP_INFLUXDB_TOKEN"
+      cooldown: 120
+      elasticity_policies: []
+      scheduled_policies: []
+    - name: minio           # letters, numbers or underscore
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_MINIO_HOSTNAME      = "$ONEAPP_MINIO_HOSTNAME"
+        ONEAPP_MINIO_OPTS          = "$ONEAPP_MINIO_OPTS"
+        ONEAPP_MINIO_ROOT_USER     = "$ONEAPP_MINIO_ROOT_USER"
+        ONEAPP_MINIO_ROOT_PASSWORD = "$ONEAPP_MINIO_ROOT_PASSWORD"
+        ONEAPP_MINIO_TLS_ENABLED   = "$ONEAPP_MINIO_TLS_ENABLED"
+        ONEAPP_MINIO_TLS_CERT      = "$ONEAPP_MINIO_TLS_CERT"
+        ONEAPP_MINIO_TLS_KEY       = "$ONEAPP_MINIO_TLS_KEY"
+      cooldown: 120          # Cooldown period duration after a scale operation, in seconds. Default 300s
+      elasticity_policies: []
+      scheduled_policies: []
+    - name: jenkins
+      parents: [minio]         # Names of the roles that must be deployed before this one.
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_JENKINS_USERNAME                 = "$ONEAPP_JENKINS_USERNAME"
+        ONEAPP_JENKINS_PASSWORD                 = "$ONEAPP_JENKINS_PASSWORD"
+        ONEAPP_JENKINS_SITES_TOKEN              = "$ONEAPP_JENKINS_SITES_TOKEN"
+        ONEAPP_JENKINS_OPENNEBULA_ENDPOINT      = "$ONEAPP_JENKINS_OPENNEBULA_ENDPOINT"
+        ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT = "$ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT"
+        ONEAPP_JENKINS_OPENNEBULA_USERNAME      = "$ONEAPP_JENKINS_OPENNEBULA_USERNAME"
+        ONEAPP_JENKINS_OPENNEBULA_PASSWORD      = "$ONEAPP_JENKINS_OPENNEBULA_PASSWORD"
+        ONEAPP_JENKINS_OPENNEBULA_INSECURE      = "$ONEAPP_JENKINS_OPENNEBULA_INSECURE"
+        ONEAPP_JENKINS_AWS_ACCESS_KEY_ID        = "$ONEAPP_MINIO_ROOT_USER"
+        ONEAPP_JENKINS_AWS_SECRET_ACCESS_KEY    = "$ONEAPP_MINIO_ROOT_PASSWORD"
+      cooldown: 120
+      elasticity_policies: []
+      scheduled_policies: []
+    - name: tnlcm
+      parents: [jenkins, influxdb]
+      cardinality: 1
+      max_vms: 1
+      vm_template_contents: |
+        NIC = [
+          NAME = "NIC0",
+          NETWORK_ID = "$Public" ]
+        ONEAPP_TNLCM_JENKINS_HOST           = "${jenkins.TEMPLATE.CONTEXT.ETH0_IP}"
+        ONEAPP_TNLCM_JENKINS_USERNAME       = "$ONEAPP_JENKINS_USERNAME"
+        ONEAPP_TNLCM_JENKINS_PASSWORD       = "$ONEAPP_JENKINS_PASSWORD"
+        ONEAPP_TNLCM_ADMIN_USER             = "$ONEAPP_TNLCM_ADMIN_USER"
+        ONEAPP_TNLCM_ADMIN_PASSWORD         = "$ONEAPP_TNLCM_ADMIN_PASSWORD"
+        ONEAPP_TNLCM_SITES_BRANCH           = "$ONEAPP_TNLCM_SITES_BRANCH"
+        ONEAPP_TNLCM_DEPLOYMENT_SITE        = "$ONEAPP_TNLCM_DEPLOYMENT_SITE"
+        ONEAPP_TNLCM_DEPLOYMENT_SITE_TOKEN  = "$ONEAPP_JENKINS_SITES_TOKEN"
+        ONEAPP_TNLCM_INFLUXDB_HOST          = "${influxdb.TEMPLATE.CONTEXT.ETH0_IP}"
+        ONEAPP_TNLCM_INFLUXDB_ORG           = "$ONEAPP_INFLUXDB_ORG"
+        ONEAPP_TNLCM_INFLUXDB_BUCKET        = "$ONEAPP_INFLUXDB_BUCKET"
+        ONEAPP_TNLCM_INFLUXDB_TOKEN         = "$ONEAPP_INFLUXDB_TOKEN"
+      cooldown: 120
+      elasticity_policies: []
+      scheduled_policies: []
+  networks:                        # Hash of virtual networks to use in the service.
+    Public: "M|network|Public||id:"
+  user_inputs:                   # Hash of custom attributes to use in the service. Initially meaningless. Has to also be specified in the role's vm_template_contents. custom_attrs_values serves the same purpose
+    ONEAPP_INFLUXDB_USER:      "M|text|The username for the InfluxDB admin user. At least 5 characters||myadmin"
+    ONEAPP_INFLUXDB_PASSWORD:  "M|password|The password for the InfluxDB admin user. At least 8 characters"
+    ONEAPP_INFLUXDB_ORG:       "M|text|The organization for the InfluxDB admin user. At least 5 characters||myorg"
+    ONEAPP_INFLUXDB_BUCKET:    "M|text|The bucket for the InfluxDB admin user. At least 5 characters||mybucket"
+    ONEAPP_INFLUXDB_TOKEN:     "M|password|The token for the InfluxDB admin user. At least 8 characters||my-influxdb-token"
+    ONEAPP_MINIO_HOSTNAME:       "O|text|MinIO hostname for TLS certificate||localhost,minio-*.example.net"
+    ONEAPP_MINIO_OPTS:           "O|text|Additional commandline options for MinIO server||--console-address :9001"
+    ONEAPP_MINIO_ROOT_USER:      "O|text|MinIO root user for MinIO server. At least 5 characters||myminioadmin"
+    ONEAPP_MINIO_ROOT_PASSWORD:  "M|password|MinIO root user password for MinIO server. At least 8 characters"
+    ONEAPP_MINIO_TLS_ENABLED:    'M|boolean|Enable TLS configuration| |NO'
+    ONEAPP_MINIO_TLS_CERT:       "O|text64|MinIO TLS certificate (.crt)||"
+    ONEAPP_MINIO_TLS_KEY:        "O|text64|MinIO TLS key (.key)||"    
+    ONEAPP_JENKINS_USERNAME:                  "O|text|The username for the Jenkins admin user. At least 5 characters||admin"
+    ONEAPP_JENKINS_PASSWORD:                  "M|password|The password for the Jenkins admin user. At least 8 characters"
+    ONEAPP_JENKINS_SITES_TOKEN:               "M|password|Token to encrypt and decrypt the 6G-Sandbox-Sites repository files for your site using Ansible Vault"
+    ONEAPP_JENKINS_OPENNEBULA_ENDPOINT:       "M|text|The URL of your OpenNebula XML-RPC Endpoint API (for example, 'http://example.com:2633/RPC2')"
+    ONEAPP_JENKINS_OPENNEBULA_FLOW_ENDPOINT:  "M|text|The URL of your OneFlow HTTP Endpoint API (for example, 'http://example.com:2474')"
+    ONEAPP_JENKINS_OPENNEBULA_USERNAME:       "M|text|The OpenNebula username used by Jenkins to deploy each component"
+    ONEAPP_JENKINS_OPENNEBULA_PASSWORD:       "M|password|The password for the OpenNebula user used by Jenkins to deploy each component"
+    ONEAPP_JENKINS_OPENNEBULA_INSECURE:       "O|boolean|Allow insecure connexions into the OpenNebula XML-RPC Endpoint API (skip TLS verification)||YES"
+    ONEAPP_TNLCM_ADMIN_USER:       "O|text|Name of the TNLCM admin user. At least 5 characters||tnlcm"
+    ONEAPP_TNLCM_ADMIN_PASSWORD:   "M|password|Password of the TNLCM admin user. At least 8 characters"
+    ONEAPP_TNLCM_SITES_BRANCH:     "M|text|Name of the branch in 6G-Sandbox-Sites repository to deploy the trial networks"
+    ONEAPP_TNLCM_DEPLOYMENT_SITE:  "M|text|Name of directory in branch ONEAPP_TNLCM_SITES_BRANCH to deploy the trial networks"
+  user_inputs_metadata:
+    - NAME: "INFLUXDB"
+      TITLE: "InfluxDB"
+      TYPE: APP
+      DESCRIPTION: "This tab includes all parameters required to configure InfluxDB."
+    - NAME: "MINIO"
+      TITLE: "MinIO"
+      TYPE: APP
+      DESCRIPTION: "This tab includes all parameters required to configure MinIO."
+    - NAME: "JENKINS"
+      TITLE: "Jenkins"
+      TYPE: APP
+      DESCRIPTION: "This tab includes all parameters required to configure Jenkins."
+    - NAME: "TNLCM"
+      TITLE: "TNLCM"
+      TYPE: APP
+      DESCRIPTION: "This tab includes all parameters required to configure TNLCM."
+logo: sandbox.png
+images: []
