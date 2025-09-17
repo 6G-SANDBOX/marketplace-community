@@ -123,7 +123,7 @@ install_opennebula_cli()
 {
     msg info "Add OpenNebula .deb community repository"
     wget -q -O- https://downloads.opennebula.io/repo/repo2.key | gpg --dearmor --yes --output /etc/apt/keyrings/opennebula.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/opennebula.gpg] https://downloads.opennebula.io/repo/7.0/Ubuntu/22.04 stable opennebula" > /etc/apt/sources.list.d/opennebula.list
+    echo "deb [signed-by=/etc/apt/keyrings/opennebula.gpg] https://downloads.opennebula.io/repo/6.10/Ubuntu/22.04 stable opennebula" > /etc/apt/sources.list.d/opennebula.list
     wait_for_dpkg_lock_release
     apt-get update
 
