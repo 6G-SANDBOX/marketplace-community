@@ -9,8 +9,7 @@ set -o errexit -o pipefail
 ONEAPP_JENKINS_USERNAME="${ONEAPP_JENKINS_USERNAME:-admin}"
 ONEAPP_JENKINS_OPENNEBULA_INSECURE="${ONEAPP_JENKINS_OPENNEBULA_INSECURE:-YES}"
 
-DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg software-properties-common gpg python3-pip ruby-dev"
-DEP_RUBY="opennebula-cli"
+DEP_PKGS="fontconfig openjdk-21-jre-headless gnupg wget software-properties-common gpg python3-pip apt-transport-https"
 DEP_PIP="boto3 botocore pyone==6.8.3 netaddr"
 ANSIBLE_COLLECTIONS="amazon.aws kubernetes.core community.general"
 CONSULT_ME_DIR="/var/lib/jenkins/consult_me/"
@@ -36,8 +35,8 @@ service_install()
     # pip modules for jenkins user
     install_pip_deps
 
-    # ruby gems for jenkins user
-    install_ruby_deps
+    # opennebula cli
+    install_opennebula_cli
 
     # ansible and terraform
     install_ansible_terraform
@@ -120,14 +119,19 @@ install_pip_deps()
     fi
 }
 
-install_ruby_deps()
+install_opennebula_cli()
 {
-    if [ -n "${DEP_RUBY}" ]; then
-        msg info "Install required ruby gems for jenkins user"
-        if ! sudo -H -u jenkins bash -c "cd ~ && gem install --user-install ${DEP_RUBY}" ; then
-            msg error "ruby gem(s) installation failed"
-            exit 1
-        fi
+    msg info "Add OpenNebula .deb community repository"
+    wget -q -O- https://downloads.opennebula.io/repo/repo2.key | gpg --dearmor --yes --output /etc/apt/keyrings/opennebula.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/opennebula.gpg] https://downloads.opennebula.io/repo/7.0/Ubuntu/22.04 stable opennebula" > /etc/apt/sources.list.d/opennebula.list
+    wait_for_dpkg_lock_release
+    apt-get update
+
+    msg info "Install opennebula-tools package"
+    # https://forum.opennebula.io/t/running-cli-tools-locally/14225/2
+    if ! apt-get install -y opennebula-tools ; then
+        msg error "opennebula-tools installation failed"
+        exit 1
     fi
 }
 
