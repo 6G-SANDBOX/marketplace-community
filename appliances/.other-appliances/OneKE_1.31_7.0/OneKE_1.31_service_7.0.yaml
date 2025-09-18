@@ -1,5 +1,5 @@
 ---
-name: "[6G-Sandbox] Service OneKE 1.31"
+name: "[6G-Sandbox] Service OneKE 1.31 for OpenNebula 7.0"
 version: 1.31.3-7.0.0-0-20250528
 publisher: OpenNebula Systems
 description: |-
@@ -34,20 +34,23 @@ os-release: 22.04 LTS
 os-arch: x86_64
 hypervisor: ALL
 type: SERVICE_TEMPLATE
-opennebula_version: 6.2, 6.3, 6.4, 6.6, 6.8, 6.10, 7.0
+opennebula_version: 6.8, 6.10, 7.0
 roles:                                          # CHANGED FOR 6G-SANDBOX
-  vnf: "[6G-Sandbox] OneKE 1.31 VNF"
-  master: "[6G-Sandbox] OneKE 1.31 Node"
-  worker: "[6G-Sandbox] OneKE 1.31 Node"
-  storage: "[6G-Sandbox] OneKE 1.31 Storage"
+  vnf: "[6G-Sandbox] OneKE 1.31 VNF for OpenNebula 7.0"
+  master: "[6G-Sandbox] OneKE 1.31 Node for OpenNebula 7.0"
+  worker: "[6G-Sandbox] OneKE 1.31 Node for OpenNebula 7.0"
+  storage: "[6G-Sandbox] OneKE 1.31 Storage for OpenNebula 7.0"
 opennebula_template:
-  name: "[6G-Sandbox] Service OneKE 1.31"
+  name: "[6G-Sandbox] Service OneKE 1.31 for OpenNebula 7.0"
   deployment: straight
   description: ''
   roles:
   - name: vnf
     cardinality: 1
     min_vms: 1
+    cooldown: 120
+    elasticity_policies: []
+    scheduled_policies: []
     vm_template_contents: |
       NIC = [
         NAME = "NIC0",
@@ -74,14 +77,14 @@ opennebula_template:
       ONEAPP_VNF_NAT4_INTERFACES_OUT = "$ONEAPP_VNF_NAT4_INTERFACES_OUT"
       ONEAPP_VNF_ROUTER4_ENABLED = "$ONEAPP_VNF_ROUTER4_ENABLED"
       ONEAPP_VNF_ROUTER4_INTERFACES = "$ONEAPP_VNF_ROUTER4_INTERFACES"
-    cooldown: 120
-    elasticity_policies: []
-    scheduled_policies: []
   - name: master
     parents:
     - vnf
     cardinality: 1
     min_vms: 1
+    cooldown: 120
+    elasticity_policies: []
+    scheduled_policies: []
     vm_template_contents: |
       NIC = [
         NAME = "NIC0",
@@ -93,10 +96,12 @@ opennebula_template:
       ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
       ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
       ONEAPP_K8S_EXTRA_SANS = "$ONEAPP_K8S_EXTRA_SANS"
-      ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED = "$ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED"
+      ONEAPP_K8S_CLUSTER_CIDR = "$ONEAPP_K8S_CLUSTER_CIDR"
+      ONEAPP_K8S_SERVICE_CIDR = "$ONEAPP_K8S_SERVICE_CIDR"
       ONEAPP_K8S_HTTP_PROXY = "$ONEAPP_K8S_HTTP_PROXY"
       ONEAPP_K8S_HTTPS_PROXY = "$ONEAPP_K8S_HTTPS_PROXY"
       ONEAPP_K8S_NO_PROXY = "$ONEAPP_K8S_NO_PROXY"
+      ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED = "$ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED"
       ONEAPP_K8S_MULTUS_ENABLED = "$ONEAPP_K8S_MULTUS_ENABLED"
       ONEAPP_K8S_MULTUS_CONFIG = "$ONEAPP_K8S_MULTUS_CONFIG"
       ONEAPP_K8S_CNI_PLUGIN = "$ONEAPP_K8S_CNI_PLUGIN"
@@ -114,13 +119,13 @@ opennebula_template:
       ONEAPP_VNF_HAPROXY_LB1_IP = "<ETH0_EP0>"
       ONEAPP_VNF_HAPROXY_LB1_PORT = "$ONEAPP_VNF_HAPROXY_LB1_PORT"
       ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-    cooldown: 120
-    elasticity_policies: []
-    scheduled_policies: []
   - name: worker
     parents:
     - vnf
     cardinality: 1
+    cooldown: 120
+    elasticity_policies: []
+    scheduled_policies: []
     vm_template_contents: |
       NIC = [
         NAME = "NIC0",
@@ -131,10 +136,12 @@ opennebula_template:
       ONEAPP_VROUTER_ETH1_VIP0 = "$ONEAPP_VROUTER_ETH1_VIP0"
       ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
       ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
-      ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED = "$ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED"
+      ONEAPP_K8S_CLUSTER_CIDR = "$ONEAPP_K8S_CLUSTER_CIDR"
+      ONEAPP_K8S_SERVICE_CIDR = "$ONEAPP_K8S_SERVICE_CIDR"
       ONEAPP_K8S_HTTP_PROXY = "$ONEAPP_K8S_HTTP_PROXY"
       ONEAPP_K8S_HTTPS_PROXY = "$ONEAPP_K8S_HTTPS_PROXY"
       ONEAPP_K8S_NO_PROXY = "$ONEAPP_K8S_NO_PROXY"
+      ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED = "$ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED"
       ONEAPP_K8S_MULTUS_ENABLED = "$ONEAPP_K8S_MULTUS_ENABLED"
       ONEAPP_K8S_CNI_PLUGIN = "$ONEAPP_K8S_CNI_PLUGIN"
       ONEAPP_K8S_LONGHORN_ENABLED = "$ONEAPP_K8S_LONGHORN_ENABLED"
@@ -147,13 +154,13 @@ opennebula_template:
       ONEAPP_VNF_HAPROXY_LB3_IP = "<ETH0_EP0>"
       ONEAPP_VNF_HAPROXY_LB3_PORT = "$ONEAPP_VNF_HAPROXY_LB3_PORT"
       ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-    cooldown: 120
-    elasticity_policies: []
-    scheduled_policies: []
   - name: storage
     parents:
     - vnf
     cardinality: 3       # CHANGED FOR 6G-SANDBOX
+    cooldown: 120
+    elasticity_policies: []
+    scheduled_policies: []
     vm_template_contents: |
       NIC = [
         NAME = "NIC0",
@@ -164,6 +171,8 @@ opennebula_template:
       ONEAPP_VROUTER_ETH1_VIP0 = "$ONEAPP_VROUTER_ETH1_VIP0"
       ONEAPP_RKE2_SUPERVISOR_EP = "$ONEAPP_RKE2_SUPERVISOR_EP"
       ONEAPP_K8S_CONTROL_PLANE_EP = "$ONEAPP_K8S_CONTROL_PLANE_EP"
+      ONEAPP_K8S_CLUSTER_CIDR = "$ONEAPP_K8S_CLUSTER_CIDR"
+      ONEAPP_K8S_SERVICE_CIDR = "$ONEAPP_K8S_SERVICE_CIDR"
       ONEAPP_K8S_HTTP_PROXY = "$ONEAPP_K8S_HTTP_PROXY"
       ONEAPP_K8S_HTTPS_PROXY = "$ONEAPP_K8S_HTTPS_PROXY"
       ONEAPP_K8S_NO_PROXY = "$ONEAPP_K8S_NO_PROXY"
@@ -175,28 +184,26 @@ opennebula_template:
       ONEAPP_VNF_HAPROXY_LB0_PORT = "$ONEAPP_VNF_HAPROXY_LB0_PORT"
       ONEAPP_VNF_HAPROXY_LB1_PORT = "$ONEAPP_VNF_HAPROXY_LB1_PORT"
       ONEAPP_VNF_DNS_ENABLED = "$ONEAPP_VNF_DNS_ENABLED"
-    cooldown: 120
-    elasticity_policies: []
-    scheduled_policies: []
   networks:
     Public: 'M|network|Public||id:'
     Private: 'M|network|Private||id:'
-  custom_attrs:
+  user_inputs:
     ONEAPP_VROUTER_ETH0_VIP0: O|text|Control Plane Endpoint VIP (IPv4)||
     ONEAPP_VROUTER_ETH1_VIP0: O|text|Default Gateway VIP (IPv4)||
     ONEAPP_RKE2_SUPERVISOR_EP: O|text|RKE2 Supervisor endpoint||ep0.eth0.vr:9345
     ONEAPP_K8S_CONTROL_PLANE_EP: O|text|Control Plane endpoint||ep0.eth0.vr:6443
     ONEAPP_K8S_EXTRA_SANS: O|text|ApiServer extra certificate SANs||localhost,127.0.0.1,ep0.eth0.vr,${vnf.TEMPLATE.CONTEXT.ETH0_IP}
+    ONEAPP_K8S_CLUSTER_CIDR: O|text|Cluster subnet CIDR||10.42.0.0/16
+    ONEAPP_K8S_SERVICE_CIDR: O|text|Service subnet CIDR||10.43.0.0/16
+    ONEAPP_K8S_HTTP_PROXY: O|text|HTTP Proxy for cluster traffic (default none)||
+    ONEAPP_K8S_HTTPS_PROXY: O|text|HTTPS Proxy for cluster traffic (default none)||
+    ONEAPP_K8S_NO_PROXY: O|text|Non-proxied exceptions for cluster traffic (only effective if http proxy is enabled)||
     ONEAPP_RKE2_CLOUD_CONTROLLER_ENABLED: O|boolean|Enables default RKE2 cloud controller||YES
-    ONEAPP_K8S_HTTP_PROXY: O|text|Defines HTTP Proxy for cluster traffic (default none)||
-    ONEAPP_K8S_HTTPS_PROXY: O|text|Defines HTTPS Proxy for cluster traffic (default none)||
-    ONEAPP_K8S_NO_PROXY: O|text|Defines non-proxied exceptions for cluster traffic
-      (only effective if jhttp proxy is enabled)||localhost,127.0.0.1/32,$ONEAPP_RKE2_SUPERVISOR_EP,$ONEAPP_K8S_CONTROL_PLANE_EP
     ONEAPP_K8S_MULTUS_ENABLED: O|boolean|Enable Multus||YES                          # DEFAULT CHANGED FOR 6G-SANDBOX FROM NO TO YES
     ONEAPP_K8S_MULTUS_CONFIG: O|text64|Multus custom config (default none)||
     ONEAPP_K8S_CNI_PLUGIN: O|list|CNI plugin supported by RKE2|canal,calico,cilium|cilium
     ONEAPP_K8S_CNI_CONFIG: O|text64|CNI custom config (default none)||
-    ONEAPP_K8S_CILIUM_BGP_ENABLED: O|boolean|Enable BGP control plane for Cilium. It could conflict with other Service LB Controllers.||
+    ONEAPP_K8S_CILIUM_BGP_ENABLED: O|boolean|Enable BGP control plane for Cilium. It could conflict with other Service LB Controllers.||NO
     ONEAPP_K8S_CILIUM_RANGE: O|text|Cilium LB IP CIDR. Only effective if `ONEAPP_K8S_CILIUM_BGP_ENABLED` is set to `YES` or undefined. (default none)||
     ONEAPP_K8S_METALLB_ENABLED: O|boolean|Enable MetalLB||NO
     ONEAPP_K8S_METALLB_CLASS: O|text|MetalLB Load Balancer Class name||metallb
@@ -219,6 +226,62 @@ opennebula_template:
     ONEAPP_VNF_NAT4_INTERFACES_OUT: O|text|NAT - Outgoing Interfaces||eth0
     ONEAPP_VNF_ROUTER4_ENABLED: O|boolean|Enable Router||YES
     ONEAPP_VNF_ROUTER4_INTERFACES: O|text|Router - Interfaces||eth0,eth1
+  user_inputs_metadata:
+  - NAME: VROUTER
+    TITLE: Virtual IPs
+    TYPE: APP
+    DESCRIPTION: This tab includes all parameters required to configure the VIPS.
+  - NAME: VNF
+    TITLE: Virtual Network Functions
+    TYPE: APP
+    DESCRIPTION: This tab includes all parameters required to configure the Virtual
+      Network Functions.
+  - NAME: K8S
+    TITLE: Kubernetes Cluster
+    TYPE: APP
+    DESCRIPTION: This tab includes all parameters required to configure the Kubernetes
+      cluster.
+  - NAME: RKE2
+    TITLE: RKE2
+    TYPE: APP
+    DESCRIPTION: This tab includes all parameters required to configure the RKE2
+      integration.
+  - NAME: ETH0
+    TITLE: Control Plane
+    TYPE: GROUP
+  - NAME: ETH1
+    TITLE: Gateway
+    TYPE: GROUP
+  - NAME: CNI
+    TITLE: Container Network Interface
+    TYPE: GROUP
+  - NAME: CLOUD
+    TITLE: Cloud Controller
+    TYPE: GROUP
+  - NAME: SUPERVISOR
+    TITLE: Supervisor
+    TYPE: GROUP
+  - NAME: CONTROL
+    TITLE: Control Plane
+    TYPE: GROUP
+  - NAME: EXTRA
+    TITLE: API Server
+    TYPE: GROUP
+  - NAME: CLUSTER
+    TITLE: Cluster CIDR
+    TYPE: GROUP
+  - NAME: SERVICE
+    TITLE: Services CIDR
+    TYPE: GROUP
+  - NAME: HTTP
+    TITLE: HTTP Proxy
+    TYPE: GROUP
+  - NAME: HTTPS
+    TITLE: HTTPs Proxy
+    TYPE: GROUP
+  - NAME: 'NO'
+    TITLE: Proxy exceptions
+    TYPE: GROUP
   ready_status_gate: true
   automatic_deletion: true  # CHANGED FOR 6G-SANDBOX
 logo: kubernetes.png

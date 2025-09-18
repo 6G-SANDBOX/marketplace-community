@@ -1,0 +1,73 @@
+---
+name: "[6G-Sandbox] OneKE 1.31 VNF for OpenNebula 7.0"
+version: 1.31.3-7.0.0-0-20250528
+publisher: OpenNebula Systems
+description: |-
+  Appliance providing several Virtual Network Functions (routing, NAT, DNS, DHCP)
+  to run as regular VM.
+
+  See the dedicated [documentation](https://github.com/OpenNebula/one-apps/wiki).
+short_description: Appliance with several Virtual Network Functions to run as VM
+tags:
+  - service
+  - oneflow
+  - onegate
+  - vnf
+  - 6G-Sandbox
+  - 6G-Library
+  - kubernetes
+  - alpine
+  - networking
+type: VMTEMPLATE
+format: qcow2
+creation_time: 1756484477
+os-id: Alpine
+os-release: '3.20'
+os-arch: x86_64
+hypervisor: ALL
+opennebula_version: 6.6, 6.8, 6.10, 7.0
+opennebula_template:
+  context:
+    SERVICE_ID: "$SERVICE_ID"
+    ONEAPP_VNF_KEEPALIVED_ETH0_SKIP: "YES"
+    NETWORK: "YES"
+    TOKEN: "YES"
+    REPORT_READY: "YES"
+    SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"
+    START_SCRIPT_BASE64: "IyEvYmluL2Jhc2gKYXBrIGFkZCBweXRob24z"     # CHANGED FOR 6G-SANDBOX
+    ONE_SERVICE_AIRGAPPED: "NO"
+    ONEAPP_VROUTER_ETH0_VIP0: "$ONEAPP_VROUTER_ETH0_VIP0"
+    ONEAPP_VROUTER_ETH1_VIP0: "$ONEAPP_VROUTER_ETH1_VIP0"
+    ONEAPP_VNF_HAPROXY_ENABLED: "YES"
+    ONEAPP_VNF_HAPROXY_ONEGATE_ENABLED: "YES"
+    ONEAPP_VNF_HAPROXY_INTERFACES: "$ONEAPP_VNF_HAPROXY_INTERFACES"
+    ONEAPP_VNF_HAPROXY_REFRESH_RATE: "$ONEAPP_VNF_HAPROXY_REFRESH_RATE"
+    ONEAPP_VNF_HAPROXY_LB0_IP: "$ONEAPP_VNF_HAPROXY_LB0_IP"
+    ONEAPP_VNF_HAPROXY_LB0_PORT: "$ONEAPP_VNF_HAPROXY_LB0_PORT"
+    ONEAPP_VNF_HAPROXY_LB1_IP: "$ONEAPP_VNF_HAPROXY_LB1_IP"
+    ONEAPP_VNF_HAPROXY_LB1_PORT: "$ONEAPP_VNF_HAPROXY_LB1_PORT"
+    ONEAPP_VNF_HAPROXY_LB2_IP: "$ONEAPP_VNF_HAPROXY_LB2_IP"
+    ONEAPP_VNF_HAPROXY_LB2_PORT: "$ONEAPP_VNF_HAPROXY_LB2_PORT"
+    ONEAPP_VNF_HAPROXY_LB3_IP: "$ONEAPP_VNF_HAPROXY_LB3_IP"
+    ONEAPP_VNF_HAPROXY_LB3_PORT: "$ONEAPP_VNF_HAPROXY_LB3_PORT"
+    ONEAPP_VNF_DNS_ENABLED: "$ONEAPP_VNF_DNS_ENABLED"
+    ONEAPP_VNF_DNS_INTERFACES: "$ONEAPP_VNF_DNS_INTERFACES"
+    ONEAPP_VNF_DNS_NAMESERVERS: "$ONEAPP_VNF_DNS_NAMESERVERS"
+    ONEAPP_VNF_DNS_USE_ROOTSERVERS: "NO"
+    ONEAPP_VNF_NAT4_ENABLED: "$ONEAPP_VNF_NAT4_ENABLED"
+    ONEAPP_VNF_NAT4_INTERFACES_OUT: "$ONEAPP_VNF_NAT4_INTERFACES_OUT"
+    ONEAPP_VNF_ROUTER4_ENABLED: "$ONEAPP_VNF_ROUTER4_ENABLED"
+    ONEAPP_VNF_ROUTER4_INTERFACES: "$ONEAPP_VNF_ROUTER4_INTERFACES"
+  cpu: '2'    # CHANGED FOR 6G-SANDBOX
+  vcpu: "2"   # CHANGED FOR 6G-SANDBOX
+  graphics:
+    listen: 0.0.0.0
+    type: vnc
+  inputs_order: ''
+  memory: '2048'   # CHANGED FOR 6G-SANDBOX
+  os:
+    arch: x86_64
+  logo: images/logos/alpine.png
+logo: router.png
+disks:
+- "OneKE 1.31 VNF"
