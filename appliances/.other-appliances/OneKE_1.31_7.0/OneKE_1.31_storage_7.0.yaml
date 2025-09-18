@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox] OneKE 1.31 Storage for OpenNebula 7.0"
-version: 1.31.3-7.0.0-0-20250528
+version: 1.31.3-7.0.0-0-20250918-1638        # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 publisher: OpenNebula Systems
 description: |-
   OneKE 1.31 VM template for Storage VMs.
@@ -19,7 +19,7 @@ tags:
   - storage
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1756484477
+creation_time: 1758213493             # date +%s
 os-id: Ubuntu
 os-release: "22.04 LTS"
 os-arch: x86_64
