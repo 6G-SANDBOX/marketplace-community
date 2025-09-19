@@ -67,7 +67,7 @@ images:
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "5368709120"
+    size: "5368709120"    # qemu-img info <file>    # virtual size in bytes
     checksum:
-      md5: "b876857ccfddc32188b751bf1733badf"
-      sha256: "4cb172d3b548920471625f478c205fb79a09a360d26c755946b666872dd0ed64"
+      md5: "b876857ccfddc32188b751bf1733badf"    # md5sum <file>
+      sha256: "4cb172d3b548920471625f478c205fb79a09a360d26c755946b666872dd0ed64"    # sha256sum <file>

@@ -1,7 +1,7 @@
 ---
-name: "LoadCore Agent Test Tool v4.3.0.23 + hugepages"
-version: "v4.3.0.23-20250919-1159"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
-software_version: "v4.3.0.23"
+name: "LoadCore Agent Test Tool v5.0.1"
+version: "v5.0.1-20250919-1216"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+software_version: "v5.0.1"
 publisher: "Keysight Technologies"
 description: |-
     Keysight's 5G LoadCore test solution addresses critical validation requirements for improved reliability and performance of 5G emerging architectures. With comprehensive performance testing of all nodes and interfaces, this powerful yet easy-to-use solution helps network operators deliver higher-performing services, greater scale, and lower-latency communications.
@@ -32,8 +32,8 @@ tags:
   - Keysight
   - Loadcore
   - ubuntu
-format: raw
-creation_time: 1758275976        # date +%s
+format: qcow2
+creation_time: 1758277001        # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -46,28 +46,28 @@ opennebula_template:
     set_hostname: "$NAME"
     ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
     netcfg_type: "interfaces"
-  cpu: '4'
-  vcpu: '4'
+  cpu: '2'
+  vcpu: '2'
   cpu_model:
     model: "host-passthrough"
   graphics:
     listen: 0.0.0.0
     type: vnc
   hypervisor: kvm
-  memory: '18432'
+  memory: '8192'
   memory_unit_cost: 'MB'
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
 logo: keysight.png
 images:
-  - name: "LoadCore Agent Test Tool v4.3.0.23-20250919-1159 + hugepages"
+  - name: "LoadCore Agent Test Tool v5.0.1-20250919-1216"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_v4.3.0.23_hugepages.raw
+      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_v5.0.1.qcow2
     type: OS
     dev_prefix: vd
     driver: qcow2
-    size: "4831838208"
+    size: 17183014912          # qemu-img info <file>    # virtual size in bytes
     checksum:
-      md5: "3c5cfb01e8ff185faecc25d3a54bba57"
-      sha256: "4adc1b32d8ad1186ee597e682cf7492dbd26027590d3db541ac085d709046be8"
+      md5: "ce8b44dbbf18454cf6be4427fb0922e0"    # md5sum <file>
+      sha256: "15311dded9e560f57c786e29b99d1e202c659b9fabf5ab4efdd635449991bc5a"    # sha256sum <file>
