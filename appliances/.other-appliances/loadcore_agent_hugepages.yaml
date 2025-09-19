@@ -1,6 +1,6 @@
 ---
-name: "LoadCore Agent Test Tool + hugepages"
-version: "v4.3.0.23-20241202-2121"
+name: "LoadCore Agent Test Tool v4.3.0.23 + hugepages"
+version: "v4.3.0.23-20250919-1159"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v4.3.0.23"
 publisher: "Keysight Technologies"
 description: |-
@@ -33,7 +33,7 @@ tags:
   - Loadcore
   - ubuntu
 format: raw
-creation_time: "1733170911"
+creation_time: 1758275976        # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -61,9 +61,9 @@ opennebula_template:
   logo: images/logos/ubuntu.png
 logo: keysight.png
 images:
-  - name: "LoadCore Agent Test Tool + hugepages v4.3.0.23-20241202-2121"
+  - name: "LoadCore Agent Test Tool v4.3.0.23-20250919-1159 + hugepages"
     url: >-
-      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_hugepages_v4.3.0.23.raw 
+      https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_v4.3.0.23_hugepages.raw
     type: OS
     dev_prefix: vd
     driver: qcow2

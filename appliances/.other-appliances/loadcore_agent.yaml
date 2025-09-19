@@ -1,6 +1,6 @@
 ---
-name: "LoadCore Agent Test Tool"
-version: "v4.3.0.23-20241106-1840"
+name: "LoadCore Agent Test Tool v4.3.0.23"
+version: "v4.3.0.23-20250919-1159"     # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v4.3.0.23"
 publisher: "Keysight Technologies"
 description: |-
@@ -33,7 +33,7 @@ tags:
   - Loadcore
   - ubuntu
 format: raw
-creation_time: "1730914825"
+creation_time: 1758275976        # date +%s
 os-id: Ubuntu
 os-release: 22.04 LTS
 os-arch: x86_64
@@ -61,7 +61,7 @@ opennebula_template:
   logo: images/logos/ubuntu.png
 logo: keysight.png
 images:
-  - name: "LoadCore Agent Test Tool v4.3.0.23-20241106-1840"
+  - name: "LoadCore Agent Test Tool v4.3.0.23-20250919-1159"
     url: >-
       https://rawimages.mobilesandbox.cloud:9443/loadcore_agent_v4.3.0.23.raw
     type: OS
