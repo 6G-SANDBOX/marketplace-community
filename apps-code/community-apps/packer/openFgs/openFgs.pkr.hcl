@@ -18,7 +18,7 @@ source "qemu" "openFgs" {
   memory      = 4096
   accelerator = "kvm"
 
-  iso_url      = "../one-apps/export/ubuntu2204.qcow2"
+  iso_url      = "../one-apps/export/ubuntu2404.qcow2"
   iso_checksum = "none"
 
   headless = var.headless
@@ -42,8 +42,8 @@ source "qemu" "openFgs" {
     ["-device", "virtio-net-pci,netdev=net0,mac=00:11:22:33:44:55"]
   ]
   ssh_username     = "root"
-  ssh_password     = "cdcoEvLKJf3sxg2J"
-  ssh_timeout      = "900s"
+  ssh_password     = "opennebula"
+  ssh_wait_timeout = "900s"
   shutdown_command = "poweroff"
   vm_name          = "${var.appliance_name}"
 }

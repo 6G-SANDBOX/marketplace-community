@@ -1,19 +1,18 @@
 #!/bin/bash
-set -eux -o pipefail
 
-SCRIPT=$(cat <<'MAINEND'
+SCRIPT=$(cat <<MAINEND
 gawk -i inplace -f- /etc/ssh/sshd_config <<'EOF'
 BEGIN { update = "PasswordAuthentication yes" }
-/^[#\s]*PasswordAuthentication\s/ { $0 = update; found = 1 }
+/^[#\s]*PasswordAuthentication\s*/ { \$0 = update; found = 1 }
 { print }
-ENDFILE { if (!found) print update }
+END { if (!found) print update >> FILENAME }
 EOF
 
 gawk -i inplace -f- /etc/ssh/sshd_config <<'EOF'
 BEGIN { update = "PermitRootLogin yes" }
-/^[#\s]*PermitRootLogin\s/ { $0 = update; found = 1 }
+/^[#\s]*PermitRootLogin\s*/ { \$0 = update; found = 1 }
 { print }
-ENDFILE { if (!found) print update }
+END { if (!found) print update >> FILENAME }
 EOF
 
 systemctl reload sshd
@@ -25,9 +24,8 @@ MAINEND
 cat<<EOF
 ETH0_METHOD='dhcp'
 NETWORK='YES'
-SET_HOSTNAME='open5gs'
-PASSWORD='cdcoEvLKJf3sxg2J'
+SET_HOSTNAME='openfgs'
+PASSWORD='opennebula'
 ETH0_MAC='00:11:22:33:44:55'
-NETCFG_TYPE='nm'
 START_SCRIPT_BASE64="$(echo "$SCRIPT" | base64 -w0)"
 EOF

@@ -1,6 +1,6 @@
 variable "appliance_name" {
   type    = string
-  default = "service_openFgs"
+  default = "service_openFGS"
 }
 
 variable "input_dir" {

@@ -2,19 +2,29 @@
 name: "Open5GS VM"
 version: "autofill"
 software_version: "v2.7.6"
-publisher: "Fraunhofer FOKUS"
+publisher: "Fraunhofer FOKUS, University of Malaga and Telefonica"
 description: |-
-  Appliance with preinstalled Open5GS and MongoDB.
+  Appliance with preinstalled Open5GS: a C-language implementation of 5G Core and EPC
+  for 5G SA (Standalone) and NSA (Non-Standalone) networks.
+
+  The appliance includes:
+  - MongoDB for the subscriber database
+  - Node.js for the Open5GS WebUI, for subscriber management
+  - Open5GS 5G SA Core functions (AMF, SMF, UPF, AUSF, UDM, UDR, PCF, NRF, BSF)
+  - Pre-configured for 5G SA deployment
 
   See the Official [documentation](https://open5gs.org/open5gs/docs).
 
-  **Note:** There are no configuration parameters for this Appliance as it is meant
-  to be used by the [Open5GS_vm](https://github.com/6G-SANDBOX/6G-Library/tree/develop/open5gs_vm) 6g-Library component.
-short_description: Open5GS and MongoDB appliance for KVM
+  After deploying the appliance, check the status of the deployment in
+  /etc/one-appliance/status. You can check the appliance logs in
+  /var/log/one-appliance/.
+short_description: Open5GS 5G Core appliance for KVM
 tags:
   - 6G-Sandbox
   - 6G-Library
+  - TID
   - Fokus
+  - UMA
   - Open5GS
   - 5G-Core
   - ubuntu
@@ -28,10 +38,15 @@ opennebula_version: >-
   6.6, 6.8, 6.10, 7.0
 opennebula_template:
   context:
-    network: 'YES'
-    set_hostname: "$NAME"
-    ssh_public_key: "$USER[SSH_PUBLIC_KEY]"
-    netcfg_type: "interfaces"
+    NETWORK: "YES"
+    SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"
+    SET_HOSTNAME: "$NAME"
+    NETCFG_TYPE: "interfaces"
+    ONEAPP_OPEN5GS_MCC:    "$ONEAPP_OPEN5GS_MCC"
+    ONEAPP_OPEN5GS_MNC:    "$ONEAPP_OPEN5GS_MNC"
+    ONEAPP_OPEN5GS_N2_IP:  "$ONEAPP_OPEN5GS_N2_IP"
+    ONEAPP_OPEN5GS_N3_IP:  "$ONEAPP_OPEN5GS_N3_IP"
+    ONEAPP_OPEN5GS_TAC:    "$ONEAPP_OPEN5GS_TAC"
   cpu: '2'
   vcpu: '2'
   cpu_model:
@@ -45,6 +60,12 @@ opennebula_template:
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
+  user_inputs:
+    ONEAPP_OPEN5GS_MCC:    "O|text|Mobile Country Code (3 digits)||999"
+    ONEAPP_OPEN5GS_MNC:    "O|text|Mobile Network Code (2-3 digits)||75"
+    ONEAPP_OPEN5GS_N2_IP:  "O|text|N2 Interface IP Address (AMF)||10.0.3.2"
+    ONEAPP_OPEN5GS_N3_IP:  "O|text|N3 Interface IP Address (UPF)||10.0.3.2"
+    ONEAPP_OPEN5GS_TAC:    "O|range|Tracking Area Code (1-65535)|1..65535|1"
 logo: https://open5gs.org/assets/img/open5gs-logo.png
 images:
   - name: "autofill"
