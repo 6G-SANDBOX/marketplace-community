@@ -70,6 +70,7 @@ opennebula_template:
     ONEAPP_VNF_DNS_ENABLED: "$ONEAPP_VNF_DNS_ENABLED"
   cpu: "4"   # CHANGED FROM 2 to 4
   vcpu: "4"  # CHANGED FROM 2 to 4
+  vcpu_max: "16"  # NEW
   cpu_model:
     model: "host-passthrough"  # CHANGED FOR 6G-SANDBOX
   graphics:
@@ -77,6 +78,12 @@ opennebula_template:
     type: vnc
   inputs_order: ""
   memory: "4096"  # CHANGED FROM 3072 to 4096
+  memory_max: "16384"               # NEW
+  memory_resize_mode: "BALLOONING"  # NEW
+  hot_resize:                       # NEW
+    cpu_hot_add_enabled: "YES"      # NEW
+    memory_hot_add_enabled: "YES"   # NEW
+  hypervisor: "kvm"                 # NEW
   os:
     arch: x86_64
   logo: images/logos/ubuntu.png
