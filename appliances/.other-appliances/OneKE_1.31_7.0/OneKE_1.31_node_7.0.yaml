@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox] OneKE 1.31 Node for OpenNebula 7.0"
-version: 1.31.3-7.0.0-0-20250918-1638        # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: 1.31.3-7.0.0-0-20251118-1128         # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 publisher: OpenNebula Systems
 description: |-
   OneKE 1.31 VM template for Master and Worker VMs.
@@ -24,8 +24,7 @@ os-id: Ubuntu
 os-release: "22.04 LTS"
 os-arch: x86_64
 hypervisor: ALL
-opennebula_version: >-
-  6.6, 6.8, 6.10, 7.0
+opennebula_version: 6.8, 6.10, 7.0
 opennebula_template:
   context:
     SERVICE_ID: "$SERVICE_ID"
@@ -33,7 +32,6 @@ opennebula_template:
     FALLBACK_DNS: "$FALLBACK_DNS"
     GROW_FS: "/"
     NETWORK: "YES"
-    NETCFG_TYPE: "interfaces"     # CHANGED FOR 6G-SANDBOX
     TOKEN: "YES"
     REPORT_READY: "YES"
     SSH_PUBLIC_KEY: "$USER[SSH_PUBLIC_KEY]"

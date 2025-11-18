@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox] OneKE 1.31 VNF for OpenNebula 7.0"
-version: 1.31.3-7.0.0-0-20250918-1638        # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: 1.31.3-7.0.0-0-20251118-1128         # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 publisher: OpenNebula Systems
 description: |-
   Appliance providing several Virtual Network Functions (routing, NAT, DNS, DHCP)
@@ -25,7 +25,7 @@ os-id: Alpine
 os-release: '3.20'
 os-arch: x86_64
 hypervisor: ALL
-opennebula_version: 6.6, 6.8, 6.10, 7.0
+opennebula_version: 6.8, 6.10, 7.0
 opennebula_template:
   context:
     SERVICE_ID: "$SERVICE_ID"
