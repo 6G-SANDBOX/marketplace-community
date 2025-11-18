@@ -32,6 +32,7 @@ opennebula_template:
     FALLBACK_GW: "$FALLBACK_GW"
     FALLBACK_DNS: "$FALLBACK_DNS"
     GROW_FS: "/ /var/lib/longhorn"
+    NETCFG_TYPE: "interfaces"     # CHANGED FOR 6G-SANDBOX
     NETWORK: "YES"
     TOKEN: "YES"
     REPORT_READY: "YES"
