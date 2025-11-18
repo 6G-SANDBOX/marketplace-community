@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox] Service OneKE 1.31"
-version: 1.31.3-7.0.0-0-20251118-1128         # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
+version: 1.31.3-6.10.0-3-20251118-1128        # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 publisher: OpenNebula Systems
 description: |-
   [RKE2](https://docs.rke2.io/) based multi-master Kubernetes 1.31 cluster for KVM hosts,
