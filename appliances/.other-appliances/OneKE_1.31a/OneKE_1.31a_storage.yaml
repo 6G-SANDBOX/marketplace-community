@@ -1,6 +1,6 @@
 ---
 name: "[6G-Sandbox] OneKE 1.31 Airgapped Storage"
-version: 1.31.3-7.0.0-0-20250528
+version: 1.31.3-6.10.0-3-20251118-1327        # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 publisher: OpenNebula Systems
 description: |-
   OneKE 1.31 Airgapped VM template for Storage VMs.
@@ -12,27 +12,26 @@ tags:
   - oneflow
   - onegate
   - VMTEMPLATE
+
   - 6G-Sandbox
   - 6G-Library
+
   - kubernetes
   - ubuntu
-  - storage
 type: VMTEMPLATE
 format: qcow2
-creation_time: 1756484477
+creation_time: 1763468830             # date +%s
 os-id: Ubuntu
 os-release: "22.04 LTS"
 os-arch: x86_64
 hypervisor: ALL
-opennebula_version: >-
-  6.6, 6.8, 6.10
+opennebula_version: 6.8, 6.10
 opennebula_template:
   context:
     SERVICE_ID: "$SERVICE_ID"
     FALLBACK_GW: "$FALLBACK_GW"
     FALLBACK_DNS: "$FALLBACK_DNS"
     GROW_FS: "/ /var/lib/longhorn"
-    NETCFG_TYPE: "interfaces"      # CHANGED FOR 6G-SANDBOX
     NETWORK: "YES"
     TOKEN: "YES"
     REPORT_READY: "YES"
@@ -42,11 +41,13 @@ opennebula_template:
     ONEAPP_VROUTER_ETH1_VIP0: "$ONEAPP_VROUTER_ETH1_VIP0"
     ONEAPP_RKE2_SUPERVISOR_EP: "$ONEAPP_RKE2_SUPERVISOR_EP"
     ONEAPP_K8S_CONTROL_PLANE_EP: "$ONEAPP_K8S_CONTROL_PLANE_EP"
-    ONEAPP_K8S_MULTUS_ENABLED: "$ONEAPP_K8S_MULTUS_ENABLED"
-    ONEAPP_K8S_CNI_PLUGIN: "$ONEAPP_K8S_CNI_PLUGIN"
+    ONEAPP_K8S_CLUSTER_CIDR: "$ONEAPP_K8S_CLUSTER_CIDR"
+    ONEAPP_K8S_SERVICE_CIDR: "$ONEAPP_K8S_SERVICE_CIDR"
     ONEAPP_K8S_HTTP_PROXY: "$ONEAPP_K8S_HTTP_PROXY"
     ONEAPP_K8S_HTTPS_PROXY: "$ONEAPP_K8S_HTTPS_PROXY"
     ONEAPP_K8S_NO_PROXY: "$ONEAPP_K8S_NO_PROXY"
+    ONEAPP_K8S_MULTUS_ENABLED: "$ONEAPP_K8S_MULTUS_ENABLED"
+    ONEAPP_K8S_CNI_PLUGIN: "$ONEAPP_K8S_CNI_PLUGIN"
     ONEAPP_K8S_LONGHORN_ENABLED: "$ONEAPP_K8S_LONGHORN_ENABLED"
     ONEAPP_STORAGE_DEVICE: "$ONEAPP_STORAGE_DEVICE"
     ONEAPP_STORAGE_FILESYSTEM: "$ONEAPP_STORAGE_FILESYSTEM"
@@ -63,7 +64,7 @@ opennebula_template:
   memory: "3072"
   os:
     arch: x86_64
-  user_inputs: {}
+  logo: images/logos/ubuntu.png
 logo: kubernetes.png
 disks:
 - "OneKE 1.31 Airgapped OS disk"
