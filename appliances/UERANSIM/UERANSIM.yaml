@@ -75,9 +75,6 @@ opennebula_template:
     oneapp_ueransim_ue_hnet_pubkey: "$ONEAPP_UERANSIM_UE_HNET_PUBKEY"
     oneapp_ueransim_ue_hnet_pubkey_id: "$ONEAPP_UERANSIM_UE_HNET_PUBKEY"
     oneapp_ueransim_ue_suci_prot: "$ONEAPP_UERANSIM_UE_SUCI_PROT"
-    oneapp_ueransim_ue_configured_nssai_sd: "$ONEAPP_UERANSIM_UE_CONFIGURED_NSSAI_SD"
-    oneapp_ueransim_ue_default_nssai_sst: "$ONEAPP_UERANSIM_UE_DEFAULT_NSSAI_SST"
-    oneapp_ueransim_ue_default_nssai_sd: "$ONEAPP_UERANSIM_UE_DEFAULT_NSSAI_SD"
   cpu: '2'
   vcpu: '2'
   graphics:
