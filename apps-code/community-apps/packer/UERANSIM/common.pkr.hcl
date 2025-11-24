@@ -1,1 +1,0 @@
-../../../one-apps/packer/common.pkr.hcl
