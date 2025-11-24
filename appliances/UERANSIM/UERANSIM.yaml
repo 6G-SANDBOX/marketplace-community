@@ -29,6 +29,9 @@ description: |-
   * `ONEAPP_UERANSIMUE_SESSION_APN`     -  In UE simulation, Access Point Name (APN) of the initial PDU session to be established.
   * `ONEAPP_UERANSIMUE_SESSION_SST`     -  In UE simulation, Slice/Service Type (SST) of the initial PDU session to be established.
   * `ONEAPP_UERANSIMUE_SESSION_SD`      -  In UE simulation, Slice Differentiator (SD) of the initial PDU session to be established. Minimum length of 6.
+  * `ONEAPP_UERANSIMUE_HNET_PUBKEY`     -  In UE simulation, Home Network Public Key for protecting with SUCI Profile A.
+  * `ONEAPP_UERANSIMUE_HNET_PUBKEY_ID`  -  In UE simulation, Home Network Public Key ID for protecting with SUCI Profile A.
+  * `ONEAPP_UERANSIMUE_SUCI_PROT`       -  In UE simulation, SUCI Protection Scheme : 0 for Null-scheme, 1 for Profile A and 2 for Profile B.
   
   **Note**: Remember to add a password variable in the template in order to have access to it, or make sure that your OpenNebula user has an SSH Public key preconfigured.
 short_description: UERANSIM 5G gNB & UE simulator for KVM
@@ -106,6 +109,9 @@ opennebula_template:
     oneapp_ueransim_ue_session_apn:    "O|text|ONEAPP_UERANSIM_UE_SESSION_APN: In UE simulation, Access Point Name (APN) of the initial PDU session to be established. ||internet"
     oneapp_ueransim_ue_session_sst:    "O|number|ONEAPP_UERANSIM_UE_SESSION_SST: In UE simulation, Slice/Service Type (SST) of the initial PDU session to be established. ||1"
     oneapp_ueransim_ue_session_sd:     "O|text|ONEAPP_UERANSIM_UE_SESSION_SD: In UE simulation, Slice Differentiator (SD) of the initial PDU session to be established. Minimum length of 6. ||000001"
+    oneapp_ueransim_ue_hnet_pubkey:    "O|text|ONEAPP_UERANSIMUE_HNET_PUBKEY: In UE simulation, Home Network Public Key for protecting with SUCI Profile A. ||e421686f6fb2d70e3fa28d940494095686c3179fef53514667a6ed106b8a7d3d"
+    oneapp_ueransim_ue_hnet_pubkey_id: "O|number|ONEAPP_UERANSIMUE_HNET_PUBKEY_ID: In UE simulation, Home Network Public Key ID for protecting with SUCI Profile A. ||0"
+    oneapp_ueransim_ue_suci_prot:      "O|number|ONEAPP_UERANSIMUE_SUCI_PROT: In UE simulation, SUCI Protection Scheme : 0 for Null-scheme, 1 for Profile A and 2 for Profile B. ||0"
 logo: ueransim.png
 images:
   - name: "autofill"
