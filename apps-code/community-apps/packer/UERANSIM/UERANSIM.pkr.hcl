@@ -82,8 +82,8 @@ build {
 
   provisioner "file" {
     sources = [
-      "../../lib/common.sh",
-      "../../lib/functions.sh",
+      "../one-apps/appliances/lib/common.sh",
+      "../one-apps/appliances/lib/functions.sh",
     ]
     destination = "/etc/one-appliance/lib/"
   }
