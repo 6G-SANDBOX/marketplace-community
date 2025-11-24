@@ -1,26 +1,3 @@
-source "null" "null" { communicator = "none" }
-
-build {
-  sources = ["source.null.null"]
-
-  # Generate temporal CONTEXT .iso file to be able to login into the source VM.
-  provisioner "shell-local" {
-    inline = [
-      "mkdir -p ${var.input_dir}/context",
-      "${var.input_dir}/gen_context > ${var.input_dir}/context/context.sh",
-      "mkisofs -o ${var.input_dir}/${var.appliance_name}-context.iso -V CONTEXT -J -R ${var.input_dir}/context",
-    ]
-  }
-
-  # Compile the latest UERANSIM binaries if not present, or their source code changed.t
-  provisioner "shell-local" {
-    inline = [
-      "../../appliances/UERANSIM/build.sh",
-    ]
-  }
-}
-
-
 source "qemu" "UERANSIM" {
   cpus        = 2
   memory      = 2048
@@ -59,6 +36,22 @@ source "qemu" "UERANSIM" {
 
 build {
   sources = ["source.qemu.UERANSIM"]
+
+  # Generate temporal CONTEXT .iso file to be able to login into the source VM.
+  provisioner "shell-local" {
+    inline = [
+      "mkdir -p ${var.input_dir}/context",
+      "${var.input_dir}/gen_context > ${var.input_dir}/context/context.sh",
+      "mkisofs -o ${var.input_dir}/${var.appliance_name}-context.iso -V CONTEXT -J -R ${var.input_dir}/context",
+    ]
+  }
+
+  # Compile the latest UERANSIM binaries if not present, or their source code changed.
+  provisioner "shell-local" {
+    inline = [
+      "bash ../../appliances/UERANSIM/build.sh",
+    ]
+  }
 
   provisioner "shell" {
     scripts = ["${var.input_dir}/81-configure-ssh.sh"]
@@ -106,15 +99,6 @@ build {
       "../../appliances/UERANSIM/ue-mappings.json",
       ]
     destination = "/etc/one-appliance/service.d/"
-  }
-
-  # Check build.sh lock file to ensure that the binaries are correctly compiled first.
-  provisioner "shell-local" {
-    inline = [
-      "echo 'Ensuring that build.sh has already finished running...'",
-      "while [ -f /tmp/ueransim_build.lock ]; do sleep 5; done",
-      "echo 'build.sh has finished running...'",
-    ]
   }
 
   # Create directories for UERANSIM files.
