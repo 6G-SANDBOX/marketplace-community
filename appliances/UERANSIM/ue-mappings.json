@@ -63,3 +63,18 @@
   "env_var": "ONEAPP_UERANSIM_UE_SESSION_SD",
   "type": "string"
 }
+{
+  "path": ".homeNetworkPublicKey",
+  "env_var": "oneapp_ueransim_ue_hnet_pubkey",
+  "type": "string"
+}
+{
+  "path": ".homeNetworkPublicKeyId",
+  "env_var": "oneapp_ueransim_ue_hnet_pubkey_id",
+  "type": "int"
+}
+{
+  "path": ".protectionScheme",
+  "env_var": "oneapp_ueransim_ue_suci_prot",
+  "type": "int"
+}

@@ -12,14 +12,13 @@ build {
     ]
   }
 
-  # Compile the latest UERANSIM binaries if not present, or their source code changed.t
+  # Compile the latest UERANSIM binaries if not present, or their source code changed.
   provisioner "shell-local" {
     inline = [
-      "../../appliances/UERANSIM/build.sh",
+      "bash ../../appliances/UERANSIM/build.sh",
     ]
   }
 }
-
 
 source "qemu" "UERANSIM" {
   cpus        = 2
@@ -82,8 +81,8 @@ build {
 
   provisioner "file" {
     sources = [
-      "../../lib/common.sh",
-      "../../lib/functions.sh",
+      "../one-apps/appliances/lib/common.sh",
+      "../one-apps/appliances/lib/functions.sh",
     ]
     destination = "/etc/one-appliance/lib/"
   }
@@ -106,15 +105,6 @@ build {
       "../../appliances/UERANSIM/ue-mappings.json",
       ]
     destination = "/etc/one-appliance/service.d/"
-  }
-
-  # Check build.sh lock file to ensure that the binaries are correctly compiled first.
-  provisioner "shell-local" {
-    inline = [
-      "echo 'Ensuring that build.sh has already finished running...'",
-      "while [ -f /tmp/ueransim_build.lock ]; do sleep 5; done",
-      "echo 'build.sh has finished running...'",
-    ]
   }
 
   # Create directories for UERANSIM files.
