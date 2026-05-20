@@ -1,11 +1,11 @@
 ---
-name: "6G-Sandbox Jenkins"
+name: "6G-Sandbox Jenkins 24.04"
 version: "autofill"
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
 description: |-
   This appliance installs the latest version of Jenkins LTS from the official download and configures it to be ready to serve a 6G-SANDBOX site.
-  The image is based on an Ubuntu 22.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
+  The image is based on an Ubuntu 24.04 cloud image with the OpenNebula [contextualization package](http://docs.opennebula.io/6.6/management_and_operations/references/kvm_contextualization.html).
 
   Run with default values and manually configure the credentials from Jenkins WebUI, or use contextualization variables to automate the bootstrap.
   Default Jenkins credentials (if ONEAPP_JENKINS_USERNAME and ONEAPP_JENKINS_PASSWORD are unspecified) are admin:admin
@@ -37,7 +37,7 @@ tags:
 format: qcow2
 creation_time: "autofill"
 os-id: Ubuntu
-os-release: 22.04 LTS
+os-release: 24.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: >-

@@ -1,5 +1,5 @@
 ---
-name: "[6G-Sandbox toolkit] Jenkins for OpenNebula 7.0"
+name: "[6G-Sandbox toolkit] Jenkins 24.04 for OpenNebula 7.0"
 version: "v1.0.0-20250915-1622"  # <software_version>-$(date +"%Y%m%d-%H%M" -d @<creation_time>)
 software_version: "v1.0.0"
 publisher: "Telefonica Innovacion Digital"
@@ -24,7 +24,7 @@ type: VMTEMPLATE
 format: qcow2
 creation_time: 1757953367     # date +%s
 os-id: Ubuntu
-os-release: 22.04 LTS
+os-release: 24.04 LTS
 os-arch: x86_64
 hypervisor: KVM
 opennebula_version: "6.6, 6.8, 6.10, 7.0"
@@ -62,4 +62,4 @@ opennebula_template:
   user_inputs: {}
 logo: jenkins.png
 disks:
-- "6G-Sandbox Jenkins"
+- "6G-Sandbox Jenkins 24.04"
