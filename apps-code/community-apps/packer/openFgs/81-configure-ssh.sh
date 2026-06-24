@@ -26,4 +26,11 @@ BEGIN { update = "UseDNS no" }
 ENDFILE { if (!found) print update }
 EOF
 
+gawk -i inplace -f- /etc/ssh/sshd_config <<'EOF'
+BEGIN { update = "KexAlgorithms -kex-strict-s-v00@openssh.com" }
+/^[#\s]*KexAlgorithms\s/ { $0 = update; found = 1 }
+{ print }
+ENDFILE { if (!found) print update }
+EOF
+
 sync
