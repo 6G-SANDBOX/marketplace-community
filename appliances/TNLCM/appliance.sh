@@ -286,7 +286,7 @@ update_envfiles()
         ["INFLUXDB_HOST"]="ONEAPP_TNLCM_INFLUXDB_HOST"
         ["INFLUXDB_ORG"]="ONEAPP_TNLCM_INFLUXDB_ORG"
         ["INFLUXDB_BUCKET"]="ONEAPP_TNLCM_INFLUXDB_BUCKET"
-        ["INFLUXDB_TOKEN"]="ONEAPP_TNLCM_INFLUXDB_BUCKET"
+        ["INFLUXDB_TOKEN"]="ONEAPP_TNLCM_INFLUXDB_TOKEN"
     )
 
     msg info "Update enviromental variables with the input parameters"
