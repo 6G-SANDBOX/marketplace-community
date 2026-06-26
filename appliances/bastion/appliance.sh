@@ -6,7 +6,7 @@ set -o errexit -o pipefail
 # Contextualization and global variables
 # ------------------------------------------------------------------------------
 
-ONEAPP_BASTION_DNS_FORWARDERS="${ONEAPP_BASTION_DNS_FORWARDERS:-'8.8.8.8,1.1.1.1'}"
+ONEAPP_BASTION_DNS_FORWARDERS="${ONEAPP_BASTION_DNS_FORWARDERS:-8.8.8.8,1.1.1.1}"
 
 DEP_PKGS="git wireguard"
 
@@ -103,8 +103,24 @@ install_dns()
     dns_api "/user/logout?token=${tmp_token}" 1>/dev/null
 }
 
+onegate_retry()
+{
+    local retries=12
+    local delay=10
+    local count=0
+    until onegate "$@" ; do
+        count=$((count + 1))
+        if [[ $count -ge $retries ]]; then
+            msg error "onegate command failed after ${retries} attempts"
+            exit 1
+        fi
+        msg info "onegate unavailable, retrying in ${delay}s (attempt ${count}/${retries})..."
+        sleep "${delay}"
+    done
+}
+
 configure_dns()
-{  
+{
     # temporal login
     msg info "Temporal login into Technitium DNS API"
     tmp_token=$(dns_api "/user/login?user=admin&pass=admin&includeInfo=false" | jq -r '.token')
@@ -112,12 +128,12 @@ configure_dns()
     # persistent token
     msg info "Set persistent login for DNS user 'admin'"
     token=$(dns_api "/user/createToken?user=admin&pass=admin&tokenName=JenkinsToken" | jq -r '.token')
-    onegate vm update --data ONEAPP_BASTION_DNS_TOKEN="${token}"
+    onegate_retry vm update --data ONEAPP_BASTION_DNS_TOKEN="${token}"
 
     if [[ -z "${ONEAPP_BASTION_DNS_PASSWORD}" ]] ; then
         msg info "Password for Technitium DNS's admin user not provided. Generating one"
         ONEAPP_BASTION_DNS_PASSWORD=$(openssl rand -base64 32 | tr '/+' '_-')
-        onegate vm update --data ONEAPP_BASTION_DNS_PASSWORD="${ONEAPP_BASTION_DNS_PASSWORD}"
+        onegate_retry vm update --data ONEAPP_BASTION_DNS_PASSWORD="${ONEAPP_BASTION_DNS_PASSWORD}"
     fi
 
     # change password
@@ -229,12 +245,12 @@ EOF
 
 configure_routemanager()
 {
-    TEMP="$(onegate vm show --json |jq -r .VM.USER_TEMPLATE.ONEAPP_BASTION_ROUTEMANAGER_APITOKEN)"
+    TEMP="$(onegate_retry vm show --json | jq -r .VM.USER_TEMPLATE.ONEAPP_BASTION_ROUTEMANAGER_APITOKEN)"
 
     if [[ -z "${ONEAPP_BASTION_ROUTEMANAGER_APITOKEN}" && "${TEMP}" == null ]] ; then
         msg info "APITOKEN for route-manager-api not provided. Generating one"
         ONEAPP_BASTION_ROUTEMANAGER_APITOKEN=$(openssl rand -base64 32)
-        onegate vm update --data ONEAPP_BASTION_ROUTEMANAGER_APITOKEN="${ONEAPP_BASTION_ROUTEMANAGER_APITOKEN}"
+        onegate_retry vm update --data ONEAPP_BASTION_ROUTEMANAGER_APITOKEN="${ONEAPP_BASTION_ROUTEMANAGER_APITOKEN}"
     elif [[ "${TEMP}" != null ]] ; then
         msg info "Using provided or previously generated APITOKEN"
         ONEAPP_BASTION_ROUTEMANAGER_APITOKEN="${TEMP}"
